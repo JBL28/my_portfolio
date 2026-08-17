@@ -1,0 +1,74 @@
+[
+  {
+    "id": "99aade92-b4e5-4998-9deb-5b9369b46ff0",
+    "title": "AI Agent 역분석으로 무너진 API 계약 복구",
+    "summary": "AI Agent의 역분석 초안을 검토·대조 과정을 거쳐 검증한 뒤 컴포넌트 간 API 계약을 복구했습니다.",
+    "order": 1,
+    "sectionIds": ["a67e2650-2c68-433f-82cb-bcd0a4533083"],
+    "problem": "공통 계약 없이 개발이 진행되면서 BE·Signaling·FE·AI의 엔드포인트와 데이터 형식이 달라졌습니다.",
+    "action": "AI Agent로 기존 BE를 역분석해 초안을 만들되 그대로 채택하지 않고 다른 Agent의 검토 → 팀의 실제 구현 대조 → FastAPI Mock Server와 API Docs 확인을 거쳤습니다.",
+    "result": "복구와 재정렬에 1주가 들었지만 통합을 완료했고 이후 같은 유형의 계약 불일치는 재발하지 않았습니다.",
+    "competencies": ["AI 활용", "문제 해결"],
+    "usedTechnologies": ["FastAPI"]
+  },
+  {
+    "id": "e13719a0-288a-45e8-9aa5-99043f9ff896",
+    "title": "공통 files 테이블로 파일 메타데이터 책임 통합",
+    "summary": "여러 파일 형식에서 반복되던 스토리지 정보를 공통 files 테이블로 통합하고 팀을 설득했습니다.",
+    "order": 1,
+    "sectionIds": ["0138280f-7687-44a5-916d-dd64a46a69d1"],
+    "problem": "MP3·MIDI·MusicXML·JSON 등 파일마다 객체 키·크기·해시 같은 스토리지 정보가 반복되는 문제를 보고 공통 files 테이블을 제안했습니다.",
+    "judgment": "팀의 회의적인 의견에는 실제 사례와 중복 컬럼을 근거로 설명했습니다.",
+    "result": "최종 스키마에서는 10개 테이블이 files를 참조하도록 구성했습니다. MinIO 관련 변경도 도메인마다 흩어지지 않고 파일 책임 안에서 다룰 수 있었습니다.",
+    "competencies": ["기술적 판단", "협업"],
+    "usedTechnologies": ["MinIO"]
+  },
+  {
+    "id": "e8101217-85d5-416d-b359-8f7c7d9f56f7",
+    "title": "Presigned URL 직접 업로드와 무결성 검증",
+    "summary": "BE 중계 없이 Presigned URL로 직접 업로드하게 하고, 생긴 신뢰 공백을 해시·크기 대조로 보완했습니다.",
+    "order": 1,
+    "sectionIds": ["492ee30b-be3b-4db1-939d-a489c7c5a63b"],
+    "problem": "원본 1개가 결과 MP3 5개로 늘어나는 흐름에서 BE가 모든 파일을 중계하지 않도록 해야 했습니다.",
+    "action": "FE와 AI가 Presigned URL로 MinIO에 직접 업로드하게 했습니다. BE는 URL 발급·완료 신호·Job 상태를 조정하고, 직접 업로드로 생긴 신뢰 공백은 업로드 전 SHA-256·크기·Content-Type 선언 → 업로드 후 실제 객체 대조로 보완했습니다.",
+    "competencies": ["기술적 판단", "문제 해결"],
+    "usedTechnologies": ["MinIO"]
+  },
+  {
+    "id": "c7cea830-d05f-4403-8332-2ced15edd33b",
+    "title": "커밋 이후 AI 실패를 Reconciler로 회수",
+    "summary": "Job commit과 AI Worker dispatch를 분리하고, 커밋 이후 실패는 Reconciler가 재시도·timeout 처리하도록 했습니다.",
+    "order": 1,
+    "sectionIds": ["aac665ef-b599-4b0b-af42-6c2be1cb4154"],
+    "problem": "DB가 rollback됐는데 Worker만 실행되는 상태를 피해야 했습니다.",
+    "judgment": "DB에 Job을 기록하는 것과 외부 AI Worker에 작업을 보내는 것은 서로 다른 시스템이라는 점에서, 커밋 뒤 dispatch 실패는 rollback할 수 없다고 판단했습니다.",
+    "action": "Job commit → AFTER_COMMIT 비동기 dispatch 순서로 분리했습니다. 15초 주기의 Reconciler가 PENDING Job을 다시 보내거나 timeout 처리하게 했습니다.",
+    "competencies": ["DevOps"]
+  },
+  {
+    "id": "0f20bbd4-1a03-449a-9a42-9bbef4f1fdac",
+    "title": "AI가 만든 코드도 Quality Gate로 검증",
+    "summary": "AI Agent 생성 코드를 신뢰의 근거로 삼지 않고 Quality Gate를 MR 병합 조건으로 연결해 검증했습니다.",
+    "order": 1,
+    "sectionIds": ["cf134a27-0593-4109-adba-bcc86989a170"],
+    "judgment": "AI Agent로 여러 언어의 코드를 빠르게 작성하되 생성 결과를 신뢰의 근거로 삼지 않았습니다.",
+    "action": "Build → Test → SonarQube → Quality Gate → Deploy 파이프라인을 만들고 Quality Gate를 MR 병합 조건으로 연결했습니다.",
+    "result": "실제로 기준을 통과하지 못한 MR이 차단됐고, SonarQube의 판정도 입력 경로와 수정 비용을 확인한 뒤 적용했습니다.",
+    "competencies": ["AI 활용", "DevOps"],
+    "usedTechnologies": ["SonarQube"],
+    "influencedByCaseIds": ["7417f494-1d99-43cc-9c02-6bc36fe2dab1"]
+  },
+  {
+    "id": "d6cc345f-3c93-4d3a-9b10-8b942480d881",
+    "title": "처음 다루는 C/C++ 네이티브 오디오 영역에서 전환 방향 제안",
+    "summary": "레이턴시 원인을 분해해 팀에 공유하고, WebRTC 대신 C++·AOO·JUCE 기반 전환 방향을 제안했습니다.",
+    "order": 1,
+    "sectionIds": ["53a1b418-cd23-450b-a624-b4b05b04aafe"],
+    "judgment": "레이턴시를 I/O·Network·Receive Buffer로 나눠 조사하고 다이어그램으로 팀에 공유했습니다. 사용자 장비와 ISP 경로보다 팀이 직접 통제할 수 있는 수신 버퍼에 집중했습니다.",
+    "action": "WebRTC 대신 C++ 네이티브 애드온에서 AOO·JUCE로 오디오 입출력과 전송을 다루는 방향을 제안했습니다.",
+    "result": "처음 다루는 C/C++·AOO·JUCE 영역에서 5주 안에 전환 방향을 구체화했고, 팀은 이를 네이티브 오디오 입출력·전송 기능으로 실제 서비스에 연결했습니다.",
+    "competencies": ["학습 및 성장", "기술적 판단"],
+    "usedTechnologies": ["C/C++", "AOO", "JUCE"],
+    "consideredTechnologies": ["WebRTC"]
+  }
+]

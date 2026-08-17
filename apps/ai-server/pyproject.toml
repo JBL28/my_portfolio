@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-server"
+version = "0.1.0"
+description = "Graph RAG AI 서버 — Phase 02(Neo4j 스키마/적재) + Phase 03(FastAPI Gate1/Gate2/Extract/Retrieve/Generate 파이프라인, POST /chat)"
+requires-python = ">=3.11"
+dependencies = [
+    "neo4j>=5.24,<6",
+    "openai>=1.50,<2",
+    "python-dotenv>=1.0,<2",
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30,<1",
+    # 01_설계.md 8장(관측성/AISecOps) — OpenTelemetry SDK로 파이프라인 각 단계를
+    # span으로 계측하고 OTLP로 export한다(8.1/8.5). 실제 backend(Phoenix 후보, 8.5)
+    # 배포는 Phase 06 범위이므로 여기서는 SDK/exporter만 추가한다.
+    "opentelemetry-api>=1.27,<2",
+    "opentelemetry-sdk>=1.27,<2",
+    "opentelemetry-exporter-otlp>=1.27,<2",
+]
+
+# scripts/, db/는 import 가능한 패키지가 아니라 실행 스크립트·DDL 파일 모음이므로,
+# setuptools가 top-level 패키지를 자동 탐지하려다 실패하지 않도록 명시적으로 비워 둔다.
+[tool.setuptools]
+py-modules = []

@@ -1,0 +1,60 @@
+{
+  "id": "56faafe5-f3f1-4415-8922-047421e0e625",
+  "name": "TeenyFinny",
+  "slug": "teenyfinny",
+  "summary": "부모와 자녀가 함께 사용하는 청소년 용돈·투자 관리 서비스입니다. 처음 PL을 맡아 **API 계약과 공통 백엔드 구조, 인프라와 개발 흐름을 정리하는 역할**을 맡았습니다.",
+  "period": "2025.10 ~ 2025.12",
+  "teamSize": "5인",
+  "roles": [
+    "API 명세·공통 구조",
+    "DB·AWS 인프라",
+    "DevOps·기술 문서"
+  ],
+  "result": "최종 프로젝트 우수팀",
+  "repositoryVisibility": "public",
+  "technologies": [
+    "Spring Boot",
+    "MySQL",
+    "AWS",
+    "Nginx",
+    "Jenkins",
+    "SonarQube"
+  ],
+  "order": 1,
+  "buildsOnProjectSlug": null,
+  "buildsOnEvidenceSectionIds": [],
+  "sections": [
+    {
+      "id": "916bbd4c-afa6-4274-9fba-8c6bca5782bc",
+      "title": "처음 맡은 PL에서 팀이 일할 방식을 먼저 정했습니다",
+      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리를 핵심으로 잡았습니다. API 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며, 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
+      "anchor": "처음-맡은-pl에서-팀이-일할-방식을-먼저-정했습니다",
+      "order": 1,
+      "searchable": true
+    },
+    {
+      "id": "6946234b-d914-4cd5-9379-3fe69ff60de2",
+      "title": "의견이 갈렸을 때 요구사항으로 판단 기준을 맞췄습니다",
+      "body": "실시간 주식 시세에 WebSocket과 Polling 중 팀 의견이 갈렸습니다. 두 방식의 특징을 조사해 문서로 공유한 뒤 **초저지연·양방향 통신이 필요한가**를 서비스 요구사항과 대조했습니다. Polling을 제안했고, 팀이 이를 받아들였습니다.",
+      "anchor": "의견이-갈렸을-때-요구사항으로-판단-기준을-맞췄습니다",
+      "order": 2,
+      "searchable": true
+    },
+    {
+      "id": "0f407cdb-8140-48a9-91ce-19da445eddf5",
+      "title": "이중화는 직접 끊어보고 확인했습니다",
+      "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다. Failover 동안 **읽기는 유지됐고, 쓰기는 수 초 지연된 뒤 재개**됐습니다. 구성 완료를 무중단으로 표현하지 않고 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.",
+      "anchor": "이중화는-직접-끊어보고-확인했습니다",
+      "order": 3,
+      "searchable": true
+    },
+    {
+      "id": "aa221ace-dccc-4b02-b3af-edce10843774",
+      "title": "운영의 아쉬움을 다음 환경에서 다시 설계했습니다",
+      "body": "Grafana·Loki·Prometheus로 여러 서버를 관측하고 Jenkins·SonarQube로 개발 흐름을 자동화했지만, 운영 도구까지 Public 환경에 둔 점이 남았습니다. 프로젝트가 끝난 뒤 개인 서버를 구축해 **서비스 공개 필요 여부에 따라 접근 경계를 다시 설계**했습니다.",
+      "anchor": "운영의-아쉬움을-다음-환경에서-다시-설계했습니다",
+      "order": 4,
+      "searchable": true
+    }
+  ]
+}

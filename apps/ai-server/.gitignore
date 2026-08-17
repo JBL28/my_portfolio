@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# 환경변수 (NEO4J_URI/NEO4J_USER/NEO4J_PASSWORD/OPENAI_API_KEY 등 비밀 값)
+.env
+.env.*
