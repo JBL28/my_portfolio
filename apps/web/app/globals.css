@@ -12,11 +12,18 @@
 :root {
   --background: #fcfcfc; /* 순백보다 반 톤 가라앉힌 종이 배경 */
   --foreground: #18181b;
+  /* 이 사이트에서 유일하게 쓰는 유채색. 앵커로 착지한 문단을 1초간 표시하는
+     용도로만 쓴다 — 5.5의 무채색 원칙에 대한 의도된 예외이며, "지금 여기가 그
+     근거다"라는 정보를 명도만으로는 전달하기 어렵기 때문이다. 채도를 낮추고
+     알파를 얕게 잡아 본문 가독성을 해치지 않는 선에 둔다. */
+  --anchor-flash: rgb(34 197 94 / 0.14);
 }
 
 .dark {
   --background: #0a0a0b;
   --foreground: #f4f4f5;
+  /* 어두운 배경에서는 같은 알파가 거의 보이지 않아 조금 올린다. */
+  --anchor-flash: rgb(52 211 153 / 0.2);
 }
 
 @theme inline {
@@ -24,7 +31,8 @@
   --color-foreground: var(--foreground);
   /* 본문·헤드라인: Pretendard Variable (layout.tsx에서 npm 패키지 CSS를 import —
      외부 CDN 없이 self-host). */
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
     "Noto Sans KR", system-ui, sans-serif;
   /* 데이터·라벨용 토큰. 사이트의 모든 텍스트를 Pretendard 하나로 통일하므로
      --font-sans와 같은 스택을 쓴다(별도 mono 서체를 두지 않는다).
@@ -34,7 +42,8 @@
      Geist Mono에 없는 글리프(←, →, ↳ 등)가 Pretendard까지 내려오지 못하고
      Arial로 렌더링됐다. 폰트 스택에 Pretendard를 뒤에 적어두는 것만으로는
      막을 수 없는 문제라 서체 자체를 걷어냈다. */
-  --font-mono: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
+  --font-mono:
+    "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
     "Noto Sans KR", system-ui, sans-serif;
 }
 
@@ -69,6 +78,37 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* 앵커로 착지한 문단을 잠깐 밝힌다(components/ui/AnchorHighlight.tsx).
+   box-shadow의 spread로 요소 바깥까지 블록을 넓히므로 레이아웃이 밀리지 않는다
+   (padding/margin을 건드리면 착지 위치가 어긋난다). */
+@keyframes anchor-flash {
+  from {
+    background-color: var(--anchor-flash);
+    box-shadow: 0 0 0 12px var(--anchor-flash);
+  }
+  to {
+    background-color: transparent;
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+.anchor-flash {
+  border-radius: 2px;
+  animation: anchor-flash 1s ease-out both;
+}
+
+/* 모션 감소 설정에서는 위쪽 전역 규칙이 animation-duration을 0.01ms로 만들어
+   하이라이트가 보이지도 않고 사라진다. 이 표시는 "지금 이 문단이 그 근거다"라는
+   정보라서 없애면 안 되므로, 페이드 대신 정적인 블록으로 대체한다. 클래스 자체는
+   1초 뒤 JS가 제거하므로(AnchorHighlight.tsx) 지속시간은 동일하다. */
+@media (prefers-reduced-motion: reduce) {
+  .anchor-flash {
+    animation: none !important;
+    background-color: var(--anchor-flash);
+    box-shadow: 0 0 0 12px var(--anchor-flash);
   }
 }
 

@@ -4,9 +4,13 @@ import { useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { DURATION, EASE } from "@/lib/motion";
 import { postChatMessage } from "@/lib/api/chat";
+import { randomUUID } from "@/lib/uuid";
 import type { ChatMessage } from "@/lib/api/chat";
 import { ChatInput } from "@/components/domains/chat/ChatInput";
-import { MessageList, type ConversationTurn } from "@/components/domains/chat/MessageList";
+import {
+  MessageList,
+  type ConversationTurn,
+} from "@/components/domains/chat/MessageList";
 
 /**
  * 플로팅 모달(01_설계.md 5.2, 5.3). FloatingChatButton이 `next/dynamic`으로
@@ -40,7 +44,9 @@ export default function ChatModal({
   onClose: () => void;
   panelId: string;
 }) {
-  const [chatSessionId] = useState(() => crypto.randomUUID());
+  // crypto.randomUUID()를 직접 쓰지 않는다 - 보안 컨텍스트(HTTPS/localhost)에서만
+  // 존재해서 평문 HTTP로 접근하면 함수가 없어 모달이 통째로 죽는다(lib/uuid.ts).
+  const [chatSessionId] = useState(() => randomUUID());
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,7 +130,9 @@ export default function ChatModal({
       }
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={
-        prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }
+        prefersReducedMotion
+          ? { opacity: 0 }
+          : { opacity: 0, scale: 0.96, y: 8 }
       }
       transition={{ duration: DURATION.base, ease: EASE }}
       onKeyDown={handlePanelKeyDown}
@@ -148,13 +156,16 @@ export default function ChatModal({
       </div>
 
       <p className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500 dark:border-zinc-900 dark:bg-zinc-900 dark:text-zinc-400">
-        이 대화는 저장되지 않습니다. 새로고침하거나 창을 닫으면 대화 내용이 사라집니다.
+        이 대화는 저장되지 않습니다. 새로고침하거나 창을 닫으면 대화 내용이
+        사라집니다.
       </p>
 
       <MessageList turns={turns} isLoading={isLoading} />
 
       {error ? (
-        <p className="px-4 py-1 text-xs text-red-600 dark:text-red-400">{error}</p>
+        <p className="px-4 py-1 text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
       ) : null}
 
       <ChatInput onSend={handleSend} disabled={isLoading} />
