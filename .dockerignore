@@ -1,0 +1,13 @@
+# 두 Dockerfile(apps/web, apps/ai-server) 모두 저장소 루트를 빌드 컨텍스트로 쓴다 —
+# 이미지에 필요 없는 대용량/로컬 산출물을 컨텍스트에서 제외한다.
+.git
+.claude
+research
+**/node_modules
+apps/web/.next
+**/__pycache__
+**/*.pyc
+**/.env
+**/build
+**/*.egg-info
+deploy

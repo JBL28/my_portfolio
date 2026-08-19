@@ -40,14 +40,17 @@ from __future__ import annotations
 import time
 
 from fastapi import APIRouter, HTTPException, Request
-from openai import OpenAI
+from openai import OpenAIError
 
 from app.config import settings
+from app.llm.provider import get_openai_client
 from app.observability.tracing import get_tracer
-from app.pipeline.extract import run_extract
-from app.pipeline.gate_portfolio import run_gate_portfolio
-from app.pipeline.gate_site import run_gate_site
-from app.pipeline.generate import run_generate
+from app.pipeline.dispatch import (
+    run_extract,
+    run_gate_portfolio,
+    run_gate_site,
+    run_generate,
+)
 from app.pipeline.retrieve import retrieve
 from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse
 from app.security.input_scan import scan_input
@@ -95,18 +98,6 @@ def _truncate_history(history: list[ChatMessage]) -> list[ChatMessage]:
     return history[-max_messages:]
 
 
-# Neo4j driver의 get_driver()/close_driver()(app/graph/client.py)와 동일한 프로세스
-# 싱글턴 패턴 — 요청마다 새 OpenAI 클라이언트를 만들지 않고 재사용한다.
-_openai_client: OpenAI | None = None
-
-
-def _get_openai_client() -> OpenAI:
-    global _openai_client
-    if _openai_client is None:
-        _openai_client = OpenAI(api_key=settings.openai_api_key)
-    return _openai_client
-
-
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     if not request.messages:
@@ -115,7 +106,10 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     latest_message = request.messages[-1].content
     history = _truncate_history(request.messages[:-1])
 
-    client = _get_openai_client()
+    # Gate1/Gate2/Extract/Generate는 pipeline/dispatch.py가 프로바이더를 골라 클라이언트를
+    # 직접 만든다. 여기서 만드는 클라이언트는 **Retrieve의 질의 임베딩 전용**이다 —
+    # 임베딩은 프로바이더 선택과 무관하게 항상 OpenAI를 쓴다(llm/provider.py docstring).
+    embedding_client = get_openai_client()
     tracer = get_tracer()
 
     # 8.1: "requestId 발급은 BFF(Next.js)에서 이루어져야" 한다 — FastAPI는 새 값을
@@ -130,6 +124,12 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
         root_span.set_attribute("trace_id", format(span_context.trace_id, "032x"))
         root_span.set_attribute("request_id", request_id)
         root_span.set_attribute("chat_session_id", request.chatSessionId)
+        # 02_구현계획.md 0장 "자유 텍스트 trace 저장 정책"에서 확정: 질문·답변 원문과
+        # 파생 자유 텍스트(gate reason, search_intent)를 **마스킹 없이 그대로 저장**한다
+        # (저장소가 홈서버 내부에만 있고 접근 권한이 관리자 1인으로 한정되므로).
+        # 01_설계.md 8.6이 미결로 남기며 예로 든 배치 — "request span에 raw 입력,
+        # generate span에 answer 전문" — 을 그대로 따른다.
+        root_span.set_attribute("question", latest_message)
 
         try:
             # security.input — 8.1 순서상 Gate 1보다 먼저 실행되는 규칙 기반 스캔.
@@ -150,7 +150,7 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
 
             # [Gate 1] 포트폴리오 관련 질문인가?
             with tracer.start_as_current_span("gate.portfolio") as span:
-                gate1_result = run_gate_portfolio(client, latest_message, history)
+                gate1_result = run_gate_portfolio(latest_message, history)
                 span.set_attribute(
                     "is_portfolio_related", gate1_result.is_portfolio_related
                 )
@@ -164,7 +164,7 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
 
             # [Gate 2] 포트폴리오 "웹사이트 자체"에 대한 질문인가?
             with tracer.start_as_current_span("gate.site") as span:
-                gate2_result = run_gate_site(client, latest_message, history)
+                gate2_result = run_gate_site(latest_message, history)
                 span.set_attribute(
                     "is_about_site_itself", gate2_result.is_about_site_itself
                 )
@@ -178,7 +178,7 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
 
             # [Extract] 의도 및 핵심 개념 추출
             with tracer.start_as_current_span("extract") as span:
-                extract_result = run_extract(client, latest_message, history)
+                extract_result = run_extract(latest_message, history)
                 span.set_attribute("search_intent", extract_result.search_intent)
                 span.set_attribute(
                     "competencies", [c.value for c in extract_result.competencies]
@@ -202,14 +202,15 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
 
             # [Retrieve] Graph RAG 검색 (LLM 호출 없는 코드 단계) — retrieve.graph/
             # retrieve.vector/retrieve.rank span은 retrieve() 내부에서 만든다.
-            candidates = retrieve(client, extract_result)
+            candidates = retrieve(embedding_client, extract_result)
 
             # [Generate] 근거 기반 답변 생성
             with tracer.start_as_current_span("generate") as span:
                 generate_result, usage = run_generate(
-                    client, latest_message, extract_result, candidates
+                    latest_message, extract_result, candidates
                 )
-                span.set_attribute("model", settings.generate_model)
+                # `model`/`llm_provider`/`llm_fallback_used` attribute는 어떤 프로바이더가
+                # 실제로 응답했는지 아는 pipeline/dispatch.py가 기록한다.
                 if usage is not None:
                     span.set_attribute("prompt_tokens", usage.prompt_tokens)
                     span.set_attribute("completion_tokens", usage.completion_tokens)
@@ -220,6 +221,9 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
                 span.set_attribute(
                     "citations_count", len(generate_result.citations)
                 )
+                # 02_구현계획.md 0장 확정 정책(위 root span 주석 참고) — answer 전문을
+                # 마스킹 없이 그대로 기록한다.
+                span.set_attribute("answer", generate_result.answer)
 
             # security.output — Generate 이후, 실제 LLM 생성 답변만 스캔한다(Gate1/2
             # 조기 종료·파이프라인 예외 fallback은 고정 템플릿이라 스캔 대상이 아니다).
@@ -240,13 +244,16 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
                 isEvidenceSufficient=generate_result.is_evidence_sufficient,
                 citations=generate_result.citations,
             )
-        except (RuntimeError, ValueError):
+        except (RuntimeError, ValueError, OpenAIError):
             # RuntimeError: Gate1/Gate2/Extract/Generate 중 하나가 structured output
-            # 파싱에 실패(parsed is None)한 경우. ValueError: GenerateResult의 citation
-            # 제약을 모델이 어겨 pydantic 검증에서 예외가 난 경우(ValidationError는
-            # ValueError의 하위 클래스). 둘 다 Gate1/2 조기 종료와 같은 응답 모양으로
-            # 흡수한다 — span은 각 단계 안에서 이미 예외를 기록했으므로 여기서는 응답만
-            # 만든다.
+            # 파싱에 실패(parsed is None)했거나 citation 검증을 전부 통과하지 못한 경우.
+            # ValueError: GenerateResult의 citation 제약을 모델이 어겨 pydantic 검증에서
+            # 예외가 난 경우(ValidationError는 ValueError의 하위 클래스).
+            # OpenAIError: OpenAI API 호출 자체가 실패한 경우(인증 오류, rate limit,
+            # 네트워크 오류 등) — 모델의 지시 위반과 마찬가지로 FE가 별도 에러 분기를
+            # 두게 만들면 안 되는 파이프라인 내부 실패다.
+            # 셋 다 Gate1/2 조기 종료와 같은 응답 모양으로 흡수한다 — span은 각 단계
+            # 안에서 이미 예외를 기록했으므로 여기서는 응답만 만든다.
             return ChatResponse(
                 answer=_PIPELINE_ERROR_MESSAGE,
                 isEvidenceSufficient=False,

@@ -4,24 +4,75 @@
    Tailwind v4의 기본 media-query 기반 dark 변형 대신 class 기반으로 재정의한다. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ---------------------------------------------------------------------------
+   무채색 토큰 (01_설계.md 5.5 — "백엔드 개발자가 만든 듯한 무채색·컴팩트 톤").
+   색상 악센트를 두지 않는다 — 위계는 명도와 굵기, 서체 대비(Pretendard/mono)로만
+   만든다.
+   --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
+  --background: #fcfcfc; /* 순백보다 반 톤 가라앉힌 종이 배경 */
   --foreground: #18181b;
 }
 
 .dark {
-  --background: #09090b;
+  --background: #0a0a0b;
   --foreground: #f4f4f5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* 본문·헤드라인: Pretendard Variable (layout.tsx에서 npm 패키지 CSS를 import —
+     외부 CDN 없이 self-host). */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
+    "Noto Sans KR", system-ui, sans-serif;
+  /* 데이터·라벨용 토큰. 사이트의 모든 텍스트를 Pretendard 하나로 통일하므로
+     --font-sans와 같은 스택을 쓴다(별도 mono 서체를 두지 않는다).
+
+     이전에는 Geist Mono를 앞에 뒀는데, next/font가 함께 주입하는 "Geist Mono
+     Fallback"(= local(Arial)) 페이스가 Pretendard보다 **앞에** 놓이는 구조라
+     Geist Mono에 없는 글리프(←, →, ↳ 등)가 Pretendard까지 내려오지 못하고
+     Arial로 렌더링됐다. 폰트 스택에 Pretendard를 뒤에 적어두는 것만으로는
+     막을 수 없는 문제라 서체 자체를 걷어냈다. */
+  --font-mono: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo",
+    "Noto Sans KR", system-ui, sans-serif;
+}
+
+/* 서체를 Pretendard로 통일하면서 등폭 서체가 주던 "숫자 자릿수 정렬"이 사라진다.
+   기간("2025.10 ~ 2025.12")·갤러리 카운터("01 / 03")처럼 자릿수가 바뀌는 라벨이
+   흔들리지 않도록 Pretendard의 tabular figures로 그 성질만 되살린다. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-feature-settings: "ss05"; /* Pretendard: 완성형 따옴표 대체 — 인용구 표기 개선 */
+  /* 한국어는 어절 단위로만 줄바꿈한다 — 단어 중간이 끊기면("만듭니 / 다") 가독성이
+     크게 떨어진다. keep-all로 넘치는 극단적인 긴 토큰은 break-word가 받아준다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 키보드 포커스는 무채색 톤 안에서도 항상 식별 가능해야 한다. */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* 모션 감소 설정 존중 — 전환·애니메이션을 사실상 제거한다. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
 }

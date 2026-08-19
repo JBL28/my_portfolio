@@ -25,6 +25,7 @@
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from openai import OpenAI
@@ -85,6 +86,12 @@ class _Hit:
     mandatory: bool = False
     vector_score: float | None = None
     followup_case_id: str | None = None
+    # 아래 세 필드는 관측 전용이다(8.2 retrieve.graph: "매칭된 Case/Section/Project id,
+    # 매칭 경로") — 각 매칭 경로가 어떤 Case/Project를 통해 이 Section을 찾았는지를
+    # 개별 매칭 단위로 복원할 수 있도록 기록하며, 매칭·스코어링 로직에는 쓰이지 않는다.
+    case_id: str | None = None
+    project_id: str | None = None
+    project_slug: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +105,14 @@ def _step0_overview(project_hints: list[str]) -> list[_Hit]:
     Overview를 후보로 포함한다. 이 경로로 들어온 Overview는 항상 mandatory다(2장 7))."""
     rows = graph.overview_sections(project_hints)
     return [
-        _Hit(section_id=row["sectionId"], source="overview", mandatory=True) for row in rows
+        _Hit(
+            section_id=row["sectionId"],
+            source="overview",
+            mandatory=True,
+            project_id=row["projectId"],
+            project_slug=row["projectSlug"],
+        )
+        for row in rows
     ]
 
 
@@ -108,31 +122,66 @@ def _step0_overview(project_hints: list[str]) -> list[_Hit]:
 
 
 def _step1_graph_matching(
-    competencies: list[str], canonical_technologies: list[str]
-) -> tuple[list[_Hit], set[str], set[str]]:
-    """반환값: (hits, matched_case_ids, matched_project_slugs_from_project_uses)
+    competencies: list[str],
+    canonical_technologies: list[str],
+    project_hints: list[str],
+) -> tuple[list[_Hit], set[str], set[str], set[str]]:
+    """반환값: (hits, matched_case_ids, project_uses_slugs, case_project_slugs)
 
-    matched_case_ids/matched_project_slugs_from_project_uses는 3)의 seed 판단과,
-    project_hints가 비어 있었을 때의 보강(이 함수 밖, retrieve()에서 처리)에 쓰인다.
+    - project_hints(정규화된 slug)는 2장 [Retrieve] 0)의 "기본 검색 seed·우선 범위"로,
+      비어 있지 않으면 세 쿼리 모두 해당 Project 소속으로 범위를 좁힌다.
+    - matched_case_ids: 매칭된 Case id — 3)의 seed로 쓰인다.
+    - case_project_slugs: 매칭된 Case가 소속된 Project slug — 3)에서 "1)에서 매칭된
+      Case/Project"를 seed로 삼으라는 설계에 따라, Case를 통해 발견된 Project도
+      BUILDS_ON seed에 포함시킨다(Project-USES로 찾은 것만으로는 seed가 유실된다).
+    - project_uses_slugs: (Project)-[:USES]->(Technology)로 직접 매칭된 Project slug —
+      project_hints가 비어 있었을 때의 보강(2장 [Retrieve] 1), retrieve()에서 처리)에
+      쓰인다.
     """
     hits: list[_Hit] = []
     matched_case_ids: set[str] = set()
-    matched_project_slugs: set[str] = set()
+    project_uses_slugs: set[str] = set()
+    case_project_slugs: set[str] = set()
 
-    for row in graph.cases_by_competencies(competencies):
-        hits.append(_Hit(section_id=row["sectionId"], source="graph_competency"))
+    for row in graph.cases_by_competencies(competencies, project_hints):
+        hits.append(
+            _Hit(
+                section_id=row["sectionId"],
+                source="graph_competency",
+                case_id=row["caseId"],
+                project_id=row["projectId"],
+                project_slug=row["projectSlug"],
+            )
+        )
         matched_case_ids.add(row["caseId"])
+        case_project_slugs.add(row["projectSlug"])
 
-    for row in graph.cases_by_technologies_uses(canonical_technologies):
-        hits.append(_Hit(section_id=row["sectionId"], source="graph_technology_case"))
+    for row in graph.cases_by_technologies_uses(canonical_technologies, project_hints):
+        hits.append(
+            _Hit(
+                section_id=row["sectionId"],
+                source="graph_technology_case",
+                case_id=row["caseId"],
+                project_id=row["projectId"],
+                project_slug=row["projectSlug"],
+            )
+        )
         matched_case_ids.add(row["caseId"])
+        case_project_slugs.add(row["projectSlug"])
 
-    for row in graph.projects_by_technologies_uses(canonical_technologies):
+    for row in graph.projects_by_technologies_uses(canonical_technologies, project_hints):
         # wants_project_overview 값과 무관하게 후보에 추가한다(2장 [Retrieve] 1)).
-        hits.append(_Hit(section_id=row["sectionId"], source="graph_technology_project"))
-        matched_project_slugs.add(row["projectSlug"])
+        hits.append(
+            _Hit(
+                section_id=row["sectionId"],
+                source="graph_technology_project",
+                project_id=row["projectId"],
+                project_slug=row["projectSlug"],
+            )
+        )
+        project_uses_slugs.add(row["projectSlug"])
 
-    return hits, matched_case_ids, matched_project_slugs
+    return hits, matched_case_ids, project_uses_slugs, case_project_slugs
 
 
 # ---------------------------------------------------------------------------
@@ -144,10 +193,19 @@ def _step2_considered(
     canonical_technologies: list[str], project_hints: list[str]
 ) -> list[_Hit]:
     if canonical_technologies:
-        rows = graph.cases_by_technologies_considered(canonical_technologies)
+        rows = graph.cases_by_technologies_considered(canonical_technologies, project_hints)
     else:
         rows = graph.cases_with_any_considered(project_hints)
-    return [_Hit(section_id=row["sectionId"], source="considered") for row in rows]
+    return [
+        _Hit(
+            section_id=row["sectionId"],
+            source="considered",
+            case_id=row["caseId"],
+            project_id=row["projectId"],
+            project_slug=row["projectSlug"],
+        )
+        for row in rows
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -163,19 +221,59 @@ def _step3_growth(
 
     if has_seed:
         for row in graph.growth_influenced_from_seed_cases(list(seed_case_ids)):
-            hits.append(_Hit(section_id=row["sectionId"], source="growth_case"))
+            hits.append(
+                _Hit(
+                    section_id=row["sectionId"],
+                    source="growth_case",
+                    case_id=row["caseId"],
+                    project_id=row["projectId"],
+                    project_slug=row["projectSlug"],
+                )
+            )
 
         for row in graph.growth_builds_on_from_seed_projects(list(seed_project_slugs)):
             for section_id in row.get("evidenceSectionIds") or []:
-                hits.append(_Hit(section_id=section_id, source="growth_project"))
+                hits.append(
+                    _Hit(
+                        section_id=section_id,
+                        source="growth_project",
+                        project_id=row["projectId"],
+                        project_slug=row["projectSlug"],
+                    )
+                )
     else:
         for row in graph.growth_influenced_all(project_hints):
-            hits.append(_Hit(section_id=row["prevSectionId"], source="growth_case"))
-            hits.append(_Hit(section_id=row["currSectionId"], source="growth_case"))
+            hits.append(
+                _Hit(
+                    section_id=row["prevSectionId"],
+                    source="growth_case",
+                    case_id=row["prevCaseId"],
+                    project_id=row["prevProjectId"],
+                    project_slug=row["prevProjectSlug"],
+                )
+            )
+            hits.append(
+                _Hit(
+                    section_id=row["currSectionId"],
+                    source="growth_case",
+                    case_id=row["currCaseId"],
+                    project_id=row["currProjectId"],
+                    project_slug=row["currProjectSlug"],
+                )
+            )
 
         for row in graph.growth_builds_on_all(project_hints):
             for section_id in row.get("evidenceSectionIds") or []:
-                hits.append(_Hit(section_id=section_id, source="growth_project"))
+                # BUILDS_ON 관계의 evidence Section은 later/earlier 어느 쪽에도 속할 수
+                # 있으므로, 관측용 project는 관계의 later(이후 프로젝트) 쪽을 기록한다.
+                hits.append(
+                    _Hit(
+                        section_id=section_id,
+                        source="growth_project",
+                        project_id=row["laterId"],
+                        project_slug=row["laterSlug"],
+                    )
+                )
 
     return hits
 
@@ -190,9 +288,11 @@ def _embed_query(openai_client: OpenAI, text: str) -> list[float]:
     return response.data[0].embedding
 
 
-def _step4_vector(openai_client: OpenAI, search_intent: str) -> list[_Hit]:
+def _step4_vector(
+    openai_client: OpenAI, search_intent: str, project_hints: list[str]
+) -> list[_Hit]:
     embedding = _embed_query(openai_client, search_intent)
-    rows = graph.vector_search(embedding, settings.vector_search_k)
+    rows = graph.vector_search(embedding, settings.vector_search_k, project_hints)
     return [
         _Hit(section_id=row["sectionId"], source="vector", vector_score=row["score"])
         for row in rows
@@ -215,6 +315,7 @@ def _step5_followup_and_similar(extract: ExtractResult) -> list[_Hit]:
                     source="followup",
                     mandatory=True,
                     followup_case_id=ref.caseId,
+                    case_id=ref.caseId,
                 )
             )
 
@@ -224,9 +325,25 @@ def _step5_followup_and_similar(extract: ExtractResult) -> list[_Hit]:
         }
         for case_id in seed_case_ids:
             for row in graph.similar_cases_by_competency(case_id):
-                hits.append(_Hit(section_id=row["sectionId"], source="similar_case"))
+                hits.append(
+                    _Hit(
+                        section_id=row["sectionId"],
+                        source="similar_case",
+                        case_id=row["caseId"],
+                        project_id=row["projectId"],
+                        project_slug=row["projectSlug"],
+                    )
+                )
             for row in graph.similar_cases_by_technology(case_id):
-                hits.append(_Hit(section_id=row["sectionId"], source="similar_case"))
+                hits.append(
+                    _Hit(
+                        section_id=row["sectionId"],
+                        source="similar_case",
+                        case_id=row["caseId"],
+                        project_id=row["projectId"],
+                        project_slug=row["projectSlug"],
+                    )
+                )
 
     return hits
 
@@ -299,6 +416,14 @@ def _merge(hits: list[_Hit]) -> dict[str, Candidate]:
 #     더한다 — 강한 의미적 일치(유사도 0.8+)가 명시적 그래프 매칭 1건과 맞먹도록,
 #     약한 일치(0.3 이하)는 어떤 그래프 매칭보다도 낮게 가라앉도록 graph_competency와
 #     같은 스케일(1.0)에 맞췄다.
+#   - text: 2장 [Retrieve] 6)이 요구하는 본문 기반 신호 — "Case가 있는 Section은 Case
+#     필드까지 스코어링 근거로 함께 사용하고, Case가 없는 Section은 body만 사용한다".
+#     Extract가 뽑은 질의 용어(search_intent·technologies·competencies) 중 몇 개가 그
+#     Section의 스코어링 텍스트에 실제로 등장하는지의 비율(0~1)에 TEXT_MATCH_WEIGHT=0.8을
+#     곱한다. 벡터(1.0)보다 한 단계 낮춘 이유는, 표기 일치 기반 신호라 임베딩 유사도보다
+#     동의어·의역에 약하기 때문이다. 이 신호가 있어야 같은 경로로 매칭된 Section들
+#     사이에서(예: "협업"으로 DEMONSTRATES 매칭된 Case가 여러 개일 때) 질문에 실제로
+#     가까운 본문이 위로 올라온다 — 경로 가중치만으로는 그 안에서 전부 동점이 된다.
 #   - overview/followup은 이미 mandatory로 처리되어 스코어링 대상이 아니므로 가중치가
 #     없다(테이블에 없으면 0으로 취급되지만 애초에 비교 대상이 아니다).
 # ---------------------------------------------------------------------------
@@ -313,21 +438,102 @@ _SOURCE_WEIGHT: dict[str, float] = {
     "similar_case": 0.5,
 }
 _VECTOR_SIMILARITY_WEIGHT = 1.0
+_TEXT_MATCH_WEIGHT = 0.8
+
+# 스코어링 텍스트에 함께 넣는 Case 필드 — 2장 [Retrieve] 6)의 "Case 필드(검색을 돕는
+# 구조화 메타데이터)". 최종 근거가 Section.body라는 점은 [Generate] 단계의 제약이고,
+# 여기(검색 단계)에서는 설계가 명시한 대로 Case 필드도 함께 스코어링 근거로 쓴다.
+_CASE_SCORING_FIELDS = (
+    "title",
+    "summary",
+    "problem",
+    "judgment",
+    "action",
+    "result",
+    "learning",
+)
+
+# 한글/영문/숫자 연속열만 토큰으로 본다(조사·구두점은 경계로 취급).
+_TOKEN_PATTERN = re.compile(r"[0-9A-Za-z가-힣]+")
+# 1글자 토큰은 아무 본문에나 걸려 신호가 되지 못하므로 버린다.
+_MIN_TOKEN_LENGTH = 2
+
+# 스코어링 텍스트를 이어붙일 때 쓰는 구분자.
+_SCORING_TEXT_SEPARATOR = "\n"
 
 
-def _score(candidate: Candidate) -> float:
+def _tokenize(text: str) -> list[str]:
+    return [
+        token.lower()
+        for token in _TOKEN_PATTERN.findall(text)
+        if len(token) >= _MIN_TOKEN_LENGTH
+    ]
+
+
+def build_query_terms(
+    extract: ExtractResult, canonical_technologies: list[str]
+) -> list[str]:
+    """스코어링에 쓸 질의 용어 집합. Retrieve는 LLM을 호출하지 않는 코드 단계이므로
+    (2장), 질의 쪽 신호는 Extract가 이미 뽑아준 값 — search_intent(정규화된 검색 의도),
+    technologies(원문 표기 + 정규화된 canonical 이름), competencies — 이 전부다.
+    새 개념을 여기서 만들어내지 않는다."""
+    terms: list[str] = []
+    seen: set[str] = set()
+    sources = [
+        extract.search_intent,
+        *extract.technologies,
+        *canonical_technologies,
+        *(c.value for c in extract.competencies),
+    ]
+    for source in sources:
+        for token in _tokenize(source):
+            if token not in seen:
+                seen.add(token)
+                terms.append(token)
+    return terms
+
+
+def _scoring_text(candidate: Candidate) -> str:
+    """2장 [Retrieve] 6): Case가 있는 Section은 body + Case 필드, Case가 없는 Section은
+    body만."""
+    parts = [candidate.body]
+    for case in candidate.cases:
+        for field_name in _CASE_SCORING_FIELDS:
+            value = case.get(field_name)
+            if value:
+                parts.append(str(value))
+    return _SCORING_TEXT_SEPARATOR.join(parts)
+
+
+def _text_match_score(candidate: Candidate, query_terms: list[str]) -> float:
+    """질의 용어 중 스코어링 텍스트에 실제로 등장하는 비율(0~1).
+
+    한국어는 조사가 어미로 붙어("협업을", "운영에서") 토큰 완전일치로는 대부분
+    놓치므로, 토큰 단위로 자른 텍스트가 아니라 정규화된 텍스트 전체에 대한 부분
+    문자열 포함 여부로 판정한다."""
+    if not query_terms:
+        return 0.0
+    text = _scoring_text(candidate).lower()
+    matched = sum(1 for term in query_terms if term in text)
+    return matched / len(query_terms)
+
+
+def _score(candidate: Candidate, query_terms: list[str]) -> float:
     graph_score = sum(_SOURCE_WEIGHT.get(source, 0.0) for source in candidate.sources)
     vector_component = _VECTOR_SIMILARITY_WEIGHT * (candidate.vector_score or 0.0)
-    return graph_score + vector_component
+    text_component = _TEXT_MATCH_WEIGHT * _text_match_score(candidate, query_terms)
+    return graph_score + vector_component + text_component
 
 
-def _select_top_k(candidates: dict[str, Candidate], top_k: int) -> list[Candidate]:
+def _select_top_k(
+    candidates: dict[str, Candidate], top_k: int, query_terms: list[str]
+) -> list[Candidate]:
     mandatory = sorted(
         (c for c in candidates.values() if c.mandatory), key=lambda c: c.section_id
     )
     rest = sorted(
         (c for c in candidates.values() if not c.mandatory),
-        key=lambda c: (-_score(c), c.section_id),
+        key=lambda c: (-_score(c, query_terms), c.section_id),
     )
     remaining_slots = max(0, top_k - len(mandatory))
     return mandatory + rest[:remaining_slots]
@@ -355,18 +561,33 @@ def retrieve(openai_client: OpenAI, extract: ExtractResult) -> list[Candidate]:
         if extract.wants_project_overview:
             hits.extend(_step0_overview(project_hints))
 
-        # 1) 그래프 매칭 (역량/기술)
+        # 1) 그래프 매칭 (역량/기술) — project_hints를 기본 검색 우선 범위로 전달한다
+        # (2장 [Retrieve] 0)).
         competencies = [c.value for c in extract.competencies]
         canonical_technologies = normalize_technologies(extract.technologies)
-        step1_hits, seed_case_ids, seed_project_slugs = _step1_graph_matching(
-            competencies, canonical_technologies
-        )
+        (
+            step1_hits,
+            seed_case_ids,
+            project_uses_slugs,
+            case_project_slugs,
+        ) = _step1_graph_matching(competencies, canonical_technologies, project_hints)
         hits.extend(step1_hits)
 
-        # project_hints가 비어 있었다면 Project-USES 매칭 결과로 보강한다
-        # (2장 [Retrieve] 1)).
-        if not project_hints and seed_project_slugs:
-            project_hints = list(seed_project_slugs)
+        # 3)의 성장 관계 seed는 "1)에서 매칭된 Case/Project"(2장 [Retrieve] 3)) —
+        # Project-USES로 직접 매칭된 Project뿐 아니라, 매칭된 Case가 소속된 Project도
+        # BUILDS_ON seed에 포함한다(Case seed만 있고 Project seed가 비어 BUILDS_ON
+        # 탐색이 통째로 빠지는 것을 방지).
+        #
+        # 2장 [Retrieve] 1)의 "project_hints가 비어 있었다면 이 매칭 결과로 project_hints를
+        # 보강해 3)의 성장 관계 탐색에도 반영한다"는 요구는 이 seed_project_slugs가 그대로
+        # 충족한다 — 3)의 seed 있음 분기가 쓰는 값이 바로 "1)에서 매칭된 Project"이기
+        # 때문이다. 반대로 기본 검색 우선 범위인 project_hints 변수 자체를 덮어써서는
+        # 안 된다: 설계는 이 보강의 적용 범위를 3)으로 한정했고, 덮어쓰면 2)(대안 비교)와
+        # 4)(벡터)까지 "기술 하나 언급했을 뿐인 질문"에서 그 기술을 쓴 프로젝트로 범위가
+        # 축소되어 0)의 "빈 배열이면 특정 프로젝트로 좁히지 않음"과 어긋난다.
+        # (3)의 seed 없음 분기는 1)이 아무것도 매칭하지 못한 경우에만 도달하므로 보강할
+        #  값 자체가 존재하지 않는다 — 그 분기에는 원래의 project_hints를 그대로 넘긴다.)
+        seed_project_slugs = project_uses_slugs | case_project_slugs
 
         # 2) 대안 비교 매칭
         if extract.wants_alternatives_considered:
@@ -381,17 +602,46 @@ def retrieve(openai_client: OpenAI, extract: ExtractResult) -> list[Candidate]:
         hits.extend(_step5_followup_and_similar(extract))
 
         # 8.2: "매칭된 Case/Section/Project id, 매칭 경로(... 어떤 관계로 매칭됐는지)".
-        span.set_attribute("matched_section_ids", [h.section_id for h in hits])
-        span.set_attribute("matched_case_ids", sorted(seed_case_ids))
-        span.set_attribute("matched_project_slugs", sorted(seed_project_slugs))
+        # id 집계는 seed만이 아니라 모든 경로(0)~3)+5))의 매칭 결과를 대상으로 한다.
         span.set_attribute(
-            "matched_relations",
-            sorted({_SOURCE_TO_RELATION.get(h.source, h.source) for h in hits}),
+            "matched_section_ids", sorted({h.section_id for h in hits})
+        )
+        span.set_attribute(
+            "matched_case_ids",
+            sorted({h.case_id for h in hits if h.case_id is not None}),
+        )
+        span.set_attribute(
+            "matched_project_ids",
+            sorted({h.project_id for h in hits if h.project_id is not None}),
+        )
+        span.set_attribute(
+            "matched_project_slugs",
+            sorted({h.project_slug for h in hits if h.project_slug is not None}),
+        )
+        # 개별 매칭 단위 기록 — "Section A → DEMONSTRATES(caseId=..)"처럼 어떤 Section이
+        # 어떤 관계·Case·Project를 거쳐 후보가 됐는지를 복원할 수 있게 한다.
+        span.set_attribute(
+            "matched_paths",
+            sorted(
+                {
+                    f"sectionId={h.section_id}"
+                    f" relation={_SOURCE_TO_RELATION.get(h.source, h.source)}"
+                    + (f" caseId={h.case_id}" if h.case_id is not None else "")
+                    + (f" projectId={h.project_id}" if h.project_id is not None else "")
+                    + (
+                        f" projectSlug={h.project_slug}"
+                        if h.project_slug is not None
+                        else ""
+                    )
+                    for h in hits
+                }
+            ),
         )
 
-    # retrieve.vector: 4) 임베딩 + 벡터 유사도 검색.
+    # retrieve.vector: 4) 임베딩 + 벡터 유사도 검색 — project_hints가 있으면 그 범위로
+    # 좁힌다(2장 [Retrieve] 0)).
     with tracer.start_as_current_span("retrieve.vector") as span:
-        vector_hits = _step4_vector(openai_client, extract.search_intent)
+        vector_hits = _step4_vector(openai_client, extract.search_intent, project_hints)
         hits.extend(vector_hits)
 
         # 8.2: "후보 Section id, 유사도 점수".
@@ -405,8 +655,10 @@ def retrieve(openai_client: OpenAI, extract: ExtractResult) -> list[Candidate]:
         # 6) 합집합 구성
         candidates = _merge(hits)
 
-        # 7) Top-K 선정 (mandatory 항상 포함)
-        selected = _select_top_k(candidates, settings.retrieve_top_k)
+        # 7) Top-K 선정 (mandatory 항상 포함). 스코어링은 매칭 경로 가중치 + 벡터
+        # 유사도 + 본문/Case 필드 기반 텍스트 일치도를 합산한다(2장 [Retrieve] 6)).
+        query_terms = build_query_terms(extract, canonical_technologies)
+        selected = _select_top_k(candidates, settings.retrieve_top_k, query_terms)
         selected_ids = {c.section_id for c in selected}
 
         # 8.2: "최종 후보 목록 — sectionId별 sources(...), finalScore, rank, Top-K
@@ -414,13 +666,14 @@ def retrieve(openai_client: OpenAI, extract: ExtractResult) -> list[Candidate]:
         # score 내림차순)와 동일한 정렬로 기록한다.
         ranked = sorted(
             candidates.values(),
-            key=lambda c: (not c.mandatory, -_score(c), c.section_id),
+            key=lambda c: (not c.mandatory, -_score(c, query_terms), c.section_id),
         )
         span.set_attribute(
             "candidates",
             [
                 f"rank={i + 1} sectionId={c.section_id} sources={','.join(sorted(c.sources))} "
-                f"finalScore={_score(c):.3f} selected={c.section_id in selected_ids}"
+                f"finalScore={_score(c, query_terms):.3f} "
+                f"selected={c.section_id in selected_ids}"
                 for i, c in enumerate(ranked)
             ],
         )

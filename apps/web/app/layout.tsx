@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { PageLayout } from "@/components/layouts/PageLayout";
+// Pretendard Variable — npm 패키지에서 self-host로 로드한다(외부 CDN 요청 없음).
+// dynamic-subset: 한국어 글리프를 사용 범위 단위로 쪼개 필요한 것만 내려받는다.
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "채용 담당자를 위한 포트폴리오",
+  title: "이정복 · Backend Developer",
+  description:
+    "팀이 함께 쓸 기준을 만드는 백엔드 개발자 이정복의 포트폴리오 — TeenyFinny, Home Server, DailyBand.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,9 +17,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ko"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
-      <body className="min-h-full bg-background text-foreground">
+      <body className="min-h-full bg-background font-sans text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PageLayout>{children}</PageLayout>
         </ThemeProvider>

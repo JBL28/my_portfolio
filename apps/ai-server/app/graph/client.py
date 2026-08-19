@@ -100,7 +100,7 @@ def overview_sections(project_slugs: list[str]) -> list[dict[str, Any]]:
         """
         MATCH (proj:Project)-[:HAS_SECTION]->(s:Section {anchor: 'overview'})
         WHERE $slugs = [] OR proj.slug IN $slugs
-        RETURN s.id AS sectionId, proj.slug AS projectSlug
+        RETURN s.id AS sectionId, proj.id AS projectId, proj.slug AS projectSlug
         """,
         slugs=project_slugs,
     )
@@ -108,10 +108,16 @@ def overview_sections(project_slugs: list[str]) -> list[dict[str, Any]]:
 
 # ---------------------------------------------------------------------------
 # 1) 그래프 매칭 (역량/기술)
+#
+# [Retrieve] 0): "project_hints는 기본 검색 seed·우선 범위로 사용한다(빈 배열이면 특정
+# 프로젝트로 좁히지 않음)" — 아래 세 쿼리는 정규화된 project_hints(slug 목록)를 받아
+# 기본 검색 범위를 좁힌다. 3)의 성장 관계 탐색만 설계상 이 범위 밖으로 확장될 수 있다.
 # ---------------------------------------------------------------------------
 
 
-def cases_by_competencies(names: list[str]) -> list[dict[str, Any]]:
+def cases_by_competencies(
+    names: list[str], project_slugs: list[str]
+) -> list[dict[str, Any]]:
     if not names:
         return []
     return _run(
@@ -120,13 +126,18 @@ def cases_by_competencies(names: list[str]) -> list[dict[str, Any]]:
         WHERE comp.name IN $names
         MATCH (c)-[:DESCRIBED_IN]->(s:Section)
         MATCH (proj:Project)-[:HAS_CASE]->(c)
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug, c.id AS caseId
+        WHERE $slugs = [] OR proj.slug IN $slugs
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId,
+               proj.slug AS projectSlug, c.id AS caseId
         """,
         names=names,
+        slugs=project_slugs,
     )
 
 
-def cases_by_technologies_uses(canonical_names: list[str]) -> list[dict[str, Any]]:
+def cases_by_technologies_uses(
+    canonical_names: list[str], project_slugs: list[str]
+) -> list[dict[str, Any]]:
     if not canonical_names:
         return []
     return _run(
@@ -135,24 +146,30 @@ def cases_by_technologies_uses(canonical_names: list[str]) -> list[dict[str, Any
         WHERE t.name IN $names
         MATCH (c)-[:DESCRIBED_IN]->(s:Section)
         MATCH (proj:Project)-[:HAS_CASE]->(c)
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug, c.id AS caseId
+        WHERE $slugs = [] OR proj.slug IN $slugs
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId,
+               proj.slug AS projectSlug, c.id AS caseId
         """,
         names=canonical_names,
+        slugs=project_slugs,
     )
 
 
-def projects_by_technologies_uses(canonical_names: list[str]) -> list[dict[str, Any]]:
+def projects_by_technologies_uses(
+    canonical_names: list[str], project_slugs: list[str]
+) -> list[dict[str, Any]]:
     """(Project)-[:USES]->(Technology)로 매칭된 Project의 Overview Section을 반환한다."""
     if not canonical_names:
         return []
     return _run(
         """
         MATCH (proj:Project)-[:USES]->(t:Technology)
-        WHERE t.name IN $names
+        WHERE t.name IN $names AND ($slugs = [] OR proj.slug IN $slugs)
         MATCH (proj)-[:HAS_SECTION]->(s:Section {anchor: 'overview'})
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId, proj.slug AS projectSlug
         """,
         names=canonical_names,
+        slugs=project_slugs,
     )
 
 
@@ -161,7 +178,10 @@ def projects_by_technologies_uses(canonical_names: list[str]) -> list[dict[str, 
 # ---------------------------------------------------------------------------
 
 
-def cases_by_technologies_considered(canonical_names: list[str]) -> list[dict[str, Any]]:
+def cases_by_technologies_considered(
+    canonical_names: list[str], project_slugs: list[str]
+) -> list[dict[str, Any]]:
+    """[Retrieve] 0)의 기본 검색 우선 범위(project_hints)를 여기에도 동일하게 적용한다."""
     if not canonical_names:
         return []
     return _run(
@@ -170,9 +190,12 @@ def cases_by_technologies_considered(canonical_names: list[str]) -> list[dict[st
         WHERE t.name IN $names
         MATCH (c)-[:DESCRIBED_IN]->(s:Section)
         MATCH (proj:Project)-[:HAS_CASE]->(c)
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug, c.id AS caseId
+        WHERE $slugs = [] OR proj.slug IN $slugs
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId,
+               proj.slug AS projectSlug, c.id AS caseId
         """,
         names=canonical_names,
+        slugs=project_slugs,
     )
 
 
@@ -184,7 +207,8 @@ def cases_with_any_considered(project_slugs: list[str]) -> list[dict[str, Any]]:
         MATCH (c)-[:DESCRIBED_IN]->(s:Section)
         MATCH (proj:Project)-[:HAS_CASE]->(c)
         WHERE $slugs = [] OR proj.slug IN $slugs
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug, c.id AS caseId
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId,
+               proj.slug AS projectSlug, c.id AS caseId
         """,
         slugs=project_slugs,
     )
@@ -205,7 +229,8 @@ def growth_influenced_from_seed_cases(case_ids: list[str]) -> list[dict[str, Any
         MATCH (seed)-[:INFLUENCED]-(other:Case)
         MATCH (other)-[:DESCRIBED_IN]->(s:Section)
         MATCH (proj:Project)-[:HAS_CASE]->(other)
-        RETURN DISTINCT s.id AS sectionId, proj.slug AS projectSlug, other.id AS caseId
+        RETURN DISTINCT s.id AS sectionId, proj.id AS projectId,
+               proj.slug AS projectSlug, other.id AS caseId
         """,
         caseIds=case_ids,
     )
@@ -221,7 +246,8 @@ def growth_builds_on_from_seed_projects(project_slugs: list[str]) -> list[dict[s
         """
         MATCH (seed:Project) WHERE seed.slug IN $slugs
         MATCH (seed)-[r:BUILDS_ON]-(other:Project)
-        RETURN DISTINCT r.evidenceSectionIds AS evidenceSectionIds
+        RETURN DISTINCT other.id AS projectId, other.slug AS projectSlug,
+               r.evidenceSectionIds AS evidenceSectionIds
         """,
         slugs=project_slugs,
     )
@@ -238,8 +264,10 @@ def growth_influenced_all(project_slugs: list[str]) -> list[dict[str, Any]]:
         MATCH (cproj:Project)-[:HAS_CASE]->(curr)
         WHERE $slugs = [] OR pproj.slug IN $slugs OR cproj.slug IN $slugs
         RETURN DISTINCT
-          ps.id AS prevSectionId, pproj.slug AS prevProjectSlug, prev.id AS prevCaseId,
-          cs.id AS currSectionId, cproj.slug AS currProjectSlug, curr.id AS currCaseId
+          ps.id AS prevSectionId, pproj.id AS prevProjectId,
+          pproj.slug AS prevProjectSlug, prev.id AS prevCaseId,
+          cs.id AS currSectionId, cproj.id AS currProjectId,
+          cproj.slug AS currProjectSlug, curr.id AS currCaseId
         """,
         slugs=project_slugs,
     )
@@ -251,7 +279,8 @@ def growth_builds_on_all(project_slugs: list[str]) -> list[dict[str, Any]]:
         """
         MATCH (later:Project)-[r:BUILDS_ON]->(earlier:Project)
         WHERE $slugs = [] OR later.slug IN $slugs OR earlier.slug IN $slugs
-        RETURN DISTINCT later.slug AS laterSlug, earlier.slug AS earlierSlug,
+        RETURN DISTINCT later.id AS laterId, later.slug AS laterSlug,
+               earlier.id AS earlierId, earlier.slug AS earlierSlug,
                r.evidenceSectionIds AS evidenceSectionIds
         """,
         slugs=project_slugs,
@@ -263,18 +292,41 @@ def growth_builds_on_all(project_slugs: list[str]) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-def vector_search(embedding: list[float], k: int) -> list[dict[str, Any]]:
+def vector_search(
+    embedding: list[float], k: int, project_slugs: list[str]
+) -> list[dict[str, Any]]:
     """Overview는 embedding이 없으므로(searchable=false) 벡터 인덱스에 애초에
     잡히지 않는다 — 별도 필터 없이도 3.2/3.3의 "Overview는 벡터 검색 대상 아님"이
-    자동으로 보장된다."""
+    자동으로 보장된다.
+
+    [Retrieve] 0): project_slugs(정규화된 project_hints)가 있으면 벡터 후보도 그
+    Project 소속 Section으로 좁힌다 — 기본 검색의 우선 범위. 벡터 인덱스 자체는
+    Project를 모르는 전역 인덱스이므로, 범위를 좁힐 때는 후보를 넉넉히 끌어온 뒤
+    (fetchK) 소속 Project로 필터링하고 상위 k개만 남긴다.
+
+    Home Profile Section(3.2)은 어떤 Project에도 속하지 않으므로(proj IS NULL) 이
+    범위 좁히기의 대상이 아니다 — project_hints는 "어느 프로젝트 이야기인가"를 좁히는
+    값이지 "지원자 자신에 대한 근거를 빼라"는 값이 아니고, 3.2가 이 Section을
+    searchable=true로 둔 이유 자체가 "이 지원자는 어떤 개발자인가요?" 같은 질문에
+    직접 답할 근거를 벡터 검색으로 확보하기 위함이다. 따라서 proj IS NULL인 Section은
+    project_hints 유무와 무관하게 벡터 후보로 남긴다(설계 4)에 이 Section을 제외하라는
+    규칙은 없다)."""
+    fetch_k = k if not project_slugs else k * 4
     return _run(
         """
-        CALL db.index.vector.queryNodes('section_embedding_index', $k, $embedding)
+        CALL db.index.vector.queryNodes('section_embedding_index', $fetchK, $embedding)
         YIELD node, score
+        OPTIONAL MATCH (proj:Project)-[:HAS_SECTION]->(node)
+        WITH node, score, proj
+        WHERE $slugs = [] OR proj IS NULL OR proj.slug IN $slugs
         RETURN node.id AS sectionId, score AS score
+        ORDER BY score DESC
+        LIMIT $k
         """,
+        fetchK=fetch_k,
         k=k,
         embedding=embedding,
+        slugs=project_slugs,
     )
 
 
@@ -293,7 +345,8 @@ def similar_cases_by_competency(case_id: str) -> list[dict[str, Any]]:
         MATCH (otherProj:Project)-[:HAS_CASE]->(other)
         WHERE otherProj.slug <> seedProj.slug
         MATCH (other)-[:DESCRIBED_IN]->(s:Section)
-        RETURN DISTINCT s.id AS sectionId, otherProj.slug AS projectSlug, other.id AS caseId
+        RETURN DISTINCT s.id AS sectionId, otherProj.id AS projectId,
+               otherProj.slug AS projectSlug, other.id AS caseId
         """,
         caseId=case_id,
     )
@@ -310,7 +363,8 @@ def similar_cases_by_technology(case_id: str) -> list[dict[str, Any]]:
         MATCH (otherProj:Project)-[:HAS_CASE]->(other)
         WHERE otherProj.slug <> seedProj.slug
         MATCH (other)-[:DESCRIBED_IN]->(s:Section)
-        RETURN DISTINCT s.id AS sectionId, otherProj.slug AS projectSlug, other.id AS caseId
+        RETURN DISTINCT s.id AS sectionId, otherProj.id AS projectId,
+               otherProj.slug AS projectSlug, other.id AS caseId
         """,
         caseId=case_id,
     )

@@ -6,12 +6,18 @@ import {
 } from "@/lib/portfolio-data";
 import { Container } from "@/components/ui/Container";
 import { ProjectOverview } from "@/components/domains/project/ProjectOverview";
+import { ProjectGallery } from "@/components/domains/project/ProjectGallery";
 import { ProjectDetailSection } from "@/components/domains/project/ProjectDetailSection";
 import { stripInlineRichText } from "@/lib/rich-text";
 
 export function generateStaticParams() {
   return getProjectSlugsForStaticParams().map((slug) => ({ slug }));
 }
+
+// 01_설계.md 5.1: `/projects/[slug]`는 SSG 전용이다 — generateStaticParams가 반환한
+// slug 밖의 경로는 런타임 렌더 없이 곧바로 404 처리해, 배포 환경에서 서버가 data/를
+// 런타임에 읽는 경로 자체를 만들지 않는다.
+export const dynamicParams = false;
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -26,11 +32,16 @@ export async function generateMetadata({
     return { title: "Portfolio" };
   }
   return {
-    title: `${project.name} · Portfolio`,
+    title: `${project.name} · 이정복`,
     description: stripInlineRichText(project.summary),
   };
 }
 
+/**
+ * Project Detail — Home과 같은 2단 뼈대를 유지한다: 좌측은 고정된 "명세"(프로젝트
+ * 메타데이터 spec sheet, sticky), 우측은 흐르는 "서술"(H2 Section 원문). AI 답변의
+ * citation은 우측 서술의 anchor로 착지한다.
+ */
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { slug } = await params;
   const project = getProjectBySlug(slug);
@@ -39,13 +50,23 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   }
 
   const sections = [...project.sections].sort((a, b) => a.order - b.order);
+  const hasGallery = (project.images?.length ?? 0) > 0;
 
   return (
-    <Container size="narrow" className="py-12 sm:py-16">
+    <Container className="py-14 sm:py-20 lg:grid lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-x-20">
       <ProjectOverview project={project} />
-      <div>
-        {sections.map((section) => (
-          <ProjectDetailSection key={section.id} section={section} />
+      <div className="mt-16 lg:mt-0">
+        {/* 갤러리는 이미지가 확정된 프로젝트(data/projects의 images 필드)에서만
+            서술 컬럼 상단에 나타난다 — 없는 자리를 지어내지 않는다. */}
+        {hasGallery ? (
+          <ProjectGallery images={project.images!} projectName={project.name} />
+        ) : null}
+        {sections.map((section, index) => (
+          <ProjectDetailSection
+            key={section.id}
+            section={section}
+            isFirst={index === 0 && !hasGallery}
+          />
         ))}
       </div>
     </Container>

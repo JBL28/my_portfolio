@@ -35,6 +35,23 @@
   "buildsOnEvidenceSectionIds": [
     "a3ca4969-bd79-4363-87fd-e855478d3c6d"
   ],
+  "images": [
+    {
+      "src": "/projects/dailyband/01-app-screens.png",
+      "alt": "DailyBand 주요 앱 화면 모음 자리(플레이스홀더)",
+      "caption": "주요 화면 — 실제 스크린샷으로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/dailyband/02-file-pipeline.png",
+      "alt": "파일 메타데이터 처리 책임을 한 곳으로 모은 업로드 파이프라인 도식 자리(플레이스홀더)",
+      "caption": "파일 처리 파이프라인 — 실제 도식으로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/dailyband/03-ai-failure-recovery.png",
+      "alt": "트랜잭션 밖 AI 실패를 별도 상태로 회수하는 흐름도 자리(플레이스홀더)",
+      "caption": "AI 실패 회수 흐름 — 실제 흐름도로 교체 예정입니다."
+    }
+  ],
   "sections": [
     {
       "id": "a67e2650-2c68-433f-82cb-bcd0a4533083",

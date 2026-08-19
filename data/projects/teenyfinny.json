@@ -21,8 +21,26 @@
     "SonarQube"
   ],
   "order": 1,
+  "bridgeNote": "운영 도구의 Public 노출 문제를 다음 환경에서 다시 설계했습니다.",
   "buildsOnProjectSlug": null,
   "buildsOnEvidenceSectionIds": [],
+  "images": [
+    {
+      "src": "/projects/teenyfinny/01-service-architecture.png",
+      "alt": "TeenyFinny 서비스 아키텍처 다이어그램 자리(플레이스홀더)",
+      "caption": "서비스 아키텍처 — 실제 다이어그램으로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/teenyfinny/02-redundancy-test.png",
+      "alt": "이중화 구성을 직접 끊어보며 확인한 장애 전환 테스트 화면 자리(플레이스홀더)",
+      "caption": "이중화 장애 전환 검증 — 실제 캡처로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/teenyfinny/03-team-workflow.png",
+      "alt": "PL로서 팀과 합의한 개발 흐름과 브랜치 전략 도식 자리(플레이스홀더)",
+      "caption": "팀 개발 흐름 — 실제 도식으로 교체 예정입니다."
+    }
+  ],
   "sections": [
     {
       "id": "916bbd4c-afa6-4274-9fba-8c6bca5782bc",

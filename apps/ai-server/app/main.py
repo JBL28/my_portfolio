@@ -17,6 +17,7 @@ from fastapi import FastAPI
 
 from app.api.chat import router as chat_router
 from app.graph.client import close_driver
+from app.llm.provider import warn_if_incomplete
 from app.observability.tracing import configure_tracing, shutdown_tracing
 
 
@@ -26,6 +27,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # TracerProvider/OTLP exporter를 한 번 설정한다. 엔드포인트 미설정 등으로 실패해도
     # 서버 기동 자체는 막지 않는다(tracing.py 주석 참고).
     configure_tracing()
+    # 어떤 LLM 프로바이더 체인으로 뜨는지 기동 시 한 번 남긴다. 특히 OPENAI_API_KEY가
+    # 없는 구성은 Gate 1/2만 동작하고 Retrieve->Generate가 반드시 실패하므로, 첫 요청이
+    # 들어오기 전에 드러나야 한다(llm/provider.py docstring). 기동은 막지 않는다.
+    warn_if_incomplete()
     yield
     # 앱 종료 시 Neo4j driver 커넥션을 명시적으로 정리한다(graph/client.py 주석 참고).
     close_driver()

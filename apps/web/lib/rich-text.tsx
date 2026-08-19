@@ -27,7 +27,10 @@ export function parseInlineRichText(text: string): ReactNode[] {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
         <strong key={index} className="font-semibold text-foreground">
-          {part.slice(2, -2)}
+          {/* 굵게 안에 인라인 코드가 중첩될 수 있다(원문 예: "**10개 테이블이
+              `files`를 참조**") — 내부를 한 번 더 파싱해 백틱이 그대로 노출되지
+              않게 한다. 코드 안에 굵게가 중첩되는 표기는 원문에 없다. */}
+          {parseInlineRichText(part.slice(2, -2))}
         </strong>
       );
     }

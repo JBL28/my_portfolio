@@ -19,9 +19,27 @@
     "Grafana"
   ],
   "order": 2,
+  "bridgeNote": "개인 운영 환경을 다시 팀의 개발 환경으로 가져왔습니다.",
   "buildsOnProjectSlug": "teenyfinny",
   "buildsOnEvidenceSectionIds": [
     "aa221ace-dccc-4b02-b3af-edce10843774"
+  ],
+  "images": [
+    {
+      "src": "/projects/home-server/01-network-topology.png",
+      "alt": "Tailscale 내부망과 Cloudflare Tunnel 공개 경로를 구분한 네트워크 구성도 자리(플레이스홀더)",
+      "caption": "네트워크 구성 — 실제 구성도로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/home-server/02-monitoring-dashboard.png",
+      "alt": "Grafana 메트릭 대시보드 화면 자리(플레이스홀더)",
+      "caption": "모니터링 대시보드 — 실제 스크린샷으로 교체 예정입니다."
+    },
+    {
+      "src": "/projects/home-server/03-ci-cd-pipeline.png",
+      "alt": "개인 서버를 팀 품질 검증 환경으로 연결한 CI/CD 파이프라인 도식 자리(플레이스홀더)",
+      "caption": "CI/CD 파이프라인 — 실제 도식으로 교체 예정입니다."
+    }
   ],
   "sections": [
     {

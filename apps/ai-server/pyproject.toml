@@ -21,7 +21,12 @@ dependencies = [
     "opentelemetry-exporter-otlp>=1.27,<2",
 ]
 
-# scripts/, db/는 import 가능한 패키지가 아니라 실행 스크립트·DDL 파일 모음이므로,
-# setuptools가 top-level 패키지를 자동 탐지하려다 실패하지 않도록 명시적으로 비워 둔다.
+# wheel에는 애플리케이션 패키지 app/(및 하위 패키지)만 담는다 — scripts/, db/는 import
+# 가능한 패키지가 아니라 실행 스크립트·DDL 파일 모음이므로 자동 탐지 대상에서 제외한다.
+# (include를 명시하지 않으면 setuptools가 top-level 탐지에 실패하거나, 반대로 빈 wheel이
+# 만들어져 `pip install .` 후 `uvicorn app.main:app`이 모듈을 찾지 못한다.)
 [tool.setuptools]
 py-modules = []
+
+[tool.setuptools.packages.find]
+include = ["app*"]

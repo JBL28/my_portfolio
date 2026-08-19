@@ -70,6 +70,8 @@ SCHEMA_CYPHER_PATH = AI_SERVER_DIR / "db" / "schema.cypher"
 
 # 02_구현계획.md 0장에서 확정한 임베딩 모델(3.3 — "OpenAI API 확정"은 판별/추출/생성에
 # 한정되고 임베딩은 별도 결정 사항이었으나, 구현계획에서 이 모델로 확정됐다).
+# app/config.py의 settings.embedding_model(Retrieve 질의 임베딩)과 반드시 같은 값이어야
+# 한다 — 모델을 바꾸려면 두 곳을 함께 고치고 전체 재적재해야 한다(환경변수 override 없음).
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIMENSIONS = 1536
 # OpenAI embeddings API는 한 요청에 여러 입력을 배치로 보낼 수 있다. 이 포트폴리오

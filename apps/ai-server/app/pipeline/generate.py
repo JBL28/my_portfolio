@@ -13,6 +13,15 @@
 `generate` span에 요구하는 "토큰 사용량"을 기록하려면 `client.beta.chat.completions.parse`
 호출이 반환하는 raw completion에서만 얻을 수 있는 값이라 이 최소한의 반환값 추가가
 필요하다(api/chat.py가 이 값을 span attribute로 기록한다).
+
+**citation 무결성 방어(2장 [Generate] "citations는 실제로 답변에 사용한 근거 후보에서만
+만든다")**: 이 제약은 프롬프트 지시만으로는 보장되지 않으므로(모델이 존재하지 않는
+sectionId/path/anchor를 지어낼 수 있다), extract.py의 refers_to_previous_citations
+후처리와 동일한 원칙으로 서버가 사후 검증한다 — sectionId가 실제 후보(Candidate)에
+있는지 확인하고, caseId가 그 Section에 연결된 Case인지 확인한 뒤,
+projectSlug/path/anchor/quotedTitle은 모델 출력값을 신뢰하지 않고 후보의 실제 값으로
+서버가 재구성한다. FE는 citation.path#citation.anchor로 바로 이동하므로(5.4), 이
+검증 없이는 모델의 단 한 번의 오출력으로 존재하지 않는 링크가 만들어질 수 있다.
 """
 from __future__ import annotations
 
@@ -21,7 +30,7 @@ from openai.types.completion_usage import CompletionUsage
 
 from app.config import settings
 from app.pipeline.retrieve import Candidate
-from app.schemas.structured_outputs import ExtractResult, GenerateResult
+from app.schemas.structured_outputs import Citation, ExtractResult, GenerateResult
 
 # app/security/output_scan.py의 system_prompt_verbatim 규칙이 이 문자열을 그대로
 # import해서 사용한다 — _SYSTEM_PROMPT 문구가 바뀌어도 탐지 규칙이 따로 노는 일이
@@ -96,6 +105,60 @@ def build_context(candidates: list[Candidate]) -> str:
     )
 
 
+def _validate_and_rebuild_citations(
+    result: GenerateResult, candidates: list[Candidate]
+) -> GenerateResult:
+    """모듈 docstring의 citation 무결성 방어. 스키마 레벨에서는 "후보 안의 값만 허용"을
+    강제할 수 없으므로(자유 문자열 필드) 서버가 사후 검증한다:
+
+    - sectionId가 실제 후보에 없는 citation은 버린다(지어낸 근거).
+    - caseId가 있으면 그 Section에 연결된 Case인지 확인하고, 아니면 caseId를 null로
+      되돌린다 — Section 자체는 실제 사용된 후보이므로 Section 인용으로 유지한다.
+    - projectSlug/path/anchor/quotedTitle은 모델 출력값을 쓰지 않고 후보의 실제 값으로
+      재구성한다(quotedTitle 규칙은 2장 [Generate] 스키마 주석 그대로 — caseId가 있으면
+      Case.title, 없으면 Section.title).
+    - is_evidence_sufficient=true인데 검증을 통과한 citation이 하나도 없으면, structured
+      output 파싱 실패와 동일하게 RuntimeError를 던진다 — api/chat.py가 안전한
+      ChatResponse로 흡수한다(2장 Generate schema의 "true면 citations 최소 1개" 제약).
+    """
+    candidate_by_section_id = {c.section_id: c for c in candidates}
+    seen: set[tuple[str, str | None]] = set()
+    rebuilt: list[Citation] = []
+
+    for citation in result.citations:
+        candidate = candidate_by_section_id.get(citation.sectionId)
+        if candidate is None:
+            continue
+
+        case = None
+        if citation.caseId is not None:
+            case = next(
+                (c for c in candidate.cases if c["id"] == citation.caseId), None
+            )
+
+        key = (candidate.section_id, case["id"] if case else None)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        rebuilt.append(
+            Citation(
+                sectionId=candidate.section_id,
+                caseId=case["id"] if case else None,
+                projectSlug=candidate.project_slug,
+                path=candidate.path,
+                anchor=candidate.anchor,
+                quotedTitle=case["title"] if case else candidate.title,
+            )
+        )
+
+    if result.is_evidence_sufficient and not rebuilt:
+        raise RuntimeError(
+            "Generate가 실제 근거 후보에 존재하지 않는 citation만 반환했습니다."
+        )
+    return result.model_copy(update={"citations": rebuilt})
+
+
 def run_generate(
     client: OpenAI,
     latest_message: str,
@@ -120,4 +183,4 @@ def run_generate(
     result = completion.choices[0].message.parsed
     if result is None:
         raise RuntimeError("Generate structured output 파싱에 실패했습니다.")
-    return result, completion.usage
+    return _validate_and_rebuild_citations(result, candidates), completion.usage

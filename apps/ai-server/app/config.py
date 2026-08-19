@@ -60,11 +60,61 @@ class Settings:
     extract_model: str = os.environ.get("OPENAI_MODEL_EXTRACT", "gpt-4o-mini")
     generate_model: str = os.environ.get("OPENAI_MODEL_GENERATE", "gpt-4o-mini")
 
-    # 02_구현계획.md 0장에서 확정: text-embedding-3-small(1536차원). scripts/load_graph.py가
-    # 이미 이 모델로 Section.embedding을 만들어뒀으므로, Retrieve의 질의 임베딩도 반드시
-    # 같은 모델을 써야 벡터 공간이 일치한다 — 환경변수로 override 가능하게 두더라도 바꾸는
-    # 즉시 전체 재적재가 필요하다.
-    embedding_model: str = os.environ.get("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+    # 02_구현계획.md 0장에서 확정: text-embedding-3-small(1536차원). scripts/load_graph.py의
+    # EMBEDDING_MODEL 상수가 같은 값으로 Section.embedding을 만들므로, Retrieve의 질의
+    # 임베딩도 반드시 같은 모델을 써야 벡터 공간이 일치한다. 환경변수 override는 두지
+    # 않는다 — 적재 스크립트는 그 환경변수를 읽지 않으므로, runtime에서만 모델이 바뀌면
+    # DB의 임베딩과 질의 임베딩이 서로 다른 벡터 공간에 놓이는 사고가 생긴다(차원이
+    # 다르면 쿼리 실패, 같아도 비교 불가). 모델을 바꾸려면 이 상수와 load_graph.py의
+    # EMBEDDING_MODEL을 함께 고치고 전체 재적재해야 한다.
+    embedding_model: str = "text-embedding-3-small"
+
+    # --- Upstage Solar (OpenAI 호환 엔드포인트) ---
+    # Gate1/Gate2/Extract/Generate 4단계는 Upstage Solar에서도 동작하는 것이 실측으로
+    # 확인됐다(structured output의 $defs/$ref/enum/anyOf까지 전부 통과). 다만 임베딩은
+    # 예외다 — Upstage는 text-embedding-3-small을 400으로 거부하고 자체 모델은 4096차원
+    # 이라 db/schema.cypher의 1536차원 인덱스와 맞지 않는다. 따라서 **임베딩은 항상
+    # OpenAI를 쓴다**(embedding_model 주석의 "모델을 바꾸려면 전체 재적재" 제약 그대로).
+    @property
+    def upstage_api_key(self) -> str:
+        return _require_env("UPSTAGE_API_KEY")
+
+    # base_url을 상수로 박지 않는 이유: 키와 달리 엔드포인트는 리전/프록시 구성에 따라
+    # 달라질 수 있고, 바뀌어도 데이터 정합성에 영향이 없다(embedding_model과 대비된다).
+    upstage_base_url: str = os.environ.get(
+        "UPSTAGE_BASE_URL", "https://api.upstage.ai/v1"
+    )
+
+    # alias(solar-pro2)가 아니라 날짜 pin 버전을 기본값으로 둔다 — 실측에서 alias와 pin의
+    # 판별 정확도 차이는 없었지만, alias는 언제든 새 모델을 가리킬 수 있어 배포 재현성이
+    # 깨진다. solar-pro3-260323 / solar-pro4-260806도 동일하게 검증을 통과했으므로
+    # 환경변수로 교체 가능하게 둔다. OPENAI_MODEL_* 와 같은 이유로 단계별 override.
+    upstage_gate_model: str = os.environ.get("UPSTAGE_MODEL_GATE", "solar-pro2-251215")
+    upstage_extract_model: str = os.environ.get(
+        "UPSTAGE_MODEL_EXTRACT", "solar-pro2-251215"
+    )
+    upstage_generate_model: str = os.environ.get(
+        "UPSTAGE_MODEL_GENERATE", "solar-pro2-251215"
+    )
+
+    # 실측에서 유일하게 확인된 품질 이슈(기본 temperature에서 Extract의 competencies/
+    # technologies가 흔들림)가 temperature=0에서 완전히 사라졌다. OpenAI 쪽 파이프라인은
+    # 이 값을 쓰지 않는다(기존 모듈을 수정하지 않는다는 제약).
+    upstage_temperature: float = float(os.environ.get("UPSTAGE_TEMPERATURE", "0"))
+
+    # --- LLM 프로바이더 선택 ---
+    # "auto": 키가 있는 프로바이더를 자동으로 고른다(둘 다 있으면 Upstage 우선 + OpenAI
+    # 폴백, 하나만 있으면 그것만). "upstage"/"openai": 해당 프로바이더로 고정하고 폴백을
+    # 쓰지 않는다 — 장애 원인을 격리해야 할 때 쓴다.
+    llm_provider: str = os.environ.get("LLM_PROVIDER", "auto").strip().lower()
+
+    @property
+    def has_openai_api_key(self) -> bool:
+        return bool(os.environ.get("OPENAI_API_KEY"))
+
+    @property
+    def has_upstage_api_key(self) -> bool:
+        return bool(os.environ.get("UPSTAGE_API_KEY"))
 
     # --- Neo4j (scripts/load_graph.py와 동일한 환경변수명) ---
     @property
