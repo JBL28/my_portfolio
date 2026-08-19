@@ -18,7 +18,15 @@ export const DURATION = {
   fast: 0.15,
   /** 모달·패널 전환의 기준값. */
   base: 0.22,
+  /** 본문 콘텐츠 등장(components/ui/Reveal.tsx). */
+  reveal: 0.28,
 } as const;
+
+/**
+ * 목록을 순차로 띄울 때의 항목 간 지연(초). 60ms를 넘기면 아래쪽 항목이 눈에 띄게
+ * 늦어져 "읽으려는데 아직 안 떴다"가 된다.
+ */
+export const STAGGER = 0.06;
 
 /**
  * 감속(ease-out) 곡선. 시작은 빠르고 끝에서 부드럽게 멎는다 — 튕김(overshoot)이 없어

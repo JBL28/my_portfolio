@@ -7,6 +7,7 @@ import {
 import { Container } from "@/components/ui/Container";
 import { ProjectOverview } from "@/components/domains/project/ProjectOverview";
 import { ProjectGallery } from "@/components/domains/project/ProjectGallery";
+import { Reveal } from "@/components/ui/Reveal";
 import { ProjectDetailSection } from "@/components/domains/project/ProjectDetailSection";
 import { stripInlineRichText } from "@/lib/rich-text";
 
@@ -55,18 +56,27 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   return (
     <Container className="py-14 sm:py-20 lg:grid lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-x-20">
       <ProjectOverview project={project} />
-      <div className="mt-16 lg:mt-0">
+      {/* overflow-x: clip - app/page.tsx와 같은 이유(Reveal from="right"). */}
+      <div className="mt-16 overflow-x-clip lg:mt-0">
         {/* 갤러리는 이미지가 확정된 프로젝트(data/projects의 images 필드)에서만
             서술 컬럼 상단에 나타난다 — 없는 자리를 지어내지 않는다. */}
         {hasGallery ? (
-          <ProjectGallery images={project.images!} projectName={project.name} />
+          <Reveal from="right">
+            <ProjectGallery
+              images={project.images!}
+              projectName={project.name}
+            />
+          </Reveal>
         ) : null}
+        {/* stagger를 주지 않는다 - 섹션 하나하나가 길어서 순차 지연이 쌓이면
+            스크롤을 따라 내려가는 읽기 속도를 애니메이션이 앞지르지 못한다. */}
         {sections.map((section, index) => (
-          <ProjectDetailSection
-            key={section.id}
-            section={section}
-            isFirst={index === 0 && !hasGallery}
-          />
+          <Reveal key={section.id} from="right">
+            <ProjectDetailSection
+              section={section}
+              isFirst={index === 0 && !hasGallery}
+            />
+          </Reveal>
         ))}
       </div>
     </Container>

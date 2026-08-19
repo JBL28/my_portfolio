@@ -1,6 +1,8 @@
 import type { ProjectData } from "@/types/portfolio";
 import { Badge } from "@/components/ui/Badge";
 import { RichText, parseInlineRichText } from "@/lib/rich-text";
+import { Reveal } from "@/components/ui/Reveal";
+import { STAGGER } from "@/lib/motion";
 
 /**
  * Project Detail 좌측의 "명세" 레일. data/에는 Overview의 body 원문이 없으므로
@@ -20,17 +22,21 @@ import { RichText, parseInlineRichText } from "@/lib/rich-text";
 export function ProjectOverview({ project }: { project: ProjectData }) {
   return (
     <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
-      <p className="font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
-        Project
-      </p>
-      <h1 className="mt-4 text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-100">
-        {project.name}
-      </h1>
+      <Reveal>
+        <p className="font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
+          Project
+        </p>
+        <h1 className="mt-4 text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-100">
+          {project.name}
+        </h1>
+      </Reveal>
 
-      <RichText
-        text={project.summary}
-        className="mt-5 text-[0.9375rem] leading-[1.85] text-zinc-600 dark:text-zinc-400"
-      />
+      <Reveal delay={STAGGER}>
+        <RichText
+          text={project.summary}
+          className="mt-5 text-[0.9375rem] leading-[1.85] text-zinc-600 dark:text-zinc-400"
+        />
+      </Reveal>
 
       <dl className="mt-8 border-t border-zinc-200 text-sm dark:border-zinc-800">
         <OverviewRow label="기간">

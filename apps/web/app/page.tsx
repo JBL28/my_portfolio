@@ -1,8 +1,14 @@
 import { getProfile, getAllProjects } from "@/lib/portfolio-data";
 import { Container } from "@/components/ui/Container";
 import { ProjectCard } from "@/components/domains/project/ProjectCard";
-import { RichText, parseInlineRichText, splitParagraphs } from "@/lib/rich-text";
+import {
+  RichText,
+  parseInlineRichText,
+  splitParagraphs,
+} from "@/lib/rich-text";
 import { cn } from "@/lib/cn";
+import { Reveal } from "@/components/ui/Reveal";
+import { STAGGER } from "@/lib/motion";
 
 /**
  * Home — 2단 구조: 좌측은 고정된 "명세"(identity·소개·연락처, sticky 레일),
@@ -27,18 +33,22 @@ export default function HomePage() {
         id={profile.anchor}
         className="lg:sticky lg:top-20 lg:self-start"
       >
-        <p className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
-          {profile.name} · {profile.role}
-        </p>
-        <h1 className="mt-6 text-[1.75rem] font-bold leading-[1.32] tracking-[-0.02em] text-zinc-900 sm:text-[2rem] dark:text-zinc-100">
-          {parseInlineRichText(headline)}
-        </h1>
-        {rest.length > 0 ? (
-          <RichText
-            text={rest.join("\n\n")}
-            className="mt-6 text-[0.9375rem] leading-[1.85] text-zinc-600 dark:text-zinc-400"
-          />
-        ) : null}
+        <Reveal>
+          <p className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
+            {profile.name} · {profile.role}
+          </p>
+          <h1 className="mt-6 text-[1.75rem] font-bold leading-[1.32] tracking-[-0.02em] text-zinc-900 sm:text-[2rem] dark:text-zinc-100">
+            {parseInlineRichText(headline)}
+          </h1>
+        </Reveal>
+        <Reveal delay={STAGGER}>
+          {rest.length > 0 ? (
+            <RichText
+              text={rest.join("\n\n")}
+              className="mt-6 text-[0.9375rem] leading-[1.85] text-zinc-600 dark:text-zinc-400"
+            />
+          ) : null}
+        </Reveal>
 
         {/* 원문 v1.3 Home 하단 Contact([GitHub] [Email] [Resume]) — 실제 URL은 원문에
             존재하지 않으므로 data/profile.json의 contacts에 확정된 링크가 있을 때만
@@ -50,7 +60,9 @@ export default function HomePage() {
                 <a
                   href={contact.url}
                   target={contact.url.startsWith("http") ? "_blank" : undefined}
-                  rel={contact.url.startsWith("http") ? "noreferrer" : undefined}
+                  rel={
+                    contact.url.startsWith("http") ? "noreferrer" : undefined
+                  }
                   className="font-mono text-sm text-zinc-700 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900 hover:decoration-zinc-900 dark:text-zinc-300 dark:decoration-zinc-600 dark:hover:text-zinc-100 dark:hover:decoration-zinc-100"
                 >
                   {contact.label}
@@ -66,7 +78,11 @@ export default function HomePage() {
           사이의 인용구(bridgeNote — 원문 v1.3 Home의 카드 연결 문장 그대로)가 그
           연결을 잇는다. 왼쪽 스레드는 그 성장 그래프의 시각화이며, 첫 마커에서
           시작해 마지막(최신) 마커에서 열린 채 끝난다. */}
-      <section className="mt-20 lg:mt-0">
+      {/* overflow-x: clip - Reveal from="right"가 오른쪽 바깥에서 들어오므로
+          잘라내지 않으면 문서 폭이 늘어 가로 스크롤바가 생긴다. hidden이 아니라
+          clip인 것은 hidden이 스크롤 컨테이너를 만들어 좌측 레일의 sticky를
+          깨뜨리기 때문이다. */}
+      <section className="mt-20 overflow-x-clip lg:mt-0">
         <div className="flex items-baseline justify-between border-b border-zinc-200 pb-3 dark:border-zinc-800">
           <h2 className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
             Projects
@@ -95,7 +111,10 @@ export default function HomePage() {
                   aria-hidden="true"
                   className="absolute left-0 top-[3.5rem] h-[7px] w-[7px] bg-zinc-900 dark:bg-zinc-100"
                 />
-                <ProjectCard project={project} />
+                {/* 타임라인 선/점은 정지시키고 카드 본문만 떠오르게 한다. */}
+                <Reveal from="right">
+                  <ProjectCard project={project} />
+                </Reveal>
               </li>
             );
           })}
