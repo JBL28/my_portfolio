@@ -18,7 +18,7 @@ export function splitParagraphs(text: string): string[] {
 
 /** meta description 등 마크업 없이 텍스트만 필요한 곳에서 강조 표기를 제거한다. */
 export function stripInlineRichText(text: string): string {
-  return text.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/`([^`]+)`/g, "$1");
+  return text.replaceAll(/\*\*([^*]+)\*\*/g, "$1").replaceAll(/`([^`]+)`/g, "$1");
 }
 
 export function parseInlineRichText(text: string): ReactNode[] {

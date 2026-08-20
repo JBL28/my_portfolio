@@ -69,7 +69,7 @@ export function ProjectCard({ project }: { project: ProjectData }) {
         href={`/projects/${project.slug}`}
         className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-700 transition-colors hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-50"
       >
-        자세히 보기
+        자세히 보기{" "}
         <span aria-hidden="true" className="font-mono text-xs">
           →
         </span>
