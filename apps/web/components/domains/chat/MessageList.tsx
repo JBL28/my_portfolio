@@ -14,8 +14,8 @@ import { CitationLink } from "@/components/domains/chat/CitationLink";
  * ChatModal이 요청을 보낼 때는 이 turn을 축소형으로 다시 변환한다.
  */
 export type ConversationTurn =
-  | { role: "user"; content: string }
-  | { role: "assistant"; content: string; citations: Citation[] };
+  | { id: string; role: "user"; content: string }
+  | { id: string; role: "assistant"; content: string; citations: Citation[] };
 
 /**
  * 채팅 화면. 스크롤 위치를 새 메시지에 맞춰 유지해야 하므로 Client Component로
@@ -24,10 +24,10 @@ export type ConversationTurn =
 export function MessageList({
   turns,
   isLoading,
-}: {
+}: Readonly<{
   turns: ConversationTurn[];
   isLoading: boolean;
-}) {
+}>) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -43,12 +43,12 @@ export function MessageList({
         </p>
       ) : null}
 
-      {turns.map((turn, index) => (
+      {turns.map((turn) => (
         // 새 턴이 어디에 생겼는지 시선을 유도한다. `initial`은 mount 시 1회만
         // 실행되므로 이미 읽고 있던 메시지가 다시 움직이는 일은 없다 — 읽는 중에
         // 글이 흔들리지 않아야 한다는 원칙 때문에 y 이동도 6px로 묶는다.
         <motion.div
-          key={index}
+          key={turn.id}
           initial={RISE.initial}
           animate={RISE.animate}
           transition={{ duration: DURATION.fast, ease: EASE }}

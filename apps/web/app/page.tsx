@@ -176,10 +176,10 @@ export default function HomePage() {
 function ProfileRow({
   label,
   children,
-}: {
+}: Readonly<{
   label: string;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b border-zinc-200 py-3 dark:border-zinc-800">
       <dt className="pt-px text-xs leading-6 text-zinc-400 dark:text-zinc-500">

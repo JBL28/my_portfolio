@@ -13,10 +13,10 @@ import { RichText } from "@/lib/rich-text";
 export function ProjectDetailSection({
   section,
   isFirst = false,
-}: {
+}: Readonly<{
   section: ProjectSectionData;
   isFirst?: boolean;
-}) {
+}>) {
   return (
     <section
       id={section.anchor}

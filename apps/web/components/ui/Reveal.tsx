@@ -51,14 +51,14 @@ export function Reveal({
   delay = 0,
   from = "bottom",
   className,
-}: {
+}: Readonly<{
   children: ReactNode;
   /** 목록을 순차로 띄울 때 쓰는 지연(초). */
   delay?: number;
   /** 들어오는 방향. 기본은 아래에서 떠오르기. */
   from?: keyof typeof MOTION;
   className?: string;
-}) {
+}>) {
   return (
     <motion.div
       className={className}

@@ -40,10 +40,10 @@ import {
 export default function ChatModal({
   onClose,
   panelId,
-}: {
+}: Readonly<{
   onClose: () => void;
   panelId: string;
-}) {
+}>) {
   // crypto.randomUUID()를 직접 쓰지 않는다 - 보안 컨텍스트(HTTPS/localhost)에서만
   // 존재해서 평문 HTTP로 접근하면 함수가 없어 모달이 통째로 죽는다(lib/uuid.ts).
   const [chatSessionId] = useState(() => randomUUID());
@@ -61,7 +61,10 @@ export default function ChatModal({
       return;
     }
 
-    const nextTurns: ConversationTurn[] = [...turns, { role: "user", content }];
+    const nextTurns: ConversationTurn[] = [
+      ...turns,
+      { id: randomUUID(), role: "user", content },
+    ];
     setTurns(nextTurns);
     setIsLoading(true);
     setError(null);
@@ -87,6 +90,7 @@ export default function ChatModal({
       setTurns((prev) => [
         ...prev,
         {
+          id: randomUUID(),
           role: "assistant",
           content: response.answer,
           citations: response.citations,

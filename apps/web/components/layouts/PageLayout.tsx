@@ -5,7 +5,7 @@ import { FloatingChatButton } from "@/components/domains/chat/FloatingChatButton
 import { MotionProvider } from "./MotionProvider";
 import { AnchorHighlight } from "@/components/ui/AnchorHighlight";
 
-export function PageLayout({ children }: { children: ReactNode }) {
+export function PageLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     // MotionProvider는 reducedMotion 설정만 담당한다 — children(Server Component
     // 트리)은 그대로 통과하므로 페이지가 클라이언트 렌더링으로 바뀌지 않는다.

@@ -19,7 +19,9 @@ import { STAGGER } from "@/lib/motion";
  * 공개 여부에 대해 어떤 문구도 만들어내지 않는다 — 원문에 없는 주장을 임의로
  * 추가하지 않는다는 원칙(00_기획.md)을 그대로 따른다.
  */
-export function ProjectOverview({ project }: { project: ProjectData }) {
+export function ProjectOverview({
+  project,
+}: Readonly<{ project: ProjectData }>) {
   return (
     <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
       <Reveal>
@@ -73,10 +75,10 @@ export function ProjectOverview({ project }: { project: ProjectData }) {
 function OverviewRow({
   label,
   children,
-}: {
+}: Readonly<{
   label: string;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-3.5 dark:border-zinc-800">
       <dt className="pt-px text-xs leading-6 text-zinc-400 dark:text-zinc-500">

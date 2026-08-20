@@ -44,10 +44,10 @@ const CLICK_SLOP = 8;
 export function ProjectGallery({
   images,
   projectName,
-}: {
+}: Readonly<{
   images: ProjectImage[];
   projectName: string;
-}) {
+}>) {
   const trackRef = useRef<HTMLUListElement>(null);
   const [index, setIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -177,7 +177,7 @@ export function ProjectGallery({
     if ("onscrollend" in track) {
       track.addEventListener("scrollend", restore, { once: true });
     } else {
-      window.setTimeout(restore, 400);
+      globalThis.setTimeout(restore, 400);
     }
   }
 
@@ -325,10 +325,11 @@ export function ProjectGallery({
        */}
       {/* SSR에는 document가 없다. 닫혀 있을 때 portal이 그리는 DOM은 어차피
           없으므로, 이 분기가 서버/클라이언트 첫 렌더의 결과를 어긋나게 하지 않는다. */}
-      {typeof document !== "undefined"
-        ? createPortal(
+      {typeof document === "undefined"
+        ? null
+        : createPortal(
             <AnimatePresence>
-              {zoomedIndex !== null ? (
+              {zoomedIndex === null ? null : (
                 <GalleryLightbox
                   images={images}
                   index={zoomedIndex}
@@ -336,11 +337,10 @@ export function ProjectGallery({
                   onIndexChange={setZoomedIndex}
                   onClose={closeZoom}
                 />
-              ) : null}
+              )}
             </AnimatePresence>,
             document.body,
-          )
-        : null}
+          )}
     </section>
   );
 }
@@ -375,13 +375,13 @@ function GalleryLightbox({
   projectName,
   onIndexChange,
   onClose,
-}: {
+}: Readonly<{
   images: ProjectImage[];
   index: number;
   projectName: string;
   onIndexChange: (next: number) => void;
   onClose: () => void;
-}) {
+}>) {
   const closeRef = useRef<HTMLButtonElement>(null);
   // MotionProvider의 reducedMotion 설정에 기대지 않고 이 자리에서 직접 읽는다
   // (ChatModal과 같은 이유 — 확대 애니메이션은 이 컴포넌트가 스스로 정한다).
@@ -434,8 +434,8 @@ function GalleryLightbox({
         go(-1);
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [go, onClose]);
 
   // 뒤 페이지가 같이 스크롤되면 "덮여 있다"는 감각이 깨진다.
@@ -668,12 +668,12 @@ function GalleryButton({
   disabled,
   onClick,
   children,
-}: {
+}: Readonly<{
   label: string;
   disabled: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <button
       type="button"
@@ -694,12 +694,12 @@ function LightboxButton({
   disabled,
   onClick,
   children,
-}: {
+}: Readonly<{
   label: string;
   disabled: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <button
       type="button"

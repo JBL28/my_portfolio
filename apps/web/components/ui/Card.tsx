@@ -3,10 +3,10 @@ import { cn } from "@/lib/cn";
 export function Card({
   children,
   className,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <div
       className={cn(

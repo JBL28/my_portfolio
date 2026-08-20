@@ -34,8 +34,8 @@ export function randomUUID(): string {
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
   const hex: string[] = [];
-  for (let i = 0; i < bytes.length; i += 1) {
-    hex.push(bytes[i].toString(16).padStart(2, "0"));
+  for (const byte of bytes) {
+    hex.push(byte.toString(16).padStart(2, "0"));
   }
   return (
     hex.slice(0, 4).join("") +

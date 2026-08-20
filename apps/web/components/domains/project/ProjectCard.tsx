@@ -12,7 +12,7 @@ import { RichText, parseInlineRichText } from "@/lib/rich-text";
  * 마커(app/page.tsx)가 그 줄에 정렬된다. bridgeNote(원문 v1.3 Home의 카드 연결
  * 인용구)가 있으면 레코드 하단에서 다음 레코드로의 연결을 잇는다.
  */
-export function ProjectCard({ project }: { project: ProjectData }) {
+export function ProjectCard({ project }: Readonly<{ project: ProjectData }>) {
   return (
     <article>
       <p className="font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">

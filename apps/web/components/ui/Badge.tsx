@@ -3,10 +3,10 @@ import { cn } from "@/lib/cn";
 export function Badge({
   children,
   className,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <span
       className={cn(
