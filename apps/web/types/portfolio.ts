@@ -103,6 +103,12 @@ export interface ProjectData {
    */
   repositoryUrl?: string;
   /**
+   * 저장소 링크 옆에 나란히 두는 부가 링크. 저장소는 아니지만 이 프로젝트의
+   * 결과를 직접 확인할 수 있는 곳을 가리킨다 — 예를 들어 이 서버 환경에서 함께
+   * 운영 중인 다른 서비스의 실제 주소.
+   */
+  relatedLinks?: { label: string; url: string }[];
+  /**
    * 원문 v1.3 Home에서 이 프로젝트 카드 바로 뒤에 붙는 인용구(다음 프로젝트로의
    * 연결 문장, 예: "> 운영 도구의 Public 노출 문제를 다음 환경에서 다시
    * 설계했습니다."). repositoryNotice와 같은 규칙 — 원문에 없으면 필드 자체가 없다.

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ProjectData } from "@/types/portfolio";
 import { Badge } from "@/components/ui/Badge";
 import { RichText, parseInlineRichText } from "@/lib/rich-text";
@@ -26,7 +27,22 @@ export function ProjectOverview({
   return (
     <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
       <Reveal>
-        <p className="font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
+        {/* 돌아가는 길. 이 레일이 lg에서 sticky이므로 맨 위에 두면 우측 서술을
+            끝까지 읽는 동안에도 계속 손에 닿는다. 화살표는 ProjectCard의 "자세히
+            보기 →"와 짝을 이루는 반대 방향 글리프다. */}
+        <Link
+          href="/#profile"
+          className="group inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-100"
+        >
+          <span
+            aria-hidden="true"
+            className="transition-transform group-hover:-translate-x-0.5"
+          >
+            ←
+          </span>
+          About Me
+        </Link>
+        <p className="mt-6 font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
           Project
         </p>
         <h1 className="mt-4 text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-100">
@@ -64,27 +80,51 @@ export function ProjectOverview({
         <OverviewRow label="결과">{project.result}</OverviewRow>
       </dl>
 
-      {project.repositoryNotice || project.repositoryUrl ? (
+      {project.repositoryNotice ||
+      project.repositoryUrl ||
+      project.relatedLinks?.length ? (
         <div className="mt-6 space-y-2 text-[0.8125rem] leading-relaxed">
           {project.repositoryNotice ? (
             <p className="text-zinc-400 dark:text-zinc-500">
               {project.repositoryNotice}
             </p>
           ) : null}
-          {project.repositoryUrl ? (
-            <a
-              href={project.repositoryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-mono text-zinc-600 underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900 dark:text-zinc-400 dark:decoration-zinc-600 dark:hover:text-zinc-100"
-            >
-              GitHub에서 보기
-              <span aria-hidden="true">→</span>
-            </a>
-          ) : null}
+          {/* 저장소와 부가 링크를 한 줄에 나란히 둔다 — 좁은 폭에서는 wrap되어
+              아래로 접힌다. */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {project.repositoryUrl ? (
+              <ExternalLink href={project.repositoryUrl}>
+                GitHub에서 보기
+              </ExternalLink>
+            ) : null}
+            {project.relatedLinks?.map((link) => (
+              <ExternalLink key={link.url} href={link.url}>
+                {link.label}
+              </ExternalLink>
+            ))}
+          </div>
         </div>
       ) : null}
     </section>
+  );
+}
+
+/** 저장소·운영 중인 서비스처럼 사이트 밖으로 나가는 링크. 화살표까지 포함해
+ *  한 곳에서 모양을 정해 둔다. */
+function ExternalLink({
+  href,
+  children,
+}: Readonly<{ href: string; children: React.ReactNode }>) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 font-mono text-zinc-600 underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900 dark:text-zinc-400 dark:decoration-zinc-600 dark:hover:text-zinc-100"
+    >
+      {children}
+      <span aria-hidden="true">→</span>
+    </a>
   );
 }
 
