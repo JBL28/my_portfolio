@@ -39,7 +39,7 @@ export function ProjectOverview({
             className="transition-transform group-hover:-translate-x-0.5"
           >
             ←
-          </span>
+          </span>{" "}
           About Me
         </Link>
         <p className="mt-6 font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
