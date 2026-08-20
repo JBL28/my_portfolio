@@ -98,7 +98,10 @@ def _truncate_history(history: list[ChatMessage]) -> list[ChatMessage]:
     return history[-max_messages:]
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post(
+    "/chat",
+    responses={400: {"description": "messages가 비어 있는 경우"}},
+)
 def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     if not request.messages:
         raise HTTPException(status_code=400, detail="messages는 최소 1개 이상이어야 합니다.")

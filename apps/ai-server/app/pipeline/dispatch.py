@@ -25,7 +25,7 @@ llm/provider.py docstring 참고).
 """
 from __future__ import annotations
 
-from typing import Callable, TypeVar
+from typing import Callable
 
 from openai import OpenAI, OpenAIError
 from openai.types.completion_usage import CompletionUsage
@@ -49,8 +49,6 @@ from app.schemas.structured_outputs import (
     Gate2Result,
     GenerateResult,
 )
-
-_T = TypeVar("_T")
 
 # 위 docstring "폴백 조건" 참고. api/chat.py의 except 절과 같은 집합으로 유지해야 한다.
 _FALLBACK_ERRORS = (OpenAIError, RuntimeError, ValueError)
@@ -76,10 +74,10 @@ def _record(provider: LlmProvider, stage: str, fallback_used: bool) -> None:
     span.set_attribute("model", _MODELS[(provider, stage)]())
 
 
-def _dispatch(
+def _dispatch[T](
     stage: str,
-    impls: dict[LlmProvider, Callable[[OpenAI], _T]],
-) -> _T:
+    impls: dict[LlmProvider, Callable[[OpenAI], T]],
+) -> T:
     """프로바이더 체인을 앞에서부터 시도하고, 폴백 가능한 예외면 다음 프로바이더로
     넘어간다. 마지막 프로바이더까지 실패하면 그 예외를 그대로 다시 던진다 —
     api/chat.py가 흡수해 안전한 ChatResponse를 만든다."""

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ai-server"
 version = "0.1.0"
 description = "Graph RAG AI 서버 — Phase 02(Neo4j 스키마/적재) + Phase 03(FastAPI Gate1/Gate2/Extract/Retrieve/Generate 파이프라인, POST /chat)"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "neo4j>=5.24,<6",
     "openai>=1.50,<2",
