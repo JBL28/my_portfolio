@@ -387,6 +387,16 @@ jobs:
             -H "X-API-Key: $PORTAINER_API_KEY" \
             -o stack-info.json
 
+          # 이 조회가 실패하면(잘못된 endpointId, 권한 오류 등) Portainer는 .Env가 없는
+          # 에러 JSON을 돌려준다. 그대로 `.Env // []`로 넘어가면 **환경변수가 전부 빈
+          # 상태로 스택이 재배포되어** NEO4J_PASSWORD·OPENAI_API_KEY 등이 통째로
+          # 날아간다. 빈 배열이 "정상적으로 환경변수가 없는 스택"인지 "조회 실패"인지
+          # 구분되지 않으므로, 응답에 .Env 키 자체가 있는지로 판정하고 없으면 멈춘다.
+          jq -e 'has("Env")' stack-info.json > /dev/null || {
+            echo "::error::Failed to read stack metadata from Portainer (check PORTAINER_ENDPOINT_ID)"
+            cat stack-info.json
+            exit 1
+          }
           ENV_JSON=$(jq -c '.Env // []' stack-info.json)
 
           echo "Redeploying stack with latest image pull..."

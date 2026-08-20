@@ -47,9 +47,9 @@
       "caption": "인프라 구성 — 화면과 데이터는 Nginx를 거쳐 서버로 오가지만 오디오는 Electron 클라이언트끼리 직접 주고받습니다. 지연에 민감한 경로만 서버를 지나지 않게 했습니다."
     },
     {
-      "src": "/projects/dailyband/03-ai-failure-recovery.png",
-      "alt": "트랜잭션 밖 AI 실패를 별도 상태로 회수하는 흐름도 자리(플레이스홀더)",
-      "caption": "AI 실패 회수 흐름 — 실제 흐름도로 교체 예정입니다."
+      "src": "/projects/dailyband/03_data_flow_diagram.png",
+      "alt": "USER·SERVICE·AI 세 주체의 시퀀스 다이어그램 3장 — MVP 개인 연습, MVP 합주, GOAL 단계에서 MIDI·MP3·WAV·MXL이 오가는 흐름과 Split·transcript·Analyze·룰 기반 채점 단계",
+      "caption": "데이터 흐름 설계 — 같은 흐름을 두고도 팀원마다 다르게 이해하면 통합에서 어긋난다고 보아, 함께 정한 플로우를 직접 다이어그램으로 그려 이해를 맞췄습니다. MVP에서 먼저 만들 범위와 최종 목표를 나눠 각 단계에서 무엇이 오가는지 명시했습니다."
     }
   ],
   "sections": [
