@@ -4,48 +4,135 @@
     "title": "공개 필요 여부에 따른 접근 경로 분리",
     "summary": "포트포워딩으로 열려 있던 접근 경로를 Tailscale/Cloudflare Tunnel로 분리하고 결과를 확인했습니다.",
     "order": 1,
-    "sectionIds": ["572232e8-a048-432a-bbe7-264ed4954a61"],
+    "sectionIds": [
+      "572232e8-a048-432a-bbe7-264ed4954a61"
+    ],
     "problem": "처음에는 SSH와 비밀번호 관리자까지 포트포워딩으로 열어 두었습니다.",
     "action": "내부 서비스는 Tailscale, 공개 서비스는 Cloudflare Tunnel → Nginx로 분리하고 기존 포트포워딩을 제거했습니다.",
     "result": "변경 뒤 공인 포트 차단, VPN 내부 접속, 외부 공개 서비스 응답을 각각 확인했습니다.",
-    "competencies": ["운영"],
-    "usedTechnologies": ["Tailscale", "Cloudflare Tunnel", "Nginx"]
+    "competencies": [
+      "운영"
+    ],
+    "usedTechnologies": [
+      "Tailscale",
+      "Cloudflare Tunnel",
+      "Nginx"
+    ]
   },
   {
     "id": "107a4b61-ddac-4780-a57b-3b164a835b8e",
     "title": "Docker Published Port 노출 경로 재점검",
     "summary": "방화벽 설정과 별개로 노출되는 Docker Published Port를 발견해 컨테이너 노출 경로를 다시 잡았습니다.",
     "order": 1,
-    "sectionIds": ["21c4c5de-c791-4f8e-a91d-3f3821075fd0"],
+    "sectionIds": [
+      "21c4c5de-c791-4f8e-a91d-3f3821075fd0"
+    ],
     "problem": "Docker Published Port가 호스트 방화벽 정책과 별개로 노출될 수 있음을 확인했습니다.",
     "action": "외부 접근이 필요 없는 컨테이너는 Published Port를 없애고 Docker Network 내부에서만 통신한 뒤 Nginx를 거치게 했습니다.",
     "learning": "설정값이 아니라 실제로 외부에 열리는 경로를 확인하며 경계를 다시 잡았습니다.",
-    "competencies": ["운영", "문제 해결"],
-    "usedTechnologies": ["Docker", "Nginx"]
+    "competencies": [
+      "운영",
+      "문제 해결"
+    ],
+    "usedTechnologies": [
+      "Docker",
+      "Nginx"
+    ]
   },
   {
     "id": "794cdc70-b870-45f2-a240-23e3e86bbc99",
     "title": "메트릭과 접속 경로 대조로 장애 원인 특정",
     "summary": "VPN 경유 접속 장애를 메트릭·접속 경로 대조로 좁혀 Tailscale node key 만료를 특정하고 재발을 막았습니다.",
     "order": 1,
-    "sectionIds": ["dd89baf0-23c6-46c4-9160-9ac81912a076"],
+    "sectionIds": [
+      "dd89baf0-23c6-46c4-9160-9ac81912a076"
+    ],
     "problem": "VPN 경유 접속만 막혔을 때",
     "judgment": "메트릭과 서비스 상태로 서버 문제를 먼저 배제하고, 내부망과 VPN 경로의 차이에서 Tailscale node key 만료를 특정했습니다.",
     "action": "만료 기능을 끄는 대신 갱신을 자동화했습니다.",
     "result": "이후 같은 장애는 재발하지 않았습니다.",
     "learning": "내부 상태가 정상이어도 외부 접근 경로는 별도의 관측 대상이라는 사각지대도 확인했습니다.",
-    "competencies": ["문제 해결", "운영"],
-    "usedTechnologies": ["Tailscale"]
+    "competencies": [
+      "문제 해결",
+      "운영"
+    ],
+    "usedTechnologies": [
+      "Tailscale"
+    ]
   },
   {
     "id": "7417f494-1d99-43cc-9c02-6bc36fe2dab1",
     "title": "개인 서버를 팀 품질 검증 환경으로 연결",
     "summary": "GitLab Runner와 SonarQube를 직접 호스팅해 팀 프로젝트의 CI/CD·Quality Gate 환경으로 연결했습니다.",
     "order": 1,
-    "sectionIds": ["a3ca4969-bd79-4363-87fd-e855478d3c6d"],
+    "sectionIds": [
+      "a3ca4969-bd79-4363-87fd-e855478d3c6d"
+    ],
     "action": "GitLab Runner와 SonarQube를 직접 호스팅해 팀 프로젝트에 사용했습니다. Runner는 Private 환경에서 outbound로 작업을 가져오게 하고, 팀원이 열람해야 하는 SonarQube는 접근 권한을 둔 Public 접점으로 분리했습니다.",
     "result": "이 환경은 DailyBand의 Build → Test → SonarQube → Quality Gate 흐름으로 이어졌습니다.",
-    "competencies": ["운영", "DevOps"],
-    "usedTechnologies": ["GitLab Runner", "SonarQube"]
+    "competencies": [
+      "운영",
+      "DevOps"
+    ],
+    "usedTechnologies": [
+      "GitLab Runner",
+      "SonarQube"
+    ]
+  },
+  {
+    "id": "57100bc4-7ea8-458a-a959-ee13562860d3",
+    "title": "AI 답변의 판정 사유를 남겨 오분류 원인을 특정",
+    "summary": "게이트가 질문을 걸러낸 사유를 기록해 두어, 오분류의 원인을 언어 이해가 아닌 판정 기준에서 특정하고 수정했습니다.",
+    "order": 1,
+    "sectionIds": [
+      "794a1de1-a472-4ba7-b753-887afa0bb9b8"
+    ],
+    "problem": "GraphRAG 챗봇을 구성한 뒤 답변을 믿어도 되는지 확인할 방법이 없었습니다.",
+    "judgment": "호출 성공·실패만 남기지 않고 게이트가 그렇게 판정한 사유까지 기록하기로 했습니다.",
+    "action": "요청 하나가 거치는 판별·검색·생성 단계를 스팬으로 기록하고 판정 사유를 함께 남겼습니다.",
+    "result": "걸러진 질문의 원인이 두 게이트의 역할 경계가 어긋난 것임을 특정하고, 판정 기준을 수정한 뒤 같은 질문이 통과하는 것을 확인했습니다.",
+    "learning": "기록이 없었다면 줄임말을 이해하지 못한 문제로 원인을 잘못 짚었을 것입니다.",
+    "competencies": [
+      "AI 활용",
+      "문제 해결"
+    ],
+    "usedTechnologies": [
+      "Phoenix"
+    ]
+  },
+  {
+    "id": "72663520-129f-40eb-81ab-fcf6f01b3006",
+    "title": "폴백 범위에서 임베딩을 제외",
+    "summary": "응답 생성에는 폴백을 두되 임베딩은 한 모델로 고정해, 색인과 질의의 기준이 어긋나지 않게 했습니다.",
+    "order": 1,
+    "sectionIds": [
+      "8f683ddb-836f-4d23-864c-af954d781dcd"
+    ],
+    "problem": "제공자를 늘리면서 어느 구간까지 폴백을 적용할지 정해야 했습니다.",
+    "judgment": "색인할 때와 질의할 때의 임베딩이 달라지면 유사도 비교의 전제가 깨지므로 임베딩은 폴백 대상에서 제외했습니다.",
+    "action": "응답 생성은 한 제공자를 우선 사용하고 문제가 생기면 다른 제공자로 넘어가도록 구성하되, 임베딩은 한 모델로 고정했습니다.",
+    "learning": "가용성이 필요한 구간과 일관성이 필요한 구간에는 서로 다른 기준이 필요합니다.",
+    "competencies": [
+      "기술적 판단"
+    ],
+    "usedTechnologies": []
+  },
+  {
+    "id": "c59b0d03-c474-40a7-a31c-c15e7662966c",
+    "title": "두 모델의 교차 검토 사이에 사람의 판정을 둠",
+    "summary": "서로 다른 두 AI 모델이 상대의 결과를 검토하게 하고, 반영할 피드백은 직접 골랐습니다.",
+    "order": 1,
+    "sectionIds": [
+      "71735cae-db33-46e5-817b-40498446ea0f"
+    ],
+    "problem": "AI가 만든 코드를 그대로 신뢰할 수 있는지가 문제였습니다.",
+    "judgment": "교차 검토를 자동 반영 루프로 만들지 않고 사이에 사람의 판정을 두었습니다.",
+    "action": "구현 단계마다 구현보고서와 검증보고서를 쌍으로 남기고, 두 모델이 상대의 결과를 검토하게 한 뒤 적용할 피드백만 골라 전달했습니다.",
+    "result": "AI 서버 검증에서 치명적 결함 한 건을 포함해 세 건을 찾아 수정하고 재검증에서 모두 해결을 확인했습니다.",
+    "competencies": [
+      "AI 활용",
+      "기술적 판단"
+    ],
+    "usedTechnologies": []
   }
 ]

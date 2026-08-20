@@ -37,14 +37,14 @@
   ],
   "images": [
     {
-      "src": "/projects/dailyband/01-app-screens.png",
-      "alt": "DailyBand 주요 앱 화면 모음 자리(플레이스홀더)",
-      "caption": "주요 화면 — 실제 스크린샷으로 교체 예정입니다."
+      "src": "/projects/dailyband/01_dailband_cover.png",
+      "alt": "데일밴드 서비스 소개 표지 — 악보와 무대 화면, 세션 보관함이 함께 보이는 합주 화면",
+      "caption": "서비스 개요 — 초보자가 온라인으로 합주하고 AI 피드백을 받는 서비스입니다. 악보를 따라 연주하면 테이크로 기록되고 연주 기록과 고스트 세션은 세션 보관함에서 관리합니다."
     },
     {
-      "src": "/projects/dailyband/02-file-pipeline.png",
-      "alt": "파일 메타데이터 처리 책임을 한 곳으로 모은 업로드 파이프라인 도식 자리(플레이스홀더)",
-      "caption": "파일 처리 파이프라인 — 실제 도식으로 교체 예정입니다."
+      "src": "/projects/dailyband/02_dailband_infra.png",
+      "alt": "데일밴드 인프라 구성도 — EC2 안의 BE·Storage·모니터링과 Nginx 리버스 프록시, 밖의 시그널링 릴레이와 AI 서버, Electron 클라이언트의 오디오 P2P 경로",
+      "caption": "인프라 구성 — 화면과 데이터는 Nginx를 거쳐 서버로 오가지만 오디오는 Electron 클라이언트끼리 직접 주고받습니다. 지연에 민감한 경로만 서버를 지나지 않게 했습니다."
     },
     {
       "src": "/projects/dailyband/03-ai-failure-recovery.png",

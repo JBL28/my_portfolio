@@ -32,17 +32,17 @@
     {
       "src": "/projects/teenyfinny/01_TeenyFinny_Cover.png",
       "alt": "TeenyFinny 서비스 소개 표지 — 용돈 계좌, 투자 계좌, 목표 적금, 금융 퀴즈 앱 화면",
-      "caption": "서비스 개요 — 아이의 용돈 관리와 금융 학습, 투자 경험을 부모와 함께 다루는 가족 금융 플랫폼입니다."
+      "caption": "서비스 개요 — 아이가 용돈을 관리하고 금융을 배우며 투자를 경험합니다. 부모는 그 과정을 함께 봅니다."
     },
     {
       "src": "/projects/teenyfinny/02_TeenyFinny_Infra.png",
       "alt": "AWS 두 가용영역에 로드밸런서와 Channel·Core 서버를 이중화하고 터널로 온프레미스 DB에 연결한 인프라 구성도",
-      "caption": "인프라 구성 — 가용영역·로드밸런서·애플리케이션·DB를 모두 두 벌로 두고, DB 앞단의 ProxySQL과 Orchestrator에 장애 전환을 맡겼습니다."
+      "caption": "인프라 구성 — 가용영역·로드밸런서·애플리케이션·DB를 모두 두 벌로 두고 DB 앞단의 ProxySQL과 Orchestrator에 장애 전환을 맡겼습니다."
     },
     {
       "src": "/projects/teenyfinny/03_TeenyFinny_ERD.png",
       "alt": "서비스 도메인 테이블과 BaaS 뱅킹 테이블을 나눠 설계한 ERD",
-      "caption": "데이터 모델 — 용돈·퀴즈·목표적금 등 서비스 도메인과 계좌·거래·주문의 BaaS 영역을 분리해, 인프라의 Channel DB와 Core DB 분리와 짝을 맞췄습니다."
+      "caption": "데이터 모델 — 용돈·퀴즈·목표적금 등 서비스 도메인과 계좌·거래·주문의 BaaS 영역을 분리해 인프라의 Channel DB와 Core DB 분리와 짝을 맞췄습니다."
     },
     {
       "src": "/projects/teenyfinny/04_TeenyFinny_Presentation.jpg",
