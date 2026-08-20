@@ -1,5 +1,6 @@
 import type { ProjectSectionData } from "@/types/portfolio";
 import { RichText } from "@/lib/rich-text";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 
 /**
  * Project Detail 우측 "서술" 컬럼의 H2 Section. 01_설계.md 3.2의 anchor 렌더링
@@ -40,6 +41,17 @@ export function ProjectDetailSection({
         text={section.body}
         className="mt-4 max-w-xl text-[0.9375rem] leading-[1.9] text-zinc-600 dark:text-zinc-400"
       />
+      {/* 근거 링크는 본문 끝에 별도 줄로 둔다 — 문장 안에 섞으면 링크임이 눈에
+          걸리지 않는다. 여럿이면 한 줄에 나란히 놓고 좁은 폭에서 접힌다. */}
+      {section.links?.length ? (
+        <div className="mt-4 flex max-w-xl flex-wrap items-center gap-x-4 gap-y-1">
+          {section.links.map((link) => (
+            <ExternalLink key={link.url} href={link.url}>
+              {link.label}
+            </ExternalLink>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

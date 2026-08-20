@@ -3,6 +3,7 @@ import type { ProjectData } from "@/types/portfolio";
 import { Badge } from "@/components/ui/Badge";
 import { RichText, parseInlineRichText } from "@/lib/rich-text";
 import { Reveal } from "@/components/ui/Reveal";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { STAGGER } from "@/lib/motion";
 
 /**
@@ -106,25 +107,6 @@ export function ProjectOverview({
         </div>
       ) : null}
     </section>
-  );
-}
-
-/** 저장소·운영 중인 서비스처럼 사이트 밖으로 나가는 링크. 화살표까지 포함해
- *  한 곳에서 모양을 정해 둔다. */
-function ExternalLink({
-  href,
-  children,
-}: Readonly<{ href: string; children: React.ReactNode }>) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 font-mono text-zinc-600 underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900 dark:text-zinc-400 dark:decoration-zinc-600 dark:hover:text-zinc-100"
-    >
-      {children}
-      <span aria-hidden="true">→</span>
-    </a>
   );
 }
 

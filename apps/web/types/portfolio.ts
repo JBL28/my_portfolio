@@ -81,6 +81,12 @@ export interface ProjectSectionData {
   anchor: string;
   order: number;
   searchable: boolean;
+  /**
+   * 이 섹션의 서술을 직접 확인할 수 있는 링크. 본문 끝에 별도 줄로 붙는다 —
+   * 문장 안에 인라인으로 섞으면 링크인지 눈에 걸리지 않아, "여기서 실물을 볼 수
+   * 있다"는 신호가 약해지기 때문이다. 없으면 필드 자체를 두지 않는다.
+   */
+  links?: { label: string; url: string }[];
 }
 
 export interface ProjectData {
