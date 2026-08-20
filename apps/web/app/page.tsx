@@ -1,6 +1,7 @@
 import { getProfile, getAllProjects } from "@/lib/portfolio-data";
 import { Container } from "@/components/ui/Container";
 import { ProjectCard } from "@/components/domains/project/ProjectCard";
+import { Badge } from "@/components/ui/Badge";
 import {
   RichText,
   parseInlineRichText,
@@ -48,6 +49,52 @@ export default function HomePage() {
               className="mt-6 text-[0.9375rem] leading-[1.85] text-zinc-600 dark:text-zinc-400"
             />
           ) : null}
+        </Reveal>
+
+        {/* 소개 문단에 이어지는 신원·역량 항목. Project Detail의 명세 레일
+            (ProjectOverview)과 같은 hairline dt/dd 문법을 그대로 써서, 별도의
+            섹션을 만들지 않고 이 레일의 연장으로 읽히게 한다. */}
+        <Reveal delay={STAGGER * 2}>
+          <dl className="mt-9 border-t border-zinc-200 dark:border-zinc-800">
+            <ProfileRow label="생년월일">
+              <span className="font-mono text-[0.8125rem] tabular-nums">
+                {profile.about.birthDate}
+              </span>
+            </ProfileRow>
+            <ProfileRow label="위치">{profile.about.location}</ProfileRow>
+            <ProfileRow label="이메일">
+              {/* 메일 주소는 읽고 끝나는 정보가 아니라 누르는 동선이다. */}
+              <a
+                href={`mailto:${profile.about.email}`}
+                className="font-mono text-[0.8125rem] break-all underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900 hover:decoration-zinc-900 dark:decoration-zinc-600 dark:hover:text-zinc-100 dark:hover:decoration-zinc-100"
+              >
+                {profile.about.email}
+              </a>
+            </ProfileRow>
+            <ProfileRow label="학력">{profile.about.education}</ProfileRow>
+            {profile.skills.map((group) => (
+              <ProfileRow key={group.label} label={group.label}>
+                <span className="flex flex-wrap gap-1.5">
+                  {group.items.map((item) => (
+                    <Badge key={item}>{item}</Badge>
+                  ))}
+                </span>
+              </ProfileRow>
+            ))}
+            <ProfileRow label="GitHub">
+              {/* 스택을 읽고 나서 바로 코드를 확인하러 가는 동선이라 스택 뒤에 둔다.
+                  주소는 스킴을 떼고 보여준다 — 좁은 레일에서 "https://"는 읽는 데
+                  보탬이 없으면서 자리만 차지한다. */}
+              <a
+                href={profile.about.github}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-[0.8125rem] break-all underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900 hover:decoration-zinc-900 dark:decoration-zinc-600 dark:hover:text-zinc-100 dark:hover:decoration-zinc-100"
+              >
+                {profile.about.github.replace(/^https?:\/\//, "")}
+              </a>
+            </ProfileRow>
+          </dl>
         </Reveal>
 
         {/* 원문 v1.3 Home 하단 Contact([GitHub] [Email] [Resume]) — 실제 URL은 원문에
@@ -121,5 +168,26 @@ export default function HomePage() {
         </ol>
       </section>
     </Container>
+  );
+}
+
+/** 좌측 레일의 명세 행. ProjectOverview의 OverviewRow와 같은 문법이고, 레일
+ *  폭(24rem)에 맞춰 라벨 열만 좁혔다. */
+function ProfileRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b border-zinc-200 py-3 dark:border-zinc-800">
+      <dt className="pt-px text-xs leading-6 text-zinc-400 dark:text-zinc-500">
+        {label}
+      </dt>
+      <dd className="text-[0.875rem] leading-6 text-zinc-700 dark:text-zinc-300">
+        {children}
+      </dd>
+    </div>
   );
 }

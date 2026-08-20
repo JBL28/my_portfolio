@@ -21,6 +21,29 @@ export interface ProfileContactLink {
  * 필드이고, name/role/contacts는 FE(Home) 전용 필드다 — 적재 스크립트는 자신이 아는
  * Section 필드만 읽으므로 FE 전용 필드가 있어도 영향이 없다.
  */
+/**
+ * Home 좌측 레일의 신원 항목. 역량(skills)과 한 덩어리로 섞지 않고 분리해 둔다 —
+ * 공공기관 블라인드 채용은 이름·생년·출신지역·학교명의 기재를 금지하고 위반 시
+ * 전형에서 제외되므로, 블라인드용으로 내보낼 때 이 필드만 빼면 나머지는 그대로
+ * 성립하게 한다.
+ */
+export interface ProfileAbout {
+  birthDate: string;
+  location: string;
+  email: string;
+  education: string;
+  github: string;
+}
+
+/**
+ * 기술 스택 한 묶음. 이름만 20개 늘어놓으면 첫 화면에서 노이즈가 되므로 역할별로
+ * 묶는다. 숙련도 별점·퍼센트는 근거 없는 자기평가라 두지 않는다.
+ */
+export interface SkillGroup {
+  label: string;
+  items: string[];
+}
+
 export interface ProfileData {
   id: string;
   /** Home 상단 identity: "이정복 · Backend Developer"의 이름 부분. */
@@ -33,6 +56,8 @@ export interface ProfileData {
   anchor: string;
   order: number;
   searchable: boolean;
+  about: ProfileAbout;
+  skills: SkillGroup[];
   contacts: ProfileContactLink[];
 }
 

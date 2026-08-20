@@ -8,5 +8,44 @@
   "anchor": "profile",
   "order": 1,
   "searchable": true,
+  "about": {
+    "birthDate": "2000.02.08",
+    "location": "서울특별시 관악구",
+    "email": "joungbok8263@gmail.com",
+    "education": "전북대학교 컴퓨터공학과",
+    "github": "https://github.com/JBL28"
+  },
+  "skills": [
+    {
+      "label": "Backend",
+      "items": [
+        "Java",
+        "Spring Boot",
+        "Python",
+        "FastAPI"
+      ]
+    },
+    {
+      "label": "Data",
+      "items": [
+        "PostgreSQL",
+        "MySQL",
+        "Redis"
+      ]
+    },
+    {
+      "label": "Infra",
+      "items": [
+        "AWS",
+        "Ubuntu",
+        "Docker",
+        "Nginx",
+        "Jenkins",
+        "GitLab CI/CD",
+        "SonarQube",
+        "Grafana"
+      ]
+    }
+  ],
   "contacts": []
 }
