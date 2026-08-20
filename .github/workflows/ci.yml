@@ -62,6 +62,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # LayoutProps/PageProps 같은 라우트 타입은 .next/types에 생성되는데,
+      # next dev/build를 거치지 않은 클린 체크아웃에는 아직 없다 — 타입 체크 전에 만들어줘야 한다.
+      - name: Generate route types
+        run: npx next typegen
+
       # 타입 오류는 build도 잡지만, 먼저 돌려야 어디서 깨졌는지가 분명하다.
       - name: Type check
         run: npx tsc --noEmit
