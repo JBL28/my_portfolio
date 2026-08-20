@@ -10,7 +10,7 @@ export function Header() {
           href="/"
           className="text-[15px] font-semibold tracking-[-0.01em] text-zinc-900 dark:text-zinc-100"
         >
-          이정복
+          이정복 포트폴리오
         </Link>
         <ThemeToggle />
       </Container>
