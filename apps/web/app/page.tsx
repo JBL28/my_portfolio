@@ -72,6 +72,13 @@ export default function HomePage() {
               </a>
             </ProfileRow>
             <ProfileRow label="학력">{profile.about.education}</ProfileRow>
+            <ProfileRow label="자격·어학">
+              <span className="flex flex-col gap-0.5 font-mono text-[0.8125rem] tabular-nums">
+                {profile.about.certifications.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </span>
+            </ProfileRow>
             {profile.skills.map((group) => (
               <ProfileRow key={group.label} label={group.label}>
                 <span className="flex flex-wrap gap-1.5">

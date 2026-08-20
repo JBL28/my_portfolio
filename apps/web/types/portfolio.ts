@@ -25,6 +25,8 @@ export interface ProfileAbout {
   location: string;
   email: string;
   education: string;
+  /** 자격증·어학 점수 목록. 항목마다 줄을 바꿔 표시한다(예: ["정보처리기사(2026.06.15)", "TOEIC 815점(2024.11.09)"]). */
+  certifications: string[];
   github: string;
 }
 
