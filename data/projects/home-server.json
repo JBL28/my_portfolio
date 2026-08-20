@@ -16,7 +16,8 @@
     "Nginx",
     "Tailscale",
     "Cloudflare Tunnel",
-    "Grafana"
+    "Grafana",
+    "Phoenix"
   ],
   "order": 2,
   "bridgeNote": "개인 운영 환경을 다시 팀의 개발 환경으로 가져왔습니다.",
@@ -26,19 +27,24 @@
   ],
   "images": [
     {
-      "src": "/projects/home-server/01-network-topology.png",
-      "alt": "Tailscale 내부망과 Cloudflare Tunnel 공개 경로를 구분한 네트워크 구성도 자리(플레이스홀더)",
+      "src": "/projects/home-server/01_server_infra.png",
+      "alt": "홈서버 네트워크 구성도 자리(플레이스홀더)",
       "caption": "네트워크 구성 — 실제 구성도로 교체 예정입니다."
     },
     {
-      "src": "/projects/home-server/02-monitoring-dashboard.png",
-      "alt": "Grafana 메트릭 대시보드 화면 자리(플레이스홀더)",
-      "caption": "모니터링 대시보드 — 실제 스크린샷으로 교체 예정입니다."
+      "src": "/projects/home-server/02_server_monitoring.png",
+      "alt": "Grafana SYSTEM_METRICS 대시보드 — CPU·메모리·디스크 사용률과 디스크 읽기/쓰기 속도, 평균 온도, exporter 상태",
+      "caption": "모니터링 대시보드 — CPU·메모리·디스크와 온도, exporter 상태를 한 화면에 모아 6시간 단위로 확인합니다."
     },
     {
-      "src": "/projects/home-server/03-ci-cd-pipeline.png",
-      "alt": "개인 서버를 팀 품질 검증 환경으로 연결한 CI/CD 파이프라인 도식 자리(플레이스홀더)",
-      "caption": "CI/CD 파이프라인 — 실제 도식으로 교체 예정입니다."
+      "src": "/projects/home-server/03_server_prompt_logging.png",
+      "alt": "Phoenix 트레이싱 화면 — 요청 하나가 security.input, gate, retrieve.graph/vector/rank, generate, security.output 스팬으로 나뉜 모습",
+      "caption": "AI 응답 추적 — 질문 하나가 거치는 검증·판별·검색·생성 단계를 스팬으로 남겨, 어느 구간에서 시간이 들었고 어떤 근거로 답했는지 확인합니다."
+    },
+    {
+      "src": "/projects/home-server/04_server_traffic.png",
+      "alt": "30일간의 공개 트래픽 통계 — 순 방문자 879명, 총 요청 36.06k건, 캐시 비율 5.7%, 전송량 138MB",
+      "caption": "공개 트래픽 — 30일 동안 순 방문자 879명, 요청 36.06k건을 처리했습니다."
     }
   ],
   "sections": [

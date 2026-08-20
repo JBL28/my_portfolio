@@ -15,10 +15,14 @@
   "technologies": [
     "Spring Boot",
     "MySQL",
+    "ProxySQL",
+    "Orchestrator",
     "AWS",
+    "Docker",
     "Nginx",
     "Jenkins",
-    "SonarQube"
+    "SonarQube",
+    "Grafana"
   ],
   "order": 1,
   "bridgeNote": "운영 도구의 Public 노출 문제를 다음 환경에서 다시 설계했습니다.",
@@ -26,19 +30,24 @@
   "buildsOnEvidenceSectionIds": [],
   "images": [
     {
-      "src": "/projects/teenyfinny/01-service-architecture.png",
-      "alt": "TeenyFinny 서비스 아키텍처 다이어그램 자리(플레이스홀더)",
-      "caption": "서비스 아키텍처 — 실제 다이어그램으로 교체 예정입니다."
+      "src": "/projects/teenyfinny/01_TeenyFinny_Cover.png",
+      "alt": "TeenyFinny 서비스 소개 표지 — 용돈 계좌, 투자 계좌, 목표 적금, 금융 퀴즈 앱 화면",
+      "caption": "서비스 개요 — 아이의 용돈 관리와 금융 학습, 투자 경험을 부모와 함께 다루는 가족 금융 플랫폼입니다."
     },
     {
-      "src": "/projects/teenyfinny/02-redundancy-test.png",
-      "alt": "이중화 구성을 직접 끊어보며 확인한 장애 전환 테스트 화면 자리(플레이스홀더)",
-      "caption": "이중화 장애 전환 검증 — 실제 캡처로 교체 예정입니다."
+      "src": "/projects/teenyfinny/02_TeenyFinny_Infra.png",
+      "alt": "AWS 두 가용영역에 로드밸런서와 Channel·Core 서버를 이중화하고 터널로 온프레미스 DB에 연결한 인프라 구성도",
+      "caption": "인프라 구성 — 가용영역·로드밸런서·애플리케이션·DB를 모두 두 벌로 두고, DB 앞단의 ProxySQL과 Orchestrator에 장애 전환을 맡겼습니다."
     },
     {
-      "src": "/projects/teenyfinny/03-team-workflow.png",
-      "alt": "PL로서 팀과 합의한 개발 흐름과 브랜치 전략 도식 자리(플레이스홀더)",
-      "caption": "팀 개발 흐름 — 실제 도식으로 교체 예정입니다."
+      "src": "/projects/teenyfinny/03_TeenyFinny_ERD.png",
+      "alt": "서비스 도메인 테이블과 BaaS 뱅킹 테이블을 나눠 설계한 ERD",
+      "caption": "데이터 모델 — 용돈·퀴즈·목표적금 등 서비스 도메인과 계좌·거래·주문의 BaaS 영역을 분리해, 인프라의 Channel DB와 Core DB 분리와 짝을 맞췄습니다."
+    },
+    {
+      "src": "/projects/teenyfinny/04_TeenyFinny_Presentation.jpg",
+      "alt": "우리FIS 아카데미 프로젝트 발표회에서 기능 구현과 테스트 항목을 발표하는 장면",
+      "caption": "최종 발표 — 구현과 테스트, 인프라 설계, AI를 활용한 개발 생산성 개선을 발표했습니다."
     }
   ],
   "sections": [

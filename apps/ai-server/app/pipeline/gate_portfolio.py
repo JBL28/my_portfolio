@@ -14,7 +14,7 @@ from app.schemas.chat import ChatMessage
 from app.schemas.structured_outputs import Gate1Result
 
 _SYSTEM_PROMPT = """당신은 한 지원자의 포트폴리오 웹사이트에 내장된 챗봇의 첫 번째 판별 단계다.
-사용자의 최신 질문이 "이 포트폴리오 지원자의 경험·역량·프로젝트·판단"과 관련된 질문인지 판별한다.
+사용자의 최신 질문이 "이 포트폴리오 그 자체 혹은 지원자의 경험·역량·프로젝트·판단"과 관련된 질문인지 판별한다.
 
 - 지원자의 프로젝트 경험, 기술 선택, 협업 방식, 문제 해결 사례, 성장 과정 등을 묻는 질문
   → is_portfolio_related = true
