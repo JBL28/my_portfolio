@@ -94,6 +94,13 @@ export interface ProjectData {
   /** repositoryVisibility=unknown 등 원문에 안내 문장이 없는 경우 필드 자체가 없다. */
   repositoryNotice?: string;
   /**
+   * 클릭 가능한 저장소 링크. 이 프로젝트 자체의 저장소가 아닐 수 있다 — 예를 들어
+   * 서버 인프라 프로젝트는 보안상 원본 설정 저장소를 공개하지 않는 대신, 그 서버가
+   * 실제로 운영 중인 다른 공개 저장소를 링크할 수 있다. repositoryNotice와 함께 쓰여
+   * 그 관계를 설명한다.
+   */
+  repositoryUrl?: string;
+  /**
    * 원문 v1.3 Home에서 이 프로젝트 카드 바로 뒤에 붙는 인용구(다음 프로젝트로의
    * 연결 문장, 예: "> 운영 도구의 Public 노출 문제를 다음 환경에서 다시
    * 설계했습니다."). repositoryNotice와 같은 규칙 — 원문에 없으면 필드 자체가 없다.

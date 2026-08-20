@@ -9,7 +9,9 @@
     "전체 설계·구축·운영"
   ],
   "result": "개인 운영 환경이 DailyBand의 CI/CD·Quality Gate로 연결",
-  "repositoryVisibility": "unknown",
+  "repositoryVisibility": "private",
+  "repositoryNotice": "보안 상 서버 설정은 비공개로 둡니다. 대신 이 서버에서 운영 중인 포트폴리오 사이트 저장소를 링크합니다.",
+  "repositoryUrl": "https://github.com/JBL28/my_portfolio",
   "technologies": [
     "Ubuntu",
     "Docker",

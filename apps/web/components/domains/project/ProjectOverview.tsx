@@ -14,10 +14,11 @@ import { STAGGER } from "@/lib/motion";
  * 백엔드"라는 인물의 재료를 형식으로 옮긴 것. lg 이상에서는 스크롤해도 고정되어,
  * 우측 서술을 읽는 내내 명세가 곁에 남는다.
  *
- * repositoryNotice가 있을 때만 그 문장을 그대로 보여준다. repositoryVisibility가
- * "unknown"인 프로젝트(Home Server)는 repositoryNotice 필드 자체가 없으므로
- * 공개 여부에 대해 어떤 문구도 만들어내지 않는다 — 원문에 없는 주장을 임의로
- * 추가하지 않는다는 원칙(00_기획.md)을 그대로 따른다.
+ * repositoryNotice/repositoryUrl은 필드가 있을 때만 그 내용을 그대로 보여준다 —
+ * 원문에 없는 주장을 임의로 추가하지 않는다는 원칙(00_기획.md)을 그대로 따른다.
+ * 세 조합이 실제로 쓰인다: 공개(TeenyFinny, URL만) / 비공개(DailyBand, 안내
+ * 문구만) / 다른 저장소로 대체(Home Server, 안내 문구 + URL — 서버 인프라 자체는
+ * 비공개이지만 그 서버에서 운영 중인 다른 공개 저장소를 대신 링크하는 경우).
  */
 export function ProjectOverview({
   project,
@@ -63,10 +64,25 @@ export function ProjectOverview({
         <OverviewRow label="결과">{project.result}</OverviewRow>
       </dl>
 
-      {project.repositoryNotice ? (
-        <p className="mt-6 text-[0.8125rem] leading-relaxed text-zinc-400 dark:text-zinc-500">
-          {project.repositoryNotice}
-        </p>
+      {project.repositoryNotice || project.repositoryUrl ? (
+        <div className="mt-6 space-y-2 text-[0.8125rem] leading-relaxed">
+          {project.repositoryNotice ? (
+            <p className="text-zinc-400 dark:text-zinc-500">
+              {project.repositoryNotice}
+            </p>
+          ) : null}
+          {project.repositoryUrl ? (
+            <a
+              href={project.repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-mono text-zinc-600 underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900 dark:text-zinc-400 dark:decoration-zinc-600 dark:hover:text-zinc-100"
+            >
+              GitHub에서 보기
+              <span aria-hidden="true">→</span>
+            </a>
+          ) : null}
+        </div>
       ) : null}
     </section>
   );
