@@ -72,6 +72,11 @@ export interface ProjectImage {
   alt: string;
   /** 갤러리 하단에 표시할 짧은 설명(선택). */
   caption?: string;
+  /**
+   * 캡션 뒤에 "자세히 보기 →"로 붙는 원본 링크(선택). 이미지로는 세부를 읽을 수
+   * 없는 자료(예: 테이블이 30개인 ERD)에서 원본을 직접 열어볼 수 있게 한다.
+   */
+  detailUrl?: string;
 }
 
 export interface ProjectSectionData {
