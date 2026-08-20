@@ -1,0 +1,454 @@
+# Portfolio CI/CD
+#
+# apps/web(Next.js)와 apps/ai-server(FastAPI)를 **각각** 검사·분석·이미지화한다.
+# 두 앱은 언어도 SonarQube 프로젝트도 다르므로 분석과 게이트를 합치지 않는다 —
+# 한쪽 게이트가 깨졌을 때 어느 쪽인지 바로 보여야 하고, 한쪽 실패가 다른 쪽 이미지
+# 빌드를 막지 않아야 한다.
+#
+# 흐름:
+#   1·2. Build      각 앱이 빌드되는 상태인지
+#   3·4. Sonar      각 앱을 별도 프로젝트로 분석하고 report-task.txt를 아티팩트로 넘김
+#   5·6. Gate       넘겨받은 report로 Quality Gate 판정 (실패 시 여기서 파이프라인 중단)
+#   7.   Image      게이트를 통과한 것만 이미지로 빌드 (main push 한정)
+#   8.   Push       Docker Hub로 push
+#
+# 두 Dockerfile 모두 **빌드 컨텍스트가 저장소 루트**다 — apps/web은 빌드 타임에
+# data/를 읽어 SSG를 만들고, apps/ai-server는 이미지 안에서 /srv/data 구조를
+# 유지해야 한다(각 Dockerfile 주석 참고).
+name: Portfolio CI/CD
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  PYTHON_VERSION: '3.12'
+  NEXT_TELEMETRY_DISABLED: '1'
+  LOCAL_IMAGE_WEB: portfolio-web-ci
+  LOCAL_IMAGE_AI: portfolio-ai-server-ci
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1·2. Build
+  # ---------------------------------------------------------------------------
+  build-web:
+    name: 1. Build - web
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 타입 오류는 build도 잡지만, 먼저 돌려야 어디서 깨졌는지가 분명하다.
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      # data/*.json을 읽어 정적 페이지를 만들므로 이 단계가 데이터 무결성 검사도 겸한다.
+      - name: Build
+        run: npm run build
+
+  build-ai:
+    name: 2. Build - ai-server
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    defaults:
+      run:
+        working-directory: apps/ai-server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      # import가 아니라 컴파일만 한다. app/config.py가 NEO4J_URI·OPENAI_API_KEY를
+      # 요구하므로 CI에서 import하면 비밀값 없이는 반드시 실패한다.
+      - name: Compile check
+        run: python -m compileall -q app scripts
+
+  # ---------------------------------------------------------------------------
+  # 3·4. SonarQube Scan — 앱마다 별도 프로젝트로 분석한다
+  # ---------------------------------------------------------------------------
+  sonarqube-web:
+    name: 3. SonarQube Scan - web
+    runs-on: ubuntu-latest
+    needs: build-web
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY_WEB || secrets.SONAR_PROJECT_KEY_WEB }}
+    steps:
+      # New Code 판정에 이력이 필요하므로 얕은 클론을 쓰지 않는다.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate SonarQube configuration
+        run: |
+          test -n "$SONAR_TOKEN" || { echo "::error::Missing SONAR_TOKEN secret"; exit 1; }
+          test -n "$SONAR_HOST_URL" || { echo "::error::Missing SONAR_HOST_URL secret"; exit 1; }
+          test -n "$SONAR_PROJECT_KEY" || { echo "::error::Missing SONAR_PROJECT_KEY_WEB variable"; exit 1; }
+
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=apps/web/app,apps/web/components,apps/web/lib
+            -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/public/**
+            -Dsonar.sourceEncoding=UTF-8
+
+      - name: Upload SonarQube task report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-report-web
+          path: .scannerwork/report-task.txt
+          if-no-files-found: error
+
+  sonarqube-ai:
+    name: 4. SonarQube Scan - ai-server
+    runs-on: ubuntu-latest
+    needs: build-ai
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY_AI || secrets.SONAR_PROJECT_KEY_AI }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate SonarQube configuration
+        run: |
+          test -n "$SONAR_TOKEN" || { echo "::error::Missing SONAR_TOKEN secret"; exit 1; }
+          test -n "$SONAR_HOST_URL" || { echo "::error::Missing SONAR_HOST_URL secret"; exit 1; }
+          test -n "$SONAR_PROJECT_KEY" || { echo "::error::Missing SONAR_PROJECT_KEY_AI variable"; exit 1; }
+
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=apps/ai-server/app,apps/ai-server/scripts
+            -Dsonar.exclusions=**/__pycache__/**,**/build/**,**/*.egg-info/**
+            -Dsonar.python.version=${{ env.PYTHON_VERSION }}
+            -Dsonar.sourceEncoding=UTF-8
+
+      - name: Upload SonarQube task report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-report-ai
+          path: .scannerwork/report-task.txt
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 5·6. Quality Gate — 여기서 막히면 이미지를 만들지 않는다
+  # ---------------------------------------------------------------------------
+  quality-gate-web:
+    name: 5. Quality Gate - web
+    runs-on: ubuntu-latest
+    needs: sonarqube-web
+    steps:
+      - name: Download SonarQube task report
+        uses: actions/download-artifact@v4
+        with:
+          name: sonarqube-report-web
+          path: .scannerwork
+
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  quality-gate-ai:
+    name: 6. Quality Gate - ai-server
+    runs-on: ubuntu-latest
+    needs: sonarqube-ai
+    steps:
+      - name: Download SonarQube task report
+        uses: actions/download-artifact@v4
+        with:
+          name: sonarqube-report-ai
+          path: .scannerwork
+
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  # ---------------------------------------------------------------------------
+  # 7. Image Build — 두 이미지가 build 인자만 다르므로 matrix로 묶는다.
+  #    push와 분리한 이유는 빌드에 Docker Hub 자격증명이 필요 없기 때문이다.
+  # ---------------------------------------------------------------------------
+  docker-build:
+    name: 7. Docker Build - ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [quality-gate-web, quality-gate-ai]
+    env:
+      DOCKER_BUILDKIT: '1'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: web
+            dockerfile: apps/web/Dockerfile
+            local_image: portfolio-web-ci
+          - component: ai-server
+            dockerfile: apps/ai-server/Dockerfile
+            local_image: portfolio-ai-server-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      # 컨텍스트는 저장소 루트(.)다 — 두 이미지 모두 data/를 필요로 한다.
+      - name: Build image
+        run: |
+          docker build \
+            --file "${{ matrix.dockerfile }}" \
+            --tag "${{ matrix.local_image }}:${{ github.sha }}" \
+            .
+
+      - name: Save image
+        run: docker save "${{ matrix.local_image }}:${{ github.sha }}" --output "${{ matrix.component }}-image.tar"
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ matrix.component }}
+          path: ${{ matrix.component }}-image.tar
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # 8. Image Push
+  # ---------------------------------------------------------------------------
+  docker-push:
+    name: 8. Docker Push - ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: docker-build
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: web
+            local_image: portfolio-web-ci
+            default_suffix: portfolio-web
+          - component: ai-server
+            local_image: portfolio-ai-server-ci
+            default_suffix: portfolio-ai-server
+    steps:
+      - name: Validate Docker Hub secrets
+        run: |
+          test -n "$DOCKERHUB_USERNAME" || { echo "::error::Missing DOCKERHUB_USERNAME secret"; exit 1; }
+          test -n "$DOCKERHUB_TOKEN" || { echo "::error::Missing DOCKERHUB_TOKEN secret"; exit 1; }
+
+      # 저장소 이름은 비밀이 아니므로 variables에 둔다. 없으면 계정명으로 만든다.
+      - name: Resolve image name
+        id: image
+        env:
+          REPOSITORY: ${{ matrix.component == 'web' && vars.DOCKERHUB_REPOSITORY_WEB || vars.DOCKERHUB_REPOSITORY_AI }}
+        run: |
+          namespace=$(echo "$DOCKERHUB_USERNAME" | tr '[:upper:]' '[:lower:]')
+          image="${REPOSITORY:-$namespace/${{ matrix.default_suffix }}}"
+          echo "name=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ matrix.component }}
+
+      - name: Load image
+        run: docker load --input "${{ matrix.component }}-image.tar"
+
+      - name: Login to Docker Hub
+        run: echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Tag and push
+        run: |
+          image="${{ steps.image.outputs.name }}"
+          short_sha="$(echo "${{ github.sha }}" | cut -c1-12)"
+          docker tag "${{ matrix.local_image }}:${{ github.sha }}" "$image:$short_sha"
+          docker tag "${{ matrix.local_image }}:${{ github.sha }}" "$image:latest"
+          docker push "$image:$short_sha"
+          docker push "$image:latest"
+          echo "pushed $image:$short_sha, $image:latest" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Logout
+        if: always()
+        run: docker logout
+
+  # ---------------------------------------------------------------------------
+  # 9. Deploy — Tailscale로 홈서버 내부망에 붙어 Portainer 스택을 재배포한다.
+  #
+  # Portainer를 8000~9443 포트로 공개하지 않아도 되도록 VPN을 경유한다. 개인 서버의
+  # 접근 경계 원칙(내부용은 Tailscale, 공개용만 Cloudflare Tunnel)을 CI에서도 그대로
+  # 지키는 셈이다.
+  #
+  # 재배포는 이미지 교체만 한다 — 스택의 compose 본문과 환경변수는 Portainer에 있는
+  # 것을 그대로 다시 올리고(pullImage: true), 최신 태그를 새로 받게 한다. 워크플로가
+  # compose를 덮어쓰지 않으므로 서버에서 조정한 설정이 CI 때문에 되돌아가지 않는다.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: 9. Deploy to Home Server
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: docker-push
+    env:
+      PORTAINER_SCHEME: https
+      TS_TARGET_HOST: ${{ secrets.TS_TARGET_HOST }}
+      TS_TARGET_PORT: ${{ secrets.TS_TARGET_PORT }}
+      PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
+      PORTAINER_STACK_ID: ${{ secrets.PORTAINER_STACK_ID }}
+      PORTAINER_ENDPOINT_ID: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+    steps:
+      - name: Validate deploy secrets
+        run: |
+          test -n "${{ secrets.TS_OAUTH_CLIENT_ID }}" || { echo "::error::Missing TS_OAUTH_CLIENT_ID"; exit 1; }
+          test -n "${{ secrets.TS_OAUTH_SECRET }}" || { echo "::error::Missing TS_OAUTH_SECRET"; exit 1; }
+          test -n "$TS_TARGET_HOST" || { echo "::error::Missing TS_TARGET_HOST"; exit 1; }
+          test -n "$TS_TARGET_PORT" || { echo "::error::Missing TS_TARGET_PORT"; exit 1; }
+          test -n "$PORTAINER_API_KEY" || { echo "::error::Missing PORTAINER_API_KEY"; exit 1; }
+          test -n "$PORTAINER_STACK_ID" || { echo "::error::Missing PORTAINER_STACK_ID"; exit 1; }
+          test -n "$PORTAINER_ENDPOINT_ID" || { echo "::error::Missing PORTAINER_ENDPOINT_ID"; exit 1; }
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Redeploy Portainer stack
+        run: |
+          PORTAINER_URL="$PORTAINER_SCHEME://$TS_TARGET_HOST:$TS_TARGET_PORT"
+
+          echo "Fetching current stack compose..."
+          curl -ksS \
+            "$PORTAINER_URL/api/stacks/$PORTAINER_STACK_ID/file" \
+            -H "X-API-Key: $PORTAINER_API_KEY" \
+            -o stack-file.json
+
+          STACK_FILE_CONTENT=$(jq -r '.StackFileContent' stack-file.json)
+          test -n "$STACK_FILE_CONTENT" || { echo "::error::Empty stack compose from Portainer"; exit 1; }
+
+          echo "Fetching current stack metadata..."
+          curl -ksS \
+            "$PORTAINER_URL/api/stacks/$PORTAINER_STACK_ID?endpointId=$PORTAINER_ENDPOINT_ID" \
+            -H "X-API-Key: $PORTAINER_API_KEY" \
+            -o stack-info.json
+
+          ENV_JSON=$(jq -c '.Env // []' stack-info.json)
+
+          echo "Redeploying stack with latest image pull..."
+          jq -n \
+            --arg stackFileContent "$STACK_FILE_CONTENT" \
+            --argjson env "$ENV_JSON" \
+            '{
+              stackFileContent: $stackFileContent,
+              env: $env,
+              prune: true,
+              pullImage: true
+            }' > update-payload.json
+
+          http_code=$(curl -ksS -X PUT \
+            "$PORTAINER_URL/api/stacks/$PORTAINER_STACK_ID?endpointId=$PORTAINER_ENDPOINT_ID" \
+            -H "X-API-Key: $PORTAINER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @update-payload.json \
+            -o response.json \
+            -w "%{http_code}")
+
+          cat response.json
+          test "$http_code" = "200" || {
+            echo "::error::Portainer stack update failed with HTTP $http_code"
+            exit 1
+          }
+
+      - name: Add notice to workflow summary
+        if: always()
+        run: |
+          {
+            echo "## 배포"
+            echo ""
+            echo "- Deploy: ${{ job.status }}"
+            echo "- Stack ID: $PORTAINER_STACK_ID"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # 결과 요약
+  # ---------------------------------------------------------------------------
+  summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - build-web
+      - build-ai
+      - sonarqube-web
+      - sonarqube-ai
+      - quality-gate-web
+      - quality-gate-ai
+      - docker-build
+      - docker-push
+      - deploy
+    steps:
+      - name: Write workflow summary
+        run: |
+          {
+            echo "## Portfolio CI/CD 결과"
+            echo ""
+            echo "| 단계 | web | ai-server |"
+            echo "| --- | --- | --- |"
+            echo "| Build | ${{ needs.build-web.result }} | ${{ needs.build-ai.result }} |"
+            echo "| SonarQube | ${{ needs.sonarqube-web.result }} | ${{ needs.sonarqube-ai.result }} |"
+            echo "| Quality Gate | ${{ needs.quality-gate-web.result }} | ${{ needs.quality-gate-ai.result }} |"
+            echo ""
+            echo "- Docker Build: ${{ needs.docker-build.result }}"
+            echo "- Docker Push: ${{ needs.docker-push.result }}"
+            echo "- Deploy: ${{ needs.deploy.result }}"
+          } >> "$GITHUB_STEP_SUMMARY"
