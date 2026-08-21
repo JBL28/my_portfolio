@@ -72,6 +72,27 @@ export interface ProjectImage {
   caption?: string;
 }
 
+/**
+ * Section 하나에 붙는 증거. **선택 사항이다** — 증거가 없는 Section이 기본이고,
+ * 있을 때만 본문 아래에 열기 버튼이 붙는다. 모든 문단에 뭐라도 붙이려 들면 근거가
+ * 아니라 장식이 된다.
+ *
+ * - `image`: 갤러리에 이미 있는 이미지를 `src`로 가리킨다. alt·caption을 여기 다시
+ *   적지 않는 이유는 같은 그림의 설명이 두 곳으로 갈라지면 반드시 어긋나기 때문이다.
+ * - `code`: 코드는 저장소가 비공개일 수 있으므로(DailyBand) 데이터에 직접 담는다.
+ *   대신 원본과 따로 놀 수 있다는 약점이 있어, 무엇을 인용한 것인지 `caption`에
+ *   남긴다.
+ */
+export type SectionEvidence =
+  | { kind: "image"; label: string; src: string }
+  | {
+      kind: "code";
+      label: string;
+      language: string;
+      code: string;
+      caption?: string;
+    };
+
 export interface ProjectSectionData {
   id: string;
   title: string;
@@ -79,6 +100,8 @@ export interface ProjectSectionData {
   anchor: string;
   order: number;
   searchable: boolean;
+  /** 이 문단의 주장을 받치는 증거. 없으면 아무것도 렌더링하지 않는다. */
+  evidence?: SectionEvidence[];
 }
 
 export interface ProjectData {

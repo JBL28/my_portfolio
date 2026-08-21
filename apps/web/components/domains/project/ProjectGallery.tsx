@@ -12,13 +12,8 @@ import {
 } from "motion/react";
 import type { ProjectImage } from "@/types/portfolio";
 import { cn } from "@/lib/cn";
+import { CLICK_SLOP } from "@/lib/interaction";
 import { DURATION, EASE } from "@/lib/motion";
-
-/** 이 거리(px)를 넘게 움직였으면 "넘기려던 손짓"으로 보고 클릭으로 치지 않는다.
- *  손가락 탭도 완전히 정지하지는 않으므로 0으로 두면 확대가 열리지 않고, 너무 크게
- *  잡으면 짧은 스와이프가 확대로 오인된다. 8px는 브라우저가 탭/드래그를 가르는
- *  기준과 비슷한 값이다. */
-const CLICK_SLOP = 8;
 
 /**
  * Project Detail 우측 컬럼 상단의 이미지 갤러리. CSS scroll-snap 기반의 가로

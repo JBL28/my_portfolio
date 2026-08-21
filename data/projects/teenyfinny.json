@@ -73,7 +73,14 @@
       "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다. Failover 동안 **읽기는 유지됐고, 쓰기는 수 초 지연된 뒤 재개**됐습니다. 구성 완료를 무중단으로 표현하지 않고 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.",
       "anchor": "이중화는-직접-끊어보고-확인했습니다",
       "order": 3,
-      "searchable": true
+      "searchable": true,
+      "evidence": [
+        {
+          "kind": "image",
+          "label": "이중화 구성도",
+          "src": "/projects/teenyfinny/02_TeenyFinny_Infra.png"
+        }
+      ]
     },
     {
       "id": "aa221ace-dccc-4b02-b3af-edce10843774",
