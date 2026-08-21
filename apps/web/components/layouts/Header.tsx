@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { GitHubLink } from "@/components/ui/GitHubLink";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function Header() {
@@ -12,7 +13,10 @@ export function Header() {
         >
           이정복 포트폴리오
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <GitHubLink />
+          <ThemeToggle />
+        </div>
       </Container>
     </header>
   );
