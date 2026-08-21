@@ -8,6 +8,10 @@ import type { ProjectImage, SectionEvidence } from "@/types/portfolio";
 import { Overlay } from "@/components/ui/Overlay";
 import { DURATION, EASE } from "@/lib/motion";
 
+/** 가장 큰 미리보기의 대략적인 높이(px). 화면 아래쪽 버튼에서 미리보기를 얼마나
+ *  끌어올릴지 정하는 데만 쓰는 값이라 정확할 필요는 없다. */
+const PREVIEW_RESERVE = 360;
+
 /**
  * 문단의 주장 아래에 붙는 증거 버튼 — hover하면 내용만 미리 보이고, 누르면 크게 열린다.
  *
@@ -39,24 +43,58 @@ export function SectionEvidenceList({
   sectionTitle: string;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  /** 미리보기 대상과 그 버튼의 세로 위치(슬롯 기준 px). 위치를 같이 들고 있어야
+   *  레일 맨 위가 아니라 **누르려는 버튼 옆**에 뜬다. */
+  const [hover, setHover] = useState<{
+    index: number;
+    top: number;
+    slot: HTMLElement;
+  } | null>(null);
+  const hoverIndex = hover?.index ?? null;
   const prefersReducedMotion = useReducedMotion();
   const open = openIndex === null ? null : evidence[openIndex];
+  const hovered =
+    hoverIndex === null || openIndex !== null ? null : evidence[hoverIndex];
+
+  // 좌측 레일의 슬롯. 서버가 이미 그려둔 노드라 따로 상태로 들고 있을 이유가 없다 —
+  // effect로 담아두면 렌더가 한 번 더 돈다. SSR에는 document가 없고, 그때는 hovered도
+  // 없어 어차피 아무것도 그리지 않으므로 서버/클라이언트 첫 렌더 결과가 어긋나지 않는다.
+  /**
+   * 버튼의 화면상 세로 위치를 슬롯 기준 오프셋으로 바꾼다. 슬롯은 sticky 레일 안의
+   * 높이 0짜리 기준점이라, 이 값을 그대로 `top`에 주면 미리보기 윗변이 버튼 윗변과
+   * 나란히 선다.
+   *
+   * 아래쪽 버튼에서는 그대로 두면 미리보기가 화면 밖으로 나가므로, 뷰포트 안에
+   * 들어오도록 위로 끌어올린다(PREVIEW_RESERVE는 가장 큰 미리보기의 대략적인 높이).
+   */
+  function openPreview(index: number, button: HTMLElement) {
+    // 슬롯은 **이 순간** 찾는다. 렌더 중에 찾아 두면 그때 아직 DOM에 커밋되지 않은
+    // 경우(클라이언트 내비게이션으로 들어온 첫 렌더 등) null이 핸들러에 붙박이고,
+    // 그러면 hover해도 상태가 안 바뀌어 리렌더가 없으니 영영 복구되지 않는다.
+    const slot = document.getElementById("evidence-preview-slot");
+    if (!slot) {
+      return;
+    }
+    const buttonTop = button.getBoundingClientRect().top;
+    const slotTop = slot.getBoundingClientRect().top;
+    const maxTop = window.innerHeight - slotTop - PREVIEW_RESERVE;
+    const top = Math.max(0, Math.min(buttonTop - slotTop, Math.max(0, maxTop)));
+    setHover({ index, top, slot });
+  }
 
   return (
     <div className="mt-5 flex flex-wrap gap-2">
       {evidence.map((item, index) => (
         <span
           key={item.label}
-          className="relative"
-          onMouseEnter={() => setHoverIndex(index)}
-          onMouseLeave={() => setHoverIndex(null)}
+          onMouseEnter={(event) => openPreview(index, event.currentTarget)}
+          onMouseLeave={() => setHover(null)}
         >
           <button
             type="button"
             onClick={() => setOpenIndex(index)}
-            onFocus={() => setHoverIndex(index)}
-            onBlur={() => setHoverIndex(null)}
+            onFocus={(event) => openPreview(index, event.currentTarget)}
+            onBlur={() => setHover(null)}
             className="inline-flex cursor-pointer items-center gap-2 border border-zinc-200 px-2.5 py-1.5 font-mono text-[11px] text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 dark:focus-visible:outline-zinc-100"
           >
             {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다. */}
@@ -65,37 +103,46 @@ export function SectionEvidenceList({
             </span>
             {item.label}
           </button>
+        </span>
+      ))}
 
-          <AnimatePresence>
-            {hoverIndex === index && openIndex === null ? (
-              <motion.span
+      {/* 미리보기는 좌측 명세 레일의 슬롯(ProjectOverview)으로 보낸다. 버튼 위에
+          띄우면 읽던 문단을 가리고 폭이 좁아 다이어그램을 알아볼 수 없었다. 레일
+          폭을 그대로 쓰면 스크린샷도 구성도도 읽힌다. */}
+      {hovered && hover
+        ? createPortal(
+            <AnimatePresence>
+              <motion.div
+                key={hoverIndex}
                 aria-hidden
                 initial={
                   prefersReducedMotion
                     ? { opacity: 0 }
-                    : { opacity: 0, y: 4, scale: 0.98 }
+                    : { opacity: 0, y: -6, scale: 0.99 }
                 }
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: DURATION.fast, ease: EASE }}
-                /* 버튼 위에 띄운다 — 아래로 열면 다음 문단을 가려 읽던 자리를 잃는다.
-                   폭은 좁게 잡는다. 우측 컬럼에 overflow-x-clip이 걸려 있어 넓게
-                   잡으면 오른쪽이 잘린다. */
-                className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 block w-72 origin-bottom-left overflow-hidden border border-zinc-300 shadow-lg sm:w-80 dark:border-zinc-700"
+                style={{ top: hover.top }}
+                /* 오른쪽 변을 레일 오른쪽에 붙이고 **왼쪽으로** 자란다. left-0으로
+                   두면 레일보다 넓어진 만큼 우측 서술 위로 넘어가 읽던 문단을 덮는데,
+                   그건 미리보기를 이 레일로 옮긴 이유 자체를 무르는 일이다. 대신
+                   페이지 좌측 여백을 쓴다 — 거기에는 덮을 것이 없다. */
+                className="absolute right-0 w-[25rem] origin-top-right overflow-hidden border border-zinc-300 bg-white shadow-xl xl:w-[28rem] dark:border-zinc-700 dark:bg-zinc-950"
               >
-                {item.kind === "image" ? (
-                  <PreviewImage item={item} images={images} />
+                {hovered.kind === "image" ? (
+                  <PreviewImage item={hovered} images={images} />
                 ) : (
                   <PreviewCode
-                    html={highlighted[index]}
-                    lineCount={item.code.split("\n").length}
+                    html={highlighted[hoverIndex!]}
+                    lineCount={hovered.code.split("\n").length}
                   />
                 )}
-              </motion.span>
-            ) : null}
-          </AnimatePresence>
-        </span>
-      ))}
+              </motion.div>
+            </AnimatePresence>,
+            hover.slot,
+          )
+        : null}
 
       {/* 오버레이는 body 직속으로 내보낸다 — 이 컴포넌트는 Reveal(transform)과
           overflow-x-clip 안에 있고, 둘 다 position:fixed를 무력화한다. */}
@@ -149,7 +196,7 @@ function PreviewImage({
         alt=""
         fill
         className="object-contain"
-        sizes="20rem"
+        sizes="30rem"
       />
     </span>
   );
@@ -167,14 +214,14 @@ function PreviewCode({
   if (!html) {
     return null;
   }
-  // max-h-40(10rem)에 11px·1.7 줄간격이면 여덟 줄 남짓 들어간다. 그보다 짧으면 잘릴
+  // max-h-72(18rem)에 12px·1.7 줄간격이면 열네 줄 남짓 들어간다. 그보다 짧으면 잘릴
   // 것이 없으므로 페이드를 그리지 않는다 — 다 보이는 코드 위에 그림자가 얹히면
   // 없는 내용이 더 있는 것처럼 읽힌다.
-  const isTruncated = lineCount > 8;
+  const isTruncated = lineCount > 14;
   return (
-    <span className="relative block max-h-40 overflow-hidden">
+    <span className="relative block max-h-72 overflow-hidden">
       <span
-        className="code-block block [&_pre]:overflow-hidden [&_pre]:py-3 [&_pre]:pr-3 [&_pre]:font-mono [&_pre]:text-[11px] [&_pre]:leading-[1.7]"
+        className="code-block block [&_pre]:overflow-hidden [&_pre]:py-3 [&_pre]:pr-3 [&_pre]:font-mono [&_pre]:text-[12px] [&_pre]:leading-[1.7]"
         dangerouslySetInnerHTML={{ __html: html }}
       />
       {/* 테마 배경 위에 얹는 페이드. 배경색은 테마가 인라인으로 넣으므로 여기서

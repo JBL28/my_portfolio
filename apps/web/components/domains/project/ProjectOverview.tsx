@@ -26,7 +26,22 @@ export function ProjectOverview({
   project,
 }: Readonly<{ project: ProjectData }>) {
   return (
-    <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
+    <section
+      id="overview"
+      className="relative lg:sticky lg:top-20 lg:self-start"
+    >
+      {/* 근거 미리보기가 들어오는 자리(components/domains/project/SectionEvidence.tsx).
+          우측 서술에서 근거 버튼에 hover하면 이 명세 레일 위로 내용이 겹쳐 뜬다 —
+          버튼 바로 위에 띄우면 읽던 문단을 가리고 폭도 좁아, 다이어그램은 무엇인지
+          알아볼 수 없었다.
+
+          비어 있을 때 레일의 링크를 막지 않도록 pointer-events는 꺼 둔다. 2단이
+          성립하는 lg 이상에서만 쓴다 — 그 아래에서는 레일이 본문 위로 올라가므로
+          "옆에 뜬다"가 성립하지 않는다. */}
+      <div
+        id="evidence-preview-slot"
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden lg:block"
+      />
       <Reveal>
         {/* 돌아가는 길. 이 레일이 lg에서 sticky이므로 맨 위에 두면 우측 서술을
             끝까지 읽는 동안에도 계속 손에 닿는다. 화살표는 ProjectCard의 "자세히
