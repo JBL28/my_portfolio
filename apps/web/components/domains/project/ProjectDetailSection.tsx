@@ -64,6 +64,7 @@ export async function ProjectDetailSection({
           highlighted={highlighted}
           images={images}
           sectionTitle={section.title}
+          sectionBody={section.body}
         />
       ) : null}
 

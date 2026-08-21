@@ -102,7 +102,13 @@ export function Overlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: DURATION.base, ease: EASE }}
-      className="fixed inset-0 z-50 flex cursor-zoom-out flex-col bg-black/90 p-4 backdrop-blur-sm sm:p-8"
+      /* `dark` 클래스를 직접 단다. 이 오버레이는 사이트 테마와 무관하게 **항상 검은
+         배경**이므로, 라이트 모드에서 열면 안쪽 내용이 밝은 배경을 전제로 칠해진다 —
+         RichText의 <strong>은 text-foreground(라이트에서 거의 검정)라 아예 사라지고,
+         인라인 코드는 흰 칩으로 튄다. 여기서 dark 컨텍스트를 선언하면 --foreground가
+         밝은 값으로 바뀌고 안쪽의 dark: 변형도 함께 켜진다
+         (globals.css의 `@custom-variant dark (&:where(.dark, .dark *))`). */
+      className="dark fixed inset-0 z-50 flex cursor-zoom-out flex-col bg-black/90 p-4 backdrop-blur-sm sm:p-8"
     >
       <div className="flex shrink-0 items-center justify-between gap-4">
         <div className="min-w-0">{header}</div>

@@ -6,7 +6,8 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ProjectImage, SectionEvidence } from "@/types/portfolio";
 import { Overlay } from "@/components/ui/Overlay";
-import { DURATION, EASE } from "@/lib/motion";
+import { RichText } from "@/lib/rich-text";
+import { DURATION, EASE, STAGGER } from "@/lib/motion";
 
 /** 가장 큰 미리보기의 대략적인 높이(px). 화면 아래쪽 버튼에서 미리보기를 얼마나
  *  끌어올릴지 정하는 데만 쓰는 값이라 정확할 필요는 없다. */
@@ -34,6 +35,7 @@ export function SectionEvidenceList({
   highlighted,
   images,
   sectionTitle,
+  sectionBody,
 }: {
   evidence: SectionEvidence[];
   /** 서버에서 미리 강조한 코드 HTML. 이미지 증거 자리는 null이다. */
@@ -41,6 +43,8 @@ export function SectionEvidenceList({
   /** 갤러리 이미지 목록 — `kind: "image"`가 src로 가리키는 대상이다. */
   images: ProjectImage[];
   sectionTitle: string;
+  /** 이 증거가 받치는 문단의 본문. 확대해서 볼 때 옆에 함께 띄운다. */
+  sectionBody: string;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   /** 미리보기 대상과 그 버튼의 세로 위치(슬롯 기준 px). 위치를 같이 들고 있어야
@@ -158,12 +162,62 @@ export function SectionEvidenceList({
                       {open.label}
                     </span>
                   }
+                  contentClassName="items-stretch"
                 >
-                  {open.kind === "image" ? (
-                    <FullImage item={open} images={images} />
-                  ) : (
-                    <FullCode item={open} html={highlighted[openIndex!]} />
-                  )}
+                  {/* 콘텐츠와 그 문단의 본문을 한 화면에 둔다. 예전에는 그림만
+                      크게 띄워서, 무엇을 보고 있는 것인지 알려면 오버레이를 닫고
+                      뒤 페이지의 글을 다시 읽어야 했다 — 근거와 주장이 갈라져 있으면
+                      근거가 무엇을 받치는지 알 수 없다.
+                      넓은 화면에서는 좌우로, 좁으면 위아래로 놓는다. */}
+                  <div className="flex h-full w-full flex-col gap-6 lg:flex-row lg:gap-10">
+                    {/* 둘이 놓일 자리에서 각자 바깥쪽에서 모여든다 — 콘텐츠는
+                        왼쪽에서, 본문은 오른쪽에서. 배경이 덮인 뒤에 시작하도록
+                        살짝 늦추고, 본문을 한 박자 더 늦춰 "근거를 보고 나서 설명을
+                        읽는다"는 순서를 움직임으로도 만든다. */}
+                    <motion.div
+                      initial={
+                        prefersReducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, x: -28 }
+                      }
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: DURATION.base,
+                        ease: EASE,
+                        delay: STAGGER,
+                      }}
+                      className="flex min-h-0 flex-1 items-center justify-center lg:min-w-0"
+                    >
+                      {open.kind === "image" ? (
+                        <FullImage item={open} images={images} />
+                      ) : (
+                        <FullCode item={open} html={highlighted[openIndex!]} />
+                      )}
+                    </motion.div>
+
+                    <motion.div
+                      initial={
+                        prefersReducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, x: 28 }
+                      }
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: DURATION.base,
+                        ease: EASE,
+                        delay: STAGGER * 2,
+                      }}
+                      className="min-h-0 shrink-0 overflow-y-auto lg:w-[22rem] xl:w-[26rem]"
+                    >
+                      <h2 className="text-[1.05rem] leading-snug font-bold text-zinc-100">
+                        {sectionTitle}
+                      </h2>
+                      <RichText
+                        text={sectionBody}
+                        className="mt-3 text-[0.875rem] leading-[1.85] text-zinc-400"
+                      />
+                    </motion.div>
+                  </div>
                 </Overlay>
               ) : null}
             </AnimatePresence>,
