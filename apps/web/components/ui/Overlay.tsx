@@ -31,7 +31,7 @@ export function Overlay({
   footer,
   children,
   contentClassName,
-}: {
+}: Readonly<{
   /** 스크린리더에 읽히는 이 오버레이의 이름. */
   label: string;
   onClose: () => void;
@@ -39,7 +39,7 @@ export function Overlay({
   footer?: React.ReactNode;
   children: React.ReactNode;
   contentClassName?: string;
-}) {
+}>) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const pressRef = useRef({ x: 0, y: 0, moved: 0 });
 
@@ -51,8 +51,8 @@ export function Overlay({
         onClose();
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
   // 뒤 페이지가 같이 스크롤되면 "덮여 있다"는 감각이 깨진다.
@@ -148,12 +148,12 @@ export function OverlayButton({
   disabled = false,
   onClick,
   children,
-}: {
+}: Readonly<{
   label: string;
   disabled?: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <button
       type="button"

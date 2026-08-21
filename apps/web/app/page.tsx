@@ -230,11 +230,11 @@ function FactLink({
   href,
   external = false,
   children,
-}: {
+}: Readonly<{
   href: string;
   external?: boolean;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <a
       href={href}

@@ -26,11 +26,22 @@ export async function ProjectDetailSection({
   const evidence = section.evidence ?? [];
   // 문법 강조는 서버에서 끝낸다 — Shiki를 클라이언트로 내려보내면 문법 파일까지
   // 번들에 실린다(lib/highlight.ts). 이미지 증거 자리는 null로 비워 인덱스를 맞춘다.
-  const highlighted = await Promise.all(
-    evidence.map((item) =>
-      item.kind === "code" ? highlightCode(item.code, item.language) : null,
-    ),
+  const codeIndexes = evidence.flatMap((item, index) =>
+    item.kind === "code" ? [index] : [],
   );
+  const codeHtml = await Promise.all(
+    codeIndexes.map((index) => {
+      const item = evidence[index];
+      // codeIndexes가 code만 담으므로 이 분기는 타입 좁히기 용도다.
+      return item.kind === "code"
+        ? highlightCode(item.code, item.language)
+        : Promise.resolve("");
+    }),
+  );
+  const highlighted: (string | null)[] = evidence.map(() => null);
+  codeIndexes.forEach((index, order) => {
+    highlighted[index] = codeHtml[order];
+  });
 
   return (
     <section
