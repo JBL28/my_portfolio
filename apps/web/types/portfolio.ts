@@ -6,23 +6,11 @@
 export type RepositoryVisibility = "public" | "private" | "unknown";
 
 /**
- * Home Contact 영역의 링크 하나 (원문 v1.3 Home: [GitHub] [Email] [Resume]).
- * 실제 URL은 원문에 존재하지 않아 데이터로 확정된 뒤에만 채운다 — 빈 배열이면
- * Contact 영역을 렌더링하지 않는다(존재하지 않는 링크를 지어내지 않는다).
- */
-export interface ProfileContactLink {
-  label: string;
-  url: string;
-}
-
-/**
  * Home 좌측 레일에서 소개 문단 다음에 오는 신원 항목. 역량(skills)과 성격이 다르므로
  * (한쪽은 사무적 확인 정보, 다른 쪽은 직무 능력의 근거) 한 덩어리로 섞지 않고
  * 나눠 둔다.
  */
 export interface ProfileAbout {
-  birthDate: string;
-  location: string;
   email: string;
   education: string;
   github: string;
@@ -40,7 +28,7 @@ export interface SkillGroup {
 /**
  * data/profile.json — 01_설계.md 5.1: "Home의 지원자 소개, 연락처 등 어떤 프로젝트에도
  * 속하지 않는 정보". id~searchable은 Neo4j Home Profile Section(3.2)과 공유하는 Graph용
- * 필드이고, name/role/about/skills/contacts는 FE(Home) 전용 필드다 — 적재 스크립트는
+ * 필드이고, name/role/about/skills는 FE(Home) 전용 필드다 — 적재 스크립트는
  * 자신이 아는 Section 필드만 읽으므로 FE 전용 필드가 있어도 영향이 없다.
  */
 export interface ProfileData {
@@ -57,7 +45,6 @@ export interface ProfileData {
   searchable: boolean;
   about: ProfileAbout;
   skills: SkillGroup[];
-  contacts: ProfileContactLink[];
 }
 
 /**

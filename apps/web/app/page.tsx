@@ -46,7 +46,7 @@ export default function HomePage() {
         <section id={profile.anchor}>
           <Reveal>
             <p className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
-              {profile.name} · {profile.role}
+              {profile.role}
             </p>
             <h1 className="mt-6 text-[1.75rem] font-bold leading-[1.32] tracking-[-0.02em] text-zinc-900 sm:text-[2rem] dark:text-zinc-100">
               {parseInlineRichText(headline)}
@@ -91,10 +91,6 @@ export default function HomePage() {
               {/* 사실 — 좁은 화면 2열, 넓어지면 3열. 괘선을 두지 않아 아래 스택과
                   성격이 갈린다. */}
               <div className="mt-7 grid grid-cols-2 gap-x-8 gap-y-7 sm:grid-cols-3">
-                <Fact label="생년월일" mono>
-                  {profile.about.birthDate}
-                </Fact>
-                <Fact label="위치">{profile.about.location}</Fact>
                 <Fact label="학력">{profile.about.education}</Fact>
                 <Fact label="이메일" mono>
                   {/* 메일 주소는 읽고 끝나는 정보가 아니라 누르는 동선이다. */}
@@ -130,32 +126,6 @@ export default function HomePage() {
                 ))}
               </div>
             </dl>
-
-            {/* 원문 v1.3 Home 하단 Contact([GitHub] [Email] [Resume]) — 실제 URL은 원문에
-            존재하지 않으므로 data/profile.json의 contacts에 확정된 링크가 있을 때만
-            렌더링한다(존재하지 않는 링크를 지어내지 않는다). */}
-            {profile.contacts.length > 0 ? (
-              <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-                {profile.contacts.map((contact) => (
-                  <li key={contact.label}>
-                    <a
-                      href={contact.url}
-                      target={
-                        contact.url.startsWith("http") ? "_blank" : undefined
-                      }
-                      rel={
-                        contact.url.startsWith("http")
-                          ? "noreferrer"
-                          : undefined
-                      }
-                      className="font-mono text-sm text-zinc-700 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900 hover:decoration-zinc-900 dark:text-zinc-300 dark:decoration-zinc-600 dark:hover:text-zinc-100 dark:hover:decoration-zinc-100"
-                    >
-                      {contact.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
           </Reveal>
         </section>
 
