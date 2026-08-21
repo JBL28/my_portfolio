@@ -14,11 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="ko"
-      suppressHydrationWarning
-      className="h-full antialiased"
-    >
+    <html lang="ko" suppressHydrationWarning className="h-full antialiased">
       <body className="min-h-full bg-background font-sans text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PageLayout>{children}</PageLayout>

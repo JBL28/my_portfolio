@@ -38,7 +38,7 @@ export function MessageList({
   return (
     <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
       {turns.length === 0 && !isLoading ? (
-        <p className="text-sm text-zinc-400 dark:text-zinc-500">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           지원자의 경험, 역량, 프로젝트에 대해 질문해보세요.
         </p>
       ) : null}
@@ -52,7 +52,10 @@ export function MessageList({
           initial={RISE.initial}
           animate={RISE.animate}
           transition={{ duration: DURATION.fast, ease: EASE }}
-          className={cn("flex", turn.role === "user" ? "justify-end" : "justify-start")}
+          className={cn(
+            "flex",
+            turn.role === "user" ? "justify-end" : "justify-start",
+          )}
         >
           <div
             className={cn(
@@ -66,7 +69,9 @@ export function MessageList({
             {turn.role === "assistant" && turn.citations.length > 0 ? (
               <ul className="mt-2 space-y-1 border-t border-zinc-100 pt-2 dark:border-zinc-900">
                 {turn.citations.map((citation, citationIndex) => (
-                  <li key={`${citation.sectionId}-${citation.caseId ?? "none"}-${citationIndex}`}>
+                  <li
+                    key={`${citation.sectionId}-${citation.caseId ?? "none"}-${citationIndex}`}
+                  >
                     <CitationLink citation={citation} />
                   </li>
                 ))}
@@ -77,7 +82,7 @@ export function MessageList({
       ))}
 
       {isLoading ? (
-        <p className="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+        <p className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
           답변을 생성하는 중
           {/* 유일하게 반복되는 애니메이션이다. 문구 옆 3px 점이라 시야에서 차지하는
               면적이 작고, 답변이 도착하면 사라진다. 모션 감소 설정에서는 반복 자체가

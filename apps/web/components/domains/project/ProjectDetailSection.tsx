@@ -1,6 +1,8 @@
-import type { ProjectSectionData } from "@/types/portfolio";
+import type { ProjectImage, ProjectSectionData } from "@/types/portfolio";
 import { RichText } from "@/lib/rich-text";
+import { SectionEvidenceList } from "@/components/domains/project/SectionEvidence";
 import { ExternalLink } from "@/components/ui/ExternalLink";
+import { highlightCode } from "@/lib/highlight";
 
 /**
  * Project Detail 우측 "서술" 컬럼의 H2 Section. 01_설계.md 3.2의 anchor 렌더링
@@ -11,13 +13,36 @@ import { ExternalLink } from "@/components/ui/ExternalLink";
  * 실제로 이 지점으로 연결된다는 구조를 화면에서도 드러낸다(장식이 아니라
  * 실제 동작하는 앵커).
  */
-export function ProjectDetailSection({
+export async function ProjectDetailSection({
   section,
+  images,
   isFirst = false,
 }: Readonly<{
   section: ProjectSectionData;
+  /** 갤러리 이미지 — 증거가 src로 이 목록을 가리킨다. */
+  images: ProjectImage[];
   isFirst?: boolean;
 }>) {
+  const evidence = section.evidence ?? [];
+  // 문법 강조는 서버에서 끝낸다 — Shiki를 클라이언트로 내려보내면 문법 파일까지
+  // 번들에 실린다(lib/highlight.ts). 이미지 증거 자리는 null로 비워 인덱스를 맞춘다.
+  const codeIndexes = evidence.flatMap((item, index) =>
+    item.kind === "code" ? [index] : [],
+  );
+  const codeHtml = await Promise.all(
+    codeIndexes.map((index) => {
+      const item = evidence[index];
+      // codeIndexes가 code만 담으므로 이 분기는 타입 좁히기 용도다.
+      return item.kind === "code"
+        ? highlightCode(item.code, item.language)
+        : Promise.resolve("");
+    }),
+  );
+  const highlighted: (string | null)[] = evidence.map(() => null);
+  codeIndexes.forEach((index, order) => {
+    highlighted[index] = codeHtml[order];
+  });
+
   return (
     <section
       id={section.anchor}
@@ -32,7 +57,7 @@ export function ProjectDetailSection({
         <a
           href={`#${section.anchor}`}
           aria-label={`"${section.title}" 섹션 링크`}
-          className="ml-2 font-mono text-base font-normal text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 dark:text-zinc-600"
+          className="ml-2 font-mono text-base font-normal text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 dark:text-zinc-400"
         >
           #
         </a>
@@ -41,6 +66,19 @@ export function ProjectDetailSection({
         text={section.body}
         className="mt-4 max-w-xl text-[0.9375rem] leading-[1.9] text-zinc-600 dark:text-zinc-400"
       />
+      {/* 증거는 있을 때만 붙는다 — 없는 문단이 기본이다. 근거(오버레이)를 먼저,
+          외부 링크를 그다음에 둔다: 이 사이트 안에서 확인할 수 있는 것을 먼저
+          보여주고, 밖으로 나가는 길은 뒤에 놓는다. */}
+      {evidence.length > 0 ? (
+        <SectionEvidenceList
+          evidence={evidence}
+          highlighted={highlighted}
+          images={images}
+          sectionTitle={section.title}
+          sectionBody={section.body}
+        />
+      ) : null}
+
       {/* 근거 링크는 본문 끝에 별도 줄로 둔다 — 문장 안에 섞으면 링크임이 눈에
           걸리지 않는다. 여럿이면 한 줄에 나란히 놓고 좁은 폭에서 접힌다. */}
       {section.links?.length ? (

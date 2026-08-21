@@ -6,23 +6,11 @@
 export type RepositoryVisibility = "public" | "private" | "unknown";
 
 /**
- * Home Contact 영역의 링크 하나 (원문 v1.3 Home: [GitHub] [Email] [Resume]).
- * 실제 URL은 원문에 존재하지 않아 데이터로 확정된 뒤에만 채운다 — 빈 배열이면
- * Contact 영역을 렌더링하지 않는다(존재하지 않는 링크를 지어내지 않는다).
- */
-export interface ProfileContactLink {
-  label: string;
-  url: string;
-}
-
-/**
  * Home 좌측 레일에서 소개 문단 다음에 오는 신원 항목. 역량(skills)과 성격이 다르므로
  * (한쪽은 사무적 확인 정보, 다른 쪽은 직무 능력의 근거) 한 덩어리로 섞지 않고
  * 나눠 둔다.
  */
 export interface ProfileAbout {
-  birthDate: string;
-  location: string;
   email: string;
   education: string;
   /** 자격증·어학 점수 목록. 항목마다 줄을 바꿔 표시한다(예: ["정보처리기사(2026.06.15)", "TOEIC 815점(2024.11.09)"]). */
@@ -42,7 +30,7 @@ export interface SkillGroup {
 /**
  * data/profile.json — 01_설계.md 5.1: "Home의 지원자 소개, 연락처 등 어떤 프로젝트에도
  * 속하지 않는 정보". id~searchable은 Neo4j Home Profile Section(3.2)과 공유하는 Graph용
- * 필드이고, name/role/about/skills/contacts는 FE(Home) 전용 필드다 — 적재 스크립트는
+ * 필드이고, name/role/about/skills는 FE(Home) 전용 필드다 — 적재 스크립트는
  * 자신이 아는 Section 필드만 읽으므로 FE 전용 필드가 있어도 영향이 없다.
  */
 export interface ProfileData {
@@ -59,7 +47,6 @@ export interface ProfileData {
   searchable: boolean;
   about: ProfileAbout;
   skills: SkillGroup[];
-  contacts: ProfileContactLink[];
 }
 
 /**
@@ -79,6 +66,27 @@ export interface ProjectImage {
   detailUrl?: string;
 }
 
+/**
+ * Section 하나에 붙는 증거. **선택 사항이다** — 증거가 없는 Section이 기본이고,
+ * 있을 때만 본문 아래에 열기 버튼이 붙는다. 모든 문단에 뭐라도 붙이려 들면 근거가
+ * 아니라 장식이 된다.
+ *
+ * - `image`: 갤러리에 이미 있는 이미지를 `src`로 가리킨다. alt·caption을 여기 다시
+ *   적지 않는 이유는 같은 그림의 설명이 두 곳으로 갈라지면 반드시 어긋나기 때문이다.
+ * - `code`: 코드는 저장소가 비공개일 수 있으므로(DailyBand) 데이터에 직접 담는다.
+ *   대신 원본과 따로 놀 수 있다는 약점이 있어, 무엇을 인용한 것인지 `caption`에
+ *   남긴다.
+ */
+export type SectionEvidence =
+  | { kind: "image"; label: string; src: string }
+  | {
+      kind: "code";
+      label: string;
+      language: string;
+      code: string;
+      caption?: string;
+    };
+
 export interface ProjectSectionData {
   id: string;
   title: string;
@@ -86,6 +94,8 @@ export interface ProjectSectionData {
   anchor: string;
   order: number;
   searchable: boolean;
+  /** 이 문단의 주장을 받치는 증거. 없으면 아무것도 렌더링하지 않는다. */
+  evidence?: SectionEvidence[];
   /**
    * 이 섹션의 서술을 직접 확인할 수 있는 링크. 본문 끝에 별도 줄로 붙는다 —
    * 문장 안에 인라인으로 섞으면 링크인지 눈에 걸리지 않아, "여기서 실물을 볼 수

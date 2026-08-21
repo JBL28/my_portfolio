@@ -26,14 +26,29 @@ export function ProjectOverview({
   project,
 }: Readonly<{ project: ProjectData }>) {
   return (
-    <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
+    <section
+      id="overview"
+      className="relative lg:sticky lg:top-20 lg:self-start"
+    >
+      {/* 근거 미리보기가 들어오는 자리(components/domains/project/SectionEvidence.tsx).
+          우측 서술에서 근거 버튼에 hover하면 이 명세 레일 위로 내용이 겹쳐 뜬다 —
+          버튼 바로 위에 띄우면 읽던 문단을 가리고 폭도 좁아, 다이어그램은 무엇인지
+          알아볼 수 없었다.
+
+          비어 있을 때 레일의 링크를 막지 않도록 pointer-events는 꺼 둔다. 2단이
+          성립하는 lg 이상에서만 쓴다 — 그 아래에서는 레일이 본문 위로 올라가므로
+          "옆에 뜬다"가 성립하지 않는다. */}
+      <div
+        id="evidence-preview-slot"
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden lg:block"
+      />
       <Reveal>
         {/* 돌아가는 길. 이 레일이 lg에서 sticky이므로 맨 위에 두면 우측 서술을
             끝까지 읽는 동안에도 계속 손에 닿는다. 화살표는 ProjectCard의 "자세히
             보기 →"와 짝을 이루는 반대 방향 글리프다. */}
         <Link
           href="/#profile"
-          className="group inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400 transition-colors hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-100"
+          className="group inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
         >
           <span
             aria-hidden="true"
@@ -43,7 +58,7 @@ export function ProjectOverview({
           </span>{" "}
           About Me
         </Link>
-        <p className="mt-6 font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
+        <p className="mt-6 font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
           Project
         </p>
         <h1 className="mt-4 text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-100">
@@ -86,7 +101,7 @@ export function ProjectOverview({
       project.relatedLinks?.length ? (
         <div className="mt-6 space-y-2 text-[0.8125rem] leading-relaxed">
           {project.repositoryNotice ? (
-            <p className="text-zinc-400 dark:text-zinc-500">
+            <p className="text-zinc-500 dark:text-zinc-400">
               {project.repositoryNotice}
             </p>
           ) : null}
@@ -119,7 +134,7 @@ function OverviewRow({
 }>) {
   return (
     <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-3.5 dark:border-zinc-800">
-      <dt className="pt-px text-xs leading-6 text-zinc-400 dark:text-zinc-500">
+      <dt className="pt-px text-xs leading-6 text-zinc-500 dark:text-zinc-400">
         {label}
       </dt>
       <dd className="text-[0.875rem] leading-6 text-zinc-700 dark:text-zinc-300">

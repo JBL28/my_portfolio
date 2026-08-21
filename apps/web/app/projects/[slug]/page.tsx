@@ -76,6 +76,7 @@ export default async function ProjectDetailPage({
           <Reveal key={section.id} from="right">
             <ProjectDetailSection
               section={section}
+              images={project.images ?? []}
               isFirst={index === 0 && !hasGallery}
             />
           </Reveal>

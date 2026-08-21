@@ -116,3 +116,55 @@ body {
   background: var(--foreground);
   color: var(--background);
 }
+
+/* ---------------------------------------------------------------------------
+   증거 코드블록(Shiki) — 줄 번호와 여백.
+
+   Shiki는 각 줄을 `<span class="line">`으로 내보낸다. 번호를 마크업에 박지 않고 CSS
+   카운터로 그리는 이유는 **복사할 때 번호가 딸려오지 않게** 하기 위해서다. 증거로 띄운
+   코드는 그대로 복사해 갈 수 있어야 한다.
+
+   색은 Shiki 테마(lib/highlight.ts)가 인라인 style로 직접 넣으므로 여기서 손대지
+   않는다 — 여기서 정하는 것은 배치뿐이다.
+   --------------------------------------------------------------------------- */
+.code-block pre {
+  margin: 0;
+  overflow-x: auto;
+}
+
+.code-block code {
+  display: block;
+  counter-reset: shiki-line;
+  /* 줄 번호가 들어갈 홈. padding-left를 code에 주면 가로 스크롤 시 번호가 같이
+     밀려나가므로, 각 줄에 들여쓰기를 주고 번호를 그 안에 앉힌다. */
+}
+
+.code-block .line {
+  display: inline-block;
+  /* width가 아니라 min-width다 — 컨테이너를 내용 크기(w-fit)에 맡기면서도, 짧은 줄이
+     번호 열만 남기고 쪼그라들지 않게 한다. width:100%로 두면 컨테이너 폭보다 긴 줄이
+     잘려 가로 스크롤이 생기지 않는다. */
+  min-width: 100%;
+  padding-left: 3.25rem;
+  text-indent: -3.25rem;
+}
+
+.code-block .line::before {
+  counter-increment: shiki-line;
+  content: counter(shiki-line);
+  display: inline-block;
+  width: 2.25rem;
+  margin-right: 1rem;
+  text-align: right;
+  text-indent: 0;
+  /* 번호는 코드가 아니라 눈금이다. 드래그로 선택되지 않게 하고 명도를 낮춘다. */
+  color: color-mix(in srgb, currentColor 38%, transparent);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 마지막 줄이 개행으로 끝나면 Shiki가 빈 줄을 하나 더 만든다 — 번호만 덩그러니
+   남으므로 지운다. */
+.code-block .line:last-child:empty {
+  display: none;
+}

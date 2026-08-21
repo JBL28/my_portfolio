@@ -22,8 +22,8 @@ export default function NotFound() {
       </h1>
 
       <p className="mt-4 text-[0.9375rem] leading-relaxed text-zinc-600 dark:text-zinc-400">
-        주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 홈에서 프로젝트 목록을 확인해
-        주세요.
+        주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 홈에서 프로젝트 목록을
+        확인해 주세요.
       </p>
 
       <Link

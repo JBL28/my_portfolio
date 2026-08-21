@@ -9,8 +9,6 @@
   "order": 1,
   "searchable": true,
   "about": {
-    "birthDate": "2000.02.08",
-    "location": "서울특별시 관악구",
     "email": "joungbok8263@gmail.com",
     "education": "전북대학교 컴퓨터공학과",
     "certifications": ["정보처리기사(2026.06.15)", "TOEIC 815점(2024.11.09)"],
@@ -47,6 +45,5 @@
         "Grafana"
       ]
     }
-  ],
-  "contacts": []
+  ]
 }
