@@ -114,7 +114,7 @@ export default function HomePage() {
                     key={group.label}
                     className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-4 sm:grid-cols-[6rem_minmax(0,1fr)] dark:border-zinc-800"
                   >
-                    <dt className="pt-1 font-mono text-[11px] tracking-[0.14em] text-zinc-400 uppercase dark:text-zinc-500">
+                    <dt className="pt-1 font-mono text-[11px] tracking-[0.14em] text-zinc-500 uppercase dark:text-zinc-400">
                       {group.label}
                     </dt>
                     <dd className="flex flex-wrap gap-1.5">
@@ -141,7 +141,7 @@ export default function HomePage() {
             <h2 className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
               Projects
             </h2>
-            <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
+            <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
               {projects.length}
             </span>
           </div>
@@ -198,7 +198,7 @@ function Fact({
 }) {
   return (
     <div>
-      <dt className="text-[11px] leading-none text-zinc-400 dark:text-zinc-500">
+      <dt className="text-[11px] leading-none text-zinc-500 dark:text-zinc-400">
         {label}
       </dt>
       <dd

@@ -149,7 +149,7 @@ export default function ChatModal({
           type="button"
           onClick={onClose}
           aria-label="채팅 닫기"
-          className="inline-flex h-6 w-6 items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="inline-flex h-6 w-6 items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
         >
           <CloseIcon />
         </button>

@@ -42,7 +42,9 @@ export function FloatingChatButton() {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={isOpen ? "AI 채팅 닫기" : "AI에게 포트폴리오에 대해 질문하기"}
+        aria-label={
+          isOpen ? "AI 채팅 닫기" : "AI에게 포트폴리오에 대해 질문하기"
+        }
         aria-expanded={isOpen}
         aria-controls={CHAT_PANEL_ID}
         // 패널(z-50)과 같은 층에 둔다 — 비모달이라 패널이 열려 있는 동안에도 버튼이

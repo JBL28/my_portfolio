@@ -60,7 +60,7 @@ export function SectionEvidenceList({
             className="inline-flex cursor-pointer items-center gap-2 border border-zinc-200 px-2.5 py-1.5 font-mono text-[11px] text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 dark:focus-visible:outline-zinc-100"
           >
             {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다. */}
-            <span aria-hidden className="text-zinc-400 dark:text-zinc-500">
+            <span aria-hidden className="text-zinc-500 dark:text-zinc-400">
               {item.kind === "image" ? "▣" : "⟨⟩"}
             </span>
             {item.label}

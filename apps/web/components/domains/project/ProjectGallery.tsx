@@ -217,7 +217,7 @@ export function ProjectGallery({
               aria-live는 바깥 span에 남겨 DOM 교체와 무관하게 안정적으로 읽히게 한다. */}
           <span
             aria-live="polite"
-            className="font-mono text-xs text-zinc-400 tabular-nums dark:text-zinc-500"
+            className="font-mono text-xs text-zinc-500 tabular-nums dark:text-zinc-400"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span

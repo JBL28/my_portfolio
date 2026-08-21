@@ -30,9 +30,10 @@ export function ProjectCard({
   return (
     <article>
       <p className="font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
-        {project.period}
-        <span className="text-zinc-300 dark:text-zinc-600"> — </span>
-        {project.teamSize}
+        {/* 구분자를 본문보다 흐리게 두려 했으나, zinc 계단에서 라이트 모드 3:1을
+            넘기는 단계가 곧바로 본문 색이라 중간값이 없다. 안 보이는 장식보다
+            같은 색이 낫다. */}
+        {project.period} — {project.teamSize}
       </p>
 
       <h3 className="mt-2 text-[1.35rem] font-bold leading-snug tracking-[-0.015em] text-zinc-900 dark:text-zinc-100">
@@ -60,7 +61,7 @@ export function ProjectCard({
 
       <dl className="mt-5 space-y-1.5 text-[0.8125rem]">
         <div className="flex gap-4">
-          <dt className="w-8 shrink-0 pt-px text-xs leading-5 text-zinc-400 dark:text-zinc-500">
+          <dt className="w-8 shrink-0 pt-px text-xs leading-5 text-zinc-500 dark:text-zinc-400">
             담당
           </dt>
           <dd className="leading-5 text-zinc-600 dark:text-zinc-400">
@@ -73,7 +74,7 @@ export function ProjectCard({
           </dd>
         </div>
         <div className="flex gap-4">
-          <dt className="w-8 shrink-0 pt-px text-xs leading-5 text-zinc-400 dark:text-zinc-500">
+          <dt className="w-8 shrink-0 pt-px text-xs leading-5 text-zinc-500 dark:text-zinc-400">
             결과
           </dt>
           <dd className="leading-5 text-zinc-600 dark:text-zinc-400">

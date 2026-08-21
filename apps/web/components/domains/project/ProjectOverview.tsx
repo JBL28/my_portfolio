@@ -23,7 +23,7 @@ export function ProjectOverview({ project }: { project: ProjectData }) {
   return (
     <section id="overview" className="lg:sticky lg:top-20 lg:self-start">
       <Reveal>
-        <p className="font-mono text-xs tracking-[0.22em] text-zinc-400 uppercase dark:text-zinc-500">
+        <p className="font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:text-zinc-400">
           Project
         </p>
         <h1 className="mt-4 text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-100">
@@ -62,7 +62,7 @@ export function ProjectOverview({ project }: { project: ProjectData }) {
       </dl>
 
       {project.repositoryNotice ? (
-        <p className="mt-6 text-[0.8125rem] leading-relaxed text-zinc-400 dark:text-zinc-500">
+        <p className="mt-6 text-[0.8125rem] leading-relaxed text-zinc-500 dark:text-zinc-400">
           {project.repositoryNotice}
         </p>
       ) : null}
@@ -79,7 +79,7 @@ function OverviewRow({
 }) {
   return (
     <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-3.5 dark:border-zinc-800">
-      <dt className="pt-px text-xs leading-6 text-zinc-400 dark:text-zinc-500">
+      <dt className="pt-px text-xs leading-6 text-zinc-500 dark:text-zinc-400">
         {label}
       </dt>
       <dd className="text-[0.875rem] leading-6 text-zinc-700 dark:text-zinc-300">

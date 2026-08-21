@@ -45,7 +45,7 @@ export async function ProjectDetailSection({
         <a
           href={`#${section.anchor}`}
           aria-label={`"${section.title}" 섹션 링크`}
-          className="ml-2 font-mono text-base font-normal text-zinc-300 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 dark:text-zinc-600"
+          className="ml-2 font-mono text-base font-normal text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 dark:text-zinc-400"
         >
           #
         </a>
