@@ -167,7 +167,10 @@ export default function HomePage() {
                   />
                   {/* 타임라인 선/점은 정지시키고 카드 본문만 떠오르게 한다. */}
                   <Reveal from="right">
-                    <ProjectCard project={project} />
+                    <ProjectCard
+                      project={project}
+                      inherited={projects[index - 1]?.bridgeNote}
+                    />
                   </Reveal>
                 </li>
               );
