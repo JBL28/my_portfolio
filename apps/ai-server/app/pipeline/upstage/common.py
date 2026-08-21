@@ -8,15 +8,13 @@ temperature 고정과 재시도.
 """
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import Any
 
 from openai import OpenAI
 from openai.types.chat import ParsedChatCompletion
 from pydantic import BaseModel
 
 from app.config import settings
-
-_T = TypeVar("_T", bound=BaseModel)
 
 # parsed=None(스키마 불만족·refusal·length 절단)일 때 같은 프로바이더로 한 번 더
 # 시도한다. 실측 시행에서는 한 번도 발생하지 않았지만, 발생 시 곧바로 OpenAI로 폴백해
@@ -25,13 +23,13 @@ _T = TypeVar("_T", bound=BaseModel)
 _MAX_ATTEMPTS = 2
 
 
-def parse_structured(
+def parse_structured[T: BaseModel](
     client: OpenAI,
     model: str,
     messages: list[dict[str, str]],
-    response_format: type[_T],
+    response_format: type[T],
     stage_label: str,
-) -> ParsedChatCompletion[_T]:
+) -> ParsedChatCompletion[T]:
     """Upstage로 structured output을 호출하고 파싱된 completion을 반환한다.
 
     반환값을 `.parsed`가 아니라 completion 자체로 두는 이유: Generate가 span에 기록할
@@ -41,7 +39,7 @@ def parse_structured(
     (RuntimeError)를 던진다 — dispatch.py의 폴백 조건과 api/chat.py의 예외 흡수가
     프로바이더에 따라 달라지지 않게 하기 위해서다.
     """
-    completion: ParsedChatCompletion[_T] | None = None
+    completion: ParsedChatCompletion[T] | None = None
     for _ in range(_MAX_ATTEMPTS):
         completion = client.beta.chat.completions.parse(
             model=model,
@@ -62,7 +60,7 @@ def parse_structured(
     )
 
 
-def parsed_or_raise(completion: ParsedChatCompletion[_T], stage_label: str) -> _T:
+def parsed_or_raise[T: BaseModel](completion: ParsedChatCompletion[T], stage_label: str) -> T:
     """`parse_structured`가 이미 None을 걸러내지만, 타입 검사기에는 여전히 Optional이다.
     호출부마다 assert를 흩뿌리지 않도록 한 곳에서 좁힌다."""
     result: Any = completion.choices[0].message.parsed

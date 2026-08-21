@@ -25,6 +25,12 @@ const DURATION_MS = 1000;
 /** 라우트 이동 직후 대상 요소가 나타날 때까지의 재시도(약 600ms). */
 const RETRY_FRAMES = 40;
 
+/** offsetWidth를 읽으면 브라우저가 리플로를 강제한다 — remove/add 사이에 끼워야
+ *  두 클래스 변경이 하나로 배치되지 않고 애니메이션이 실제로 재시작된다. */
+function forceReflow(element: HTMLElement): number {
+  return element.offsetWidth;
+}
+
 export function AnchorHighlight() {
   const pathname = usePathname();
 
@@ -37,7 +43,7 @@ export function AnchorHighlight() {
       // 같은 요소를 연속으로 가리킬 때도 다시 재생되도록 클래스를 떼고 리플로를
       // 강제한 뒤 다시 붙인다(클래스만 다시 붙이면 애니메이션이 재시작되지 않는다).
       el.classList.remove(CLASS);
-      void el.offsetWidth;
+      forceReflow(el);
       el.classList.add(CLASS);
       clearTimeout(timer);
       timer = setTimeout(() => el.classList.remove(CLASS), DURATION_MS);
@@ -45,7 +51,7 @@ export function AnchorHighlight() {
 
     function flash(attempt = 0) {
       if (cancelled) return;
-      const id = decodeURIComponent(window.location.hash.slice(1));
+      const id = decodeURIComponent(globalThis.location.hash.slice(1));
       if (!id) return;
       const el = document.getElementById(id);
       if (el) {
@@ -65,22 +71,22 @@ export function AnchorHighlight() {
       // 이미 같은 해시에 있으면 hashchange가 오지 않으므로 여기서 직접 재생한다.
       if (
         link.hash &&
-        link.pathname === window.location.pathname &&
-        link.hash === window.location.hash
+        link.pathname === globalThis.location.pathname &&
+        link.hash === globalThis.location.hash
       ) {
         flash();
       }
     }
 
     raf = requestAnimationFrame(() => flash());
-    window.addEventListener("hashchange", onHashChange);
+    globalThis.addEventListener("hashchange", onHashChange);
     document.addEventListener("click", onClick);
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
       clearTimeout(timer);
-      window.removeEventListener("hashchange", onHashChange);
+      globalThis.removeEventListener("hashchange", onHashChange);
       document.removeEventListener("click", onClick);
     };
   }, [pathname]);

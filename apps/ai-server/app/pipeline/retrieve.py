@@ -213,69 +213,83 @@ def _step2_considered(
 # ---------------------------------------------------------------------------
 
 
-def _step3_growth(
-    seed_case_ids: set[str], seed_project_slugs: set[str], project_hints: list[str]
-) -> list[_Hit]:
-    hits: list[_Hit] = []
-    has_seed = bool(seed_case_ids) or bool(seed_project_slugs)
+def _growth_case_hits_from_seed(seed_case_ids: set[str]) -> list[_Hit]:
+    return [
+        _Hit(
+            section_id=row["sectionId"],
+            source="growth_case",
+            case_id=row["caseId"],
+            project_id=row["projectId"],
+            project_slug=row["projectSlug"],
+        )
+        for row in graph.growth_influenced_from_seed_cases(list(seed_case_ids))
+    ]
 
-    if has_seed:
-        for row in graph.growth_influenced_from_seed_cases(list(seed_case_ids)):
+
+def _growth_project_hits_from_seed(seed_project_slugs: set[str]) -> list[_Hit]:
+    hits: list[_Hit] = []
+    for row in graph.growth_builds_on_from_seed_projects(list(seed_project_slugs)):
+        for section_id in row.get("evidenceSectionIds") or []:
             hits.append(
                 _Hit(
-                    section_id=row["sectionId"],
-                    source="growth_case",
-                    case_id=row["caseId"],
+                    section_id=section_id,
+                    source="growth_project",
                     project_id=row["projectId"],
                     project_slug=row["projectSlug"],
                 )
             )
-
-        for row in graph.growth_builds_on_from_seed_projects(list(seed_project_slugs)):
-            for section_id in row.get("evidenceSectionIds") or []:
-                hits.append(
-                    _Hit(
-                        section_id=section_id,
-                        source="growth_project",
-                        project_id=row["projectId"],
-                        project_slug=row["projectSlug"],
-                    )
-                )
-    else:
-        for row in graph.growth_influenced_all(project_hints):
-            hits.append(
-                _Hit(
-                    section_id=row["prevSectionId"],
-                    source="growth_case",
-                    case_id=row["prevCaseId"],
-                    project_id=row["prevProjectId"],
-                    project_slug=row["prevProjectSlug"],
-                )
-            )
-            hits.append(
-                _Hit(
-                    section_id=row["currSectionId"],
-                    source="growth_case",
-                    case_id=row["currCaseId"],
-                    project_id=row["currProjectId"],
-                    project_slug=row["currProjectSlug"],
-                )
-            )
-
-        for row in graph.growth_builds_on_all(project_hints):
-            for section_id in row.get("evidenceSectionIds") or []:
-                # BUILDS_ON 관계의 evidence Section은 later/earlier 어느 쪽에도 속할 수
-                # 있으므로, 관측용 project는 관계의 later(이후 프로젝트) 쪽을 기록한다.
-                hits.append(
-                    _Hit(
-                        section_id=section_id,
-                        source="growth_project",
-                        project_id=row["laterId"],
-                        project_slug=row["laterSlug"],
-                    )
-                )
-
     return hits
+
+
+def _growth_case_hits_all(project_hints: list[str]) -> list[_Hit]:
+    hits: list[_Hit] = []
+    for row in graph.growth_influenced_all(project_hints):
+        hits.append(
+            _Hit(
+                section_id=row["prevSectionId"],
+                source="growth_case",
+                case_id=row["prevCaseId"],
+                project_id=row["prevProjectId"],
+                project_slug=row["prevProjectSlug"],
+            )
+        )
+        hits.append(
+            _Hit(
+                section_id=row["currSectionId"],
+                source="growth_case",
+                case_id=row["currCaseId"],
+                project_id=row["currProjectId"],
+                project_slug=row["currProjectSlug"],
+            )
+        )
+    return hits
+
+
+def _growth_project_hits_all(project_hints: list[str]) -> list[_Hit]:
+    hits: list[_Hit] = []
+    for row in graph.growth_builds_on_all(project_hints):
+        for section_id in row.get("evidenceSectionIds") or []:
+            # BUILDS_ON 관계의 evidence Section은 later/earlier 어느 쪽에도 속할 수
+            # 있으므로, 관측용 project는 관계의 later(이후 프로젝트) 쪽을 기록한다.
+            hits.append(
+                _Hit(
+                    section_id=section_id,
+                    source="growth_project",
+                    project_id=row["laterId"],
+                    project_slug=row["laterSlug"],
+                )
+            )
+    return hits
+
+
+def _step3_growth(
+    seed_case_ids: set[str], seed_project_slugs: set[str], project_hints: list[str]
+) -> list[_Hit]:
+    if seed_case_ids or seed_project_slugs:
+        return _growth_case_hits_from_seed(
+            seed_case_ids
+        ) + _growth_project_hits_from_seed(seed_project_slugs)
+    return _growth_case_hits_all(project_hints) + _growth_project_hits_all(project_hints)
 
 
 # ---------------------------------------------------------------------------

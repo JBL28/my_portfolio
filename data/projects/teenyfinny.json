@@ -2,7 +2,7 @@
   "id": "56faafe5-f3f1-4415-8922-047421e0e625",
   "name": "TeenyFinny",
   "slug": "teenyfinny",
-  "summary": "부모와 자녀가 함께 사용하는 청소년 용돈·투자 관리 서비스입니다. 처음 PL을 맡아 **API 계약과 공통 백엔드 구조, 인프라와 개발 흐름을 정리하는 역할**을 맡았습니다.",
+  "summary": "부모와 자녀가 함께 사용하는 청소년 용돈·투자 관리 서비스입니다. PL을 처음 맡아 **API 계약과 공통 백엔드 구조, 인프라와 개발 흐름을 정리하는 일**을 했습니다.",
   "period": "2025.10 ~ 2025.12",
   "teamSize": "5인",
   "roles": [
@@ -12,6 +12,7 @@
   ],
   "result": "최종 프로젝트 우수팀",
   "repositoryVisibility": "public",
+  "repositoryUrl": "https://github.com/TeenyFinny",
   "technologies": [
     "Spring Boot",
     "MySQL",
@@ -42,7 +43,8 @@
     {
       "src": "/projects/teenyfinny/03_TeenyFinny_ERD.png",
       "alt": "서비스 도메인 테이블과 BaaS 뱅킹 테이블을 나눠 설계한 ERD",
-      "caption": "데이터 모델 — 용돈·퀴즈·목표적금 등 서비스 도메인과 계좌·거래·주문의 BaaS 영역을 분리해 인프라의 Channel DB와 Core DB 분리와 짝을 맞췄습니다."
+      "caption": "데이터 모델 — 용돈·퀴즈·목표적금 등 서비스 도메인과 계좌·거래·주문의 BaaS 영역을 나눠 인프라의 Channel DB와 Core DB 분리와 짝을 맞췄습니다.",
+      "detailUrl": "https://www.erdcloud.com/d/QErs2MLwrMQTaGPkq"
     },
     {
       "src": "/projects/teenyfinny/04_TeenyFinny_Presentation.jpg",
@@ -54,7 +56,7 @@
     {
       "id": "916bbd4c-afa6-4274-9fba-8c6bca5782bc",
       "title": "처음 맡은 PL에서 팀이 일할 방식을 먼저 정했습니다",
-      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리를 핵심으로 잡았습니다. API 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며, 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
+      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리를 핵심으로 잡았습니다. 프론트엔드와 병행 개발이 전제였으니 **계약을 먼저 정해야 통합 비용이 줄어든다**고 판단했습니다. 기능부터 구현하고 형식은 나중에 맞추는 순서는 접었습니다. API 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
       "anchor": "처음-맡은-pl에서-팀이-일할-방식을-먼저-정했습니다",
       "order": 1,
       "searchable": true
@@ -62,16 +64,16 @@
     {
       "id": "6946234b-d914-4cd5-9379-3fe69ff60de2",
       "title": "의견이 갈렸을 때 요구사항으로 판단 기준을 맞췄습니다",
-      "body": "실시간 주식 시세에 WebSocket과 Polling 중 팀 의견이 갈렸습니다. 두 방식의 특징을 조사해 문서로 공유한 뒤 **초저지연·양방향 통신이 필요한가**를 서비스 요구사항과 대조했습니다. Polling을 제안했고, 팀이 이를 받아들였습니다.",
+      "body": "실시간 주식 시세를 두고 WebSocket과 Polling 사이에서 팀 의견이 갈렸습니다. 두 방식의 특징을 조사해 문서로 공유한 뒤 **초저지연·양방향 통신이 필요한가**를 서비스 요구사항과 대조해 Polling을 제안했고 팀이 이를 받아들였습니다.",
       "anchor": "의견이-갈렸을-때-요구사항으로-판단-기준을-맞췄습니다",
       "order": 2,
       "searchable": true
     },
     {
       "id": "0f407cdb-8140-48a9-91ce-19da445eddf5",
-      "title": "이중화는 직접 끊어보고 확인했습니다",
-      "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다. Failover 동안 **읽기는 유지됐고, 쓰기는 수 초 지연된 뒤 재개**됐습니다. 구성 완료를 무중단으로 표현하지 않고 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.",
-      "anchor": "이중화는-직접-끊어보고-확인했습니다",
+      "title": "이중화는 Active DB를 직접 끊어보고 검증했습니다",
+      "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다. Failover 동안 읽기는 유지됐고 쓰기는 수 초 지연된 뒤 재개됐습니다. **구성이 끝났다는 사실만으로 무중단이라고 말할 수는 없어서 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.**",
+      "anchor": "이중화는-active-db를-직접-끊어보고-검증했습니다",
       "order": 3,
       "searchable": true,
       "evidence": [
@@ -83,11 +85,25 @@
       ]
     },
     {
+      "id": "ac01f2d0-e685-43fd-a77b-ae97047909b5",
+      "title": "혼자 아는 상태로 두지 않고 문서로 넘겼습니다",
+      "body": "인프라는 팀원들이 잘 모르는 영역이라 제가 계속 맡았습니다. 그런데 **한 사람이 계속 쥐고 있으면 팀원의 학습 기회를 빼앗는다고 판단해** 분산 환경의 구조와 구축 과정을 기술 문서로 정리해 팀에 넘겼습니다. **설정 순서만 나열하면 읽어도 따라올 수 없다고 보아** VPC·서브넷·IGW·NAT처럼 처음 보는 사람이 막히는 개념은 따로 풀어 썼습니다. 읽는 순서도 앞에 두어 전부 읽지 않아도 흐름을 파악할 수 있게 했습니다.",
+      "anchor": "혼자-아는-상태로-두지-않고-문서로-넘겼습니다",
+      "order": 4,
+      "searchable": true,
+      "links": [
+        {
+          "label": "기술 문서 예시",
+          "url": "https://quick-moustache-fdd.notion.site/Teenyfinny-3b13abaf6e088019a40ad3d9e8da6724"
+        }
+      ]
+    },
+    {
       "id": "aa221ace-dccc-4b02-b3af-edce10843774",
       "title": "운영의 아쉬움을 다음 환경에서 다시 설계했습니다",
-      "body": "Grafana·Loki·Prometheus로 여러 서버를 관측하고 Jenkins·SonarQube로 개발 흐름을 자동화했지만, 운영 도구까지 Public 환경에 둔 점이 남았습니다. 프로젝트가 끝난 뒤 개인 서버를 구축해 **서비스 공개 필요 여부에 따라 접근 경계를 다시 설계**했습니다.",
+      "body": "Grafana·Loki·Prometheus로 여러 서버를 관측하고 Jenkins·SonarQube로 개발 흐름을 자동화했지만 운영 도구까지 Public 환경에 둔 점이 남았습니다. **로그인 기능이 있어도 운영 도구는 내부망에서만 접근하는 것이 맞다**는 생각은 프로젝트가 끝난 뒤에야 들었습니다. 그래서 개인 서버를 구축해 서비스 공개 필요 여부에 따라 접근 경계를 다시 설계했습니다.",
       "anchor": "운영의-아쉬움을-다음-환경에서-다시-설계했습니다",
-      "order": 4,
+      "order": 5,
       "searchable": true
     }
   ]

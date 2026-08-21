@@ -244,17 +244,10 @@ def build_overview_section(project: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def validate_and_assemble(
-    profile: dict,
-    projects: list[dict],
-    cases_by_slug: dict[str, list[dict]],
-    tech_lookup: dict[str, tuple[str, str]],
-) -> dict:
-    """data/ 전체를 순회하며 참조 무결성을 검증하고, DB에 쓸 형태로 조립한다."""
-
-    project_slugs = {p["slug"] for p in projects}
-
-    # 1) Section 전체 목록 (Home Profile Section + 프로젝트별 Overview + H2)
+def _assemble_sections(
+    profile: dict, projects: list[dict]
+) -> tuple[list[dict], dict[str, dict]]:
+    """1) Section 전체 목록 (Home Profile Section + 프로젝트별 Overview + H2)"""
     all_sections: list[dict] = [dict(profile)]
     project_overview_by_slug: dict[str, dict] = {}
     for project in projects:
@@ -264,13 +257,21 @@ def validate_and_assemble(
         all_sections.append(overview)
         for section in project["sections"]:
             all_sections.append({**section, "path": f"/projects/{slug}"})
+    return all_sections, project_overview_by_slug
 
+
+def _validate_unique_section_ids(all_sections: list[dict]) -> set[str]:
     section_ids = {s["id"] for s in all_sections}
     if len(section_ids) != len(all_sections):
         raise ValueError("Section id가 중복됩니다 — data/ 전체에서 id가 유일해야 합니다.")
+    return section_ids
 
-    # 2) BUILDS_ON 검증: buildsOnProjectSlug가 실제 존재하는 프로젝트인지,
-    #    buildsOnEvidenceSectionIds가 실제 존재하는 Section인지 (3.1, 4장 3번)
+
+def _validate_builds_on(
+    projects: list[dict], project_slugs: set[str], section_ids: set[str]
+) -> None:
+    """2) BUILDS_ON 검증: buildsOnProjectSlug가 실제 존재하는 프로젝트인지,
+    buildsOnEvidenceSectionIds가 실제 존재하는 Section인지 (3.1, 4장 3번)"""
     for project in projects:
         target_slug = project.get("buildsOnProjectSlug")
         if target_slug is not None and target_slug not in project_slugs:
@@ -290,48 +291,74 @@ def validate_and_assemble(
                 "buildsOnEvidenceSectionIds만 채워져 있습니다(3.1 근거 불일치)."
             )
 
-    # 3) Case 검증: competencies는 정의된 7개 안에서만, sectionIds는 실제 Section,
-    #    influencedByCaseIds는 실제(다른 프로젝트 포함 가능) Case id (3.1, 4장 2번)
+
+def _collect_unique_case_ids(cases_by_slug: dict[str, list[dict]]) -> set[str]:
     all_case_ids: set[str] = set()
-    for slug, cases in cases_by_slug.items():
+    for cases in cases_by_slug.values():
         for case in cases:
             if case["id"] in all_case_ids:
                 raise ValueError(f"Case id가 중복됩니다: {case['id']}")
             all_case_ids.add(case["id"])
+    return all_case_ids
 
+
+def _validate_case(
+    case: dict,
+    slug: str,
+    section_ids: set[str],
+    all_case_ids: set[str],
+    tech_lookup: dict[str, tuple[str, str]],
+) -> None:
+    if not case.get("sectionIds"):
+        raise ValueError(
+            f"{slug}/{case['id']}({case['title']})는 sectionIds가 비어 있습니다 — "
+            "모든 Case는 최소 하나의 Section을 가져야 합니다(00_기획.md 제약)."
+        )
+    for section_id in case["sectionIds"]:
+        if section_id not in section_ids:
+            raise ValueError(
+                f"{slug}/{case['id']}.sectionIds에 존재하지 않는 Section id "
+                f"'{section_id}'가 있습니다."
+            )
+    unknown_competencies = [
+        c for c in case.get("competencies", []) if c not in COMPETENCIES
+    ]
+    if unknown_competencies:
+        raise ValueError(
+            f"{slug}/{case['id']}가 정의되지 않은 Competency를 참조합니다: "
+            f"{unknown_competencies} (허용 목록: {COMPETENCIES})"
+        )
+    for tech in case.get("usedTechnologies", []):
+        normalize_technology(tech, tech_lookup)  # 존재하지 않으면 여기서 예외 발생
+    for tech in case.get("consideredTechnologies", []):
+        normalize_technology(tech, tech_lookup)
+    for prev_id in case.get("influencedByCaseIds", []):
+        if prev_id not in all_case_ids:
+            raise ValueError(
+                f"{slug}/{case['id']}.influencedByCaseIds가 존재하지 않는 Case id "
+                f"'{prev_id}'를 참조합니다."
+            )
+
+
+def _validate_cases(
+    cases_by_slug: dict[str, list[dict]],
+    section_ids: set[str],
+    tech_lookup: dict[str, tuple[str, str]],
+) -> None:
+    """3) Case 검증: competencies는 정의된 7개 안에서만, sectionIds는 실제 Section,
+    influencedByCaseIds는 실제(다른 프로젝트 포함 가능) Case id (3.1, 4장 2번)"""
+    all_case_ids = _collect_unique_case_ids(cases_by_slug)
     for slug, cases in cases_by_slug.items():
         for case in cases:
-            if not case.get("sectionIds"):
-                raise ValueError(
-                    f"{slug}/{case['id']}({case['title']})는 sectionIds가 비어 있습니다 — "
-                    "모든 Case는 최소 하나의 Section을 가져야 합니다(00_기획.md 제약)."
-                )
-            for section_id in case["sectionIds"]:
-                if section_id not in section_ids:
-                    raise ValueError(
-                        f"{slug}/{case['id']}.sectionIds에 존재하지 않는 Section id "
-                        f"'{section_id}'가 있습니다."
-                    )
-            unknown_competencies = [
-                c for c in case.get("competencies", []) if c not in COMPETENCIES
-            ]
-            if unknown_competencies:
-                raise ValueError(
-                    f"{slug}/{case['id']}가 정의되지 않은 Competency를 참조합니다: "
-                    f"{unknown_competencies} (허용 목록: {COMPETENCIES})"
-                )
-            for tech in case.get("usedTechnologies", []):
-                normalize_technology(tech, tech_lookup)  # 존재하지 않으면 여기서 예외 발생
-            for tech in case.get("consideredTechnologies", []):
-                normalize_technology(tech, tech_lookup)
-            for prev_id in case.get("influencedByCaseIds", []):
-                if prev_id not in all_case_ids:
-                    raise ValueError(
-                        f"{slug}/{case['id']}.influencedByCaseIds가 존재하지 않는 Case id "
-                        f"'{prev_id}'를 참조합니다."
-                    )
+            _validate_case(case, slug, section_ids, all_case_ids, tech_lookup)
 
-    # 4) Technology 검증: Project.technologies도 alias 테이블에 있어야 함
+
+def _collect_canonical_technologies(
+    projects: list[dict],
+    cases_by_slug: dict[str, list[dict]],
+    tech_lookup: dict[str, tuple[str, str]],
+) -> dict[str, str]:
+    """4) Technology 검증: Project.technologies도 alias 테이블에 있어야 함"""
     canonical_technologies: dict[str, str] = {}
     for project in projects:
         for tech in project["technologies"]:
@@ -345,6 +372,27 @@ def validate_and_assemble(
             ]:
                 canonical, category = normalize_technology(tech, tech_lookup)
                 canonical_technologies[canonical] = category
+    return canonical_technologies
+
+
+def validate_and_assemble(
+    profile: dict,
+    projects: list[dict],
+    cases_by_slug: dict[str, list[dict]],
+    tech_lookup: dict[str, tuple[str, str]],
+) -> dict:
+    """data/ 전체를 순회하며 참조 무결성을 검증하고, DB에 쓸 형태로 조립한다."""
+
+    project_slugs = {p["slug"] for p in projects}
+
+    all_sections, project_overview_by_slug = _assemble_sections(profile, projects)
+    section_ids = _validate_unique_section_ids(all_sections)
+
+    _validate_builds_on(projects, project_slugs, section_ids)
+    _validate_cases(cases_by_slug, section_ids, tech_lookup)
+    canonical_technologies = _collect_canonical_technologies(
+        projects, cases_by_slug, tech_lookup
+    )
 
     return {
         "all_sections": all_sections,

@@ -8,7 +8,7 @@ import type { Citation } from "@/lib/api/chat";
  * 프로젝트 Section이면 path가 `/projects/{slug}`라 `/projects/{slug}#{anchor}`가 된다.
  * 같은 탭 내 라우팅이므로 Next.js `Link`를 사용한다.
  */
-export function CitationLink({ citation }: { citation: Citation }) {
+export function CitationLink({ citation }: Readonly<{ citation: Citation }>) {
   const href = `${citation.path}#${citation.anchor}`;
 
   return (

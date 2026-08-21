@@ -92,6 +92,16 @@ export default function HomePage() {
                   성격이 갈린다. */}
               <div className="mt-7 grid grid-cols-2 gap-x-8 gap-y-7 sm:grid-cols-3">
                 <Fact label="학력">{profile.about.education}</Fact>
+                <Fact label="자격·어학" mono>
+                  {/* 여러 줄이라 한 칸 안에서 세로로 쌓는다. 격자의 다른 칸은
+                      한 줄짜리이므로 이 칸만 높아지는데, 행 높이가 아니라 칸 높이만
+                      늘어나므로 옆 칸을 밀지 않는다. */}
+                  <span className="flex flex-col gap-1">
+                    {profile.about.certifications.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </span>
+                </Fact>
                 <Fact label="이메일" mono>
                   {/* 메일 주소는 읽고 끝나는 정보가 아니라 누르는 동선이다. */}
                   <FactLink href={`mailto:${profile.about.email}`}>
@@ -191,11 +201,11 @@ function Fact({
   label,
   mono = false,
   children,
-}: {
+}: Readonly<{
   label: string;
   mono?: boolean;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <div>
       <dt className="text-[11px] leading-none text-zinc-500 dark:text-zinc-400">

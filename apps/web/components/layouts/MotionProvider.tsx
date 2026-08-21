@@ -20,6 +20,8 @@ import type { ReactNode } from "react";
  * children은 Server Component 트리를 그대로 통과시킨다(props로 받은 노드는
  * 클라이언트 경계를 넘어도 서버 렌더링 결과를 유지한다).
  */
-export function MotionProvider({ children }: { children: ReactNode }) {
+export function MotionProvider({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 }

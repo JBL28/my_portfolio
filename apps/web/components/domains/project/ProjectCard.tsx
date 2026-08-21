@@ -22,11 +22,11 @@ import { RichText, parseInlineRichText } from "@/lib/rich-text";
 export function ProjectCard({
   project,
   inherited,
-}: {
+}: Readonly<{
   project: ProjectData;
   /** 이전 레코드가 남긴 문제(= 이전 프로젝트의 bridgeNote). 첫 레코드에는 없다. */
   inherited?: string;
-}) {
+}>) {
   return (
     <article>
       <p className="font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
@@ -95,7 +95,7 @@ export function ProjectCard({
         href={`/projects/${project.slug}`}
         className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-700 transition-colors hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-50"
       >
-        자세히 보기
+        자세히 보기{" "}
         <span aria-hidden="true" className="font-mono text-xs">
           →
         </span>

@@ -12,11 +12,11 @@ export function Container({
   children,
   className,
   size = "wide",
-}: {
+}: Readonly<{
   children: React.ReactNode;
   className?: string;
   size?: keyof typeof MAX_WIDTH;
-}) {
+}>) {
   return (
     <div
       className={cn(

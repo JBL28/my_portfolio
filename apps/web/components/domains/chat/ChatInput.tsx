@@ -10,10 +10,10 @@ import { useState, type FormEvent } from "react";
 export function ChatInput({
   onSend,
   disabled,
-}: {
+}: Readonly<{
   onSend: (content: string) => void;
   disabled?: boolean;
-}) {
+}>) {
   const [value, setValue] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

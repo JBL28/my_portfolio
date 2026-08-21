@@ -13,6 +13,8 @@ export type RepositoryVisibility = "public" | "private" | "unknown";
 export interface ProfileAbout {
   email: string;
   education: string;
+  /** 자격증·어학 점수 목록. 항목마다 줄을 바꿔 표시한다(예: ["정보처리기사(2026.06.15)", "TOEIC 815점(2024.11.09)"]). */
+  certifications: string[];
   github: string;
 }
 
@@ -57,6 +59,11 @@ export interface ProjectImage {
   alt: string;
   /** 갤러리 하단에 표시할 짧은 설명(선택). */
   caption?: string;
+  /**
+   * 캡션 뒤에 "자세히 보기 →"로 붙는 원본 링크(선택). 이미지로는 세부를 읽을 수
+   * 없는 자료(예: 테이블이 30개인 ERD)에서 원본을 직접 열어볼 수 있게 한다.
+   */
+  detailUrl?: string;
 }
 
 /**
@@ -89,6 +96,12 @@ export interface ProjectSectionData {
   searchable: boolean;
   /** 이 문단의 주장을 받치는 증거. 없으면 아무것도 렌더링하지 않는다. */
   evidence?: SectionEvidence[];
+  /**
+   * 이 섹션의 서술을 직접 확인할 수 있는 링크. 본문 끝에 별도 줄로 붙는다 —
+   * 문장 안에 인라인으로 섞으면 링크인지 눈에 걸리지 않아, "여기서 실물을 볼 수
+   * 있다"는 신호가 약해지기 때문이다. 없으면 필드 자체를 두지 않는다.
+   */
+  links?: { label: string; url: string }[];
 }
 
 export interface ProjectData {
@@ -103,6 +116,19 @@ export interface ProjectData {
   repositoryVisibility: RepositoryVisibility;
   /** repositoryVisibility=unknown 등 원문에 안내 문장이 없는 경우 필드 자체가 없다. */
   repositoryNotice?: string;
+  /**
+   * 클릭 가능한 저장소 링크. 이 프로젝트 자체의 저장소가 아닐 수 있다 — 예를 들어
+   * 서버 인프라 프로젝트는 보안상 원본 설정 저장소를 공개하지 않는 대신, 그 서버가
+   * 실제로 운영 중인 다른 공개 저장소를 링크할 수 있다. repositoryNotice와 함께 쓰여
+   * 그 관계를 설명한다.
+   */
+  repositoryUrl?: string;
+  /**
+   * 저장소 링크 옆에 나란히 두는 부가 링크. 저장소는 아니지만 이 프로젝트의
+   * 결과를 직접 확인할 수 있는 곳을 가리킨다 — 예를 들어 이 서버 환경에서 함께
+   * 운영 중인 다른 서비스의 실제 주소.
+   */
+  relatedLinks?: { label: string; url: string }[];
   /**
    * 원문 v1.3 Home에서 이 프로젝트 카드 바로 뒤에 붙는 인용구(다음 프로젝트로의
    * 연결 문장, 예: "> 운영 도구의 Public 노출 문제를 다음 환경에서 다시

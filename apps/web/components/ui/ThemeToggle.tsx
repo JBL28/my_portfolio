@@ -30,6 +30,11 @@ export function ThemeToggle() {
 
   const isDark = mounted && resolvedTheme === "dark";
 
+  let icon: React.ReactNode = <span className="block h-4 w-4" />;
+  if (mounted) {
+    icon = isDark ? <SunIcon /> : <MoonIcon />;
+  }
+
   return (
     <button
       type="button"
@@ -37,15 +42,7 @@ export function ThemeToggle() {
       aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
       className="inline-flex h-8 w-8 items-center justify-center border border-zinc-300 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
     >
-      {mounted ? (
-        isDark ? (
-          <SunIcon />
-        ) : (
-          <MoonIcon />
-        )
-      ) : (
-        <span className="block h-4 w-4" />
-      )}
+      {icon}
     </button>
   );
 }

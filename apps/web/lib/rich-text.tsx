@@ -18,15 +18,20 @@ export function splitParagraphs(text: string): string[] {
 
 /** meta description 등 마크업 없이 텍스트만 필요한 곳에서 강조 표기를 제거한다. */
 export function stripInlineRichText(text: string): string {
-  return text.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/`([^`]+)`/g, "$1");
+  return text.replaceAll(/\*\*([^*]+)\*\*/g, "$1").replaceAll(/`([^`]+)`/g, "$1");
 }
 
 export function parseInlineRichText(text: string): ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean);
-  return parts.map((part, index) => {
+  // key는 배열 인덱스가 아니라 원문 안에서의 시작 위치(문자 오프셋)를 쓴다 —
+  // part마다 고유하고, 순서가 아니라 실제 텍스트 위치에서 나온 값이다.
+  let offset = 0;
+  return parts.map((part) => {
+    const key = offset;
+    offset += part.length;
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={index} className="font-semibold text-foreground">
+        <strong key={key} className="font-semibold text-foreground">
           {/* 굵게 안에 인라인 코드가 중첩될 수 있다(원문 예: "**10개 테이블이
               `files`를 참조**") — 내부를 한 번 더 파싱해 백틱이 그대로 노출되지
               않게 한다. 코드 안에 굵게가 중첩되는 표기는 원문에 없다. */}
@@ -37,29 +42,29 @@ export function parseInlineRichText(text: string): ReactNode[] {
     if (part.startsWith("`") && part.endsWith("`")) {
       return (
         <code
-          key={index}
+          key={key}
           className="rounded-sm bg-zinc-100 px-1 py-0.5 font-mono text-[0.9em] text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
         >
           {part.slice(1, -1)}
         </code>
       );
     }
-    return <Fragment key={index}>{part}</Fragment>;
+    return <Fragment key={key}>{part}</Fragment>;
   });
 }
 
 export function RichText({
   text,
   className,
-}: {
+}: Readonly<{
   text: string;
   className?: string;
-}) {
+}>) {
   const paragraphs = splitParagraphs(text);
   return (
     <div className={className}>
       {paragraphs.map((paragraph, index) => (
-        <p key={index} className={index > 0 ? "mt-3" : undefined}>
+        <p key={paragraph} className={index > 0 ? "mt-3" : undefined}>
           {parseInlineRichText(paragraph)}
         </p>
       ))}

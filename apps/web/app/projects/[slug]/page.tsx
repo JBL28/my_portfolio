@@ -43,7 +43,9 @@ export async function generateMetadata({
  * 메타데이터 spec sheet, sticky), 우측은 흐르는 "서술"(H2 Section 원문). AI 답변의
  * citation은 우측 서술의 anchor로 착지한다.
  */
-export default async function ProjectDetailPage({ params }: ProjectPageProps) {
+export default async function ProjectDetailPage({
+  params,
+}: Readonly<ProjectPageProps>) {
   const { slug } = await params;
   const project = getProjectBySlug(slug);
   if (!project) {

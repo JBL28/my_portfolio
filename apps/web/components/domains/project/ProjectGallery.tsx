@@ -39,10 +39,10 @@ import { DURATION, EASE } from "@/lib/motion";
 export function ProjectGallery({
   images,
   projectName,
-}: {
+}: Readonly<{
   images: ProjectImage[];
   projectName: string;
-}) {
+}>) {
   const trackRef = useRef<HTMLUListElement>(null);
   const [index, setIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -172,7 +172,7 @@ export function ProjectGallery({
     if ("onscrollend" in track) {
       track.addEventListener("scrollend", restore, { once: true });
     } else {
-      window.setTimeout(restore, 400);
+      globalThis.setTimeout(restore, 400);
     }
   }
 
@@ -304,6 +304,12 @@ export function ProjectGallery({
               {image.caption ? (
                 <figcaption className="mt-2.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
                   {image.caption}
+                  {image.detailUrl ? (
+                    <CaptionDetailLink
+                      href={image.detailUrl}
+                      className="hover:text-zinc-900 dark:hover:text-zinc-100"
+                    />
+                  ) : null}
                 </figcaption>
               ) : null}
             </figure>
@@ -320,10 +326,11 @@ export function ProjectGallery({
        */}
       {/* SSR에는 document가 없다. 닫혀 있을 때 portal이 그리는 DOM은 어차피
           없으므로, 이 분기가 서버/클라이언트 첫 렌더의 결과를 어긋나게 하지 않는다. */}
-      {typeof document !== "undefined"
-        ? createPortal(
+      {typeof document === "undefined"
+        ? null
+        : createPortal(
             <AnimatePresence>
-              {zoomedIndex !== null ? (
+              {zoomedIndex === null ? null : (
                 <GalleryLightbox
                   images={images}
                   index={zoomedIndex}
@@ -331,11 +338,10 @@ export function ProjectGallery({
                   onIndexChange={setZoomedIndex}
                   onClose={closeZoom}
                 />
-              ) : null}
+              )}
             </AnimatePresence>,
             document.body,
-          )
-        : null}
+          )}
     </section>
   );
 }
@@ -370,13 +376,13 @@ function GalleryLightbox({
   projectName,
   onIndexChange,
   onClose,
-}: {
+}: Readonly<{
   images: ProjectImage[];
   index: number;
   projectName: string;
   onIndexChange: (next: number) => void;
   onClose: () => void;
-}) {
+}>) {
   const closeRef = useRef<HTMLButtonElement>(null);
   // MotionProvider의 reducedMotion 설정에 기대지 않고 이 자리에서 직접 읽는다
   // (ChatModal과 같은 이유 — 확대 애니메이션은 이 컴포넌트가 스스로 정한다).
@@ -429,8 +435,8 @@ function GalleryLightbox({
         go(-1);
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [go, onClose]);
 
   // 뒤 페이지가 같이 스크롤되면 "덮여 있다"는 감각이 깨진다.
@@ -537,7 +543,9 @@ function GalleryLightbox({
     if (pressRef.current.moved > CLICK_SLOP) {
       return;
     }
-    if ((event.target as HTMLElement).closest("button")) {
+    // 버튼뿐 아니라 링크(캡션의 "자세히 보기")도 제외한다 — 링크를 누른 클릭에
+    // 오버레이가 닫히면 새 탭으로 나가는 동안 보던 이미지가 사라진다.
+    if ((event.target as HTMLElement).closest("button, a")) {
       return;
     }
     onClose();
@@ -630,6 +638,13 @@ function GalleryLightbox({
             {image.caption ? (
               <figcaption className="max-w-2xl shrink-0 text-center text-xs leading-relaxed text-zinc-400">
                 {image.caption}
+                {/* 라이트박스는 항상 검은 배경이라 hover를 밝은 쪽으로 준다. */}
+                {image.detailUrl ? (
+                  <CaptionDetailLink
+                    href={image.detailUrl}
+                    className="hover:text-zinc-100"
+                  />
+                ) : null}
               </figcaption>
             ) : null}
           </motion.figure>
@@ -663,12 +678,12 @@ function GalleryButton({
   disabled,
   onClick,
   children,
-}: {
+}: Readonly<{
   label: string;
   disabled: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <button
       type="button"
@@ -682,6 +697,40 @@ function GalleryButton({
   );
 }
 
+/**
+ * 캡션 뒤에 붙는 원본 링크. 이미지로는 세부를 읽을 수 없는 자료(테이블 30개짜리
+ * ERD 등)에서 원본을 직접 열게 한다.
+ *
+ * 캡션 색을 물려받고 밑줄과 화살표로만 링크임을 알린다 — 캡션은 이미지의 보조
+ * 설명이라 링크를 색으로 튀게 하면 그림보다 먼저 읽힌다. hover 색은 배경이
+ * 다른 두 자리(갤러리/라이트박스)에서 달라야 하므로 호출부가 넘긴다.
+ */
+function CaptionDetailLink({
+  href,
+  className,
+}: Readonly<{ href: string; className?: string }>) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        // 캡션 본문과 탭 정도 간격을 두고, 줄이 바뀔 때 문구가 갈라지지 않게 한다.
+        "group ml-5 inline-flex items-center gap-1 whitespace-nowrap underline decoration-dotted underline-offset-2 transition-colors",
+        className,
+      )}
+    >
+      자세히 보기{" "}
+      <span
+        aria-hidden="true"
+        className="transition-transform group-hover:translate-x-0.5"
+      >
+        →
+      </span>
+    </a>
+  );
+}
+
 /** 검은 배경 위에서만 쓰는 좌우 버튼. 라이트박스는 항상 어두우므로 다크모드
  *  분기 없이 밝은 색 하나로 고정한다. */
 function LightboxButton({
@@ -689,12 +738,12 @@ function LightboxButton({
   disabled,
   onClick,
   children,
-}: {
+}: Readonly<{
   label: string;
   disabled: boolean;
   onClick: () => void;
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <button
       type="button"

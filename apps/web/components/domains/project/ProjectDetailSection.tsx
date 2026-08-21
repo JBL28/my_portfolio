@@ -1,6 +1,7 @@
 import type { ProjectImage, ProjectSectionData } from "@/types/portfolio";
 import { RichText } from "@/lib/rich-text";
 import { SectionEvidenceList } from "@/components/domains/project/SectionEvidence";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { highlightCode } from "@/lib/highlight";
 
 /**
@@ -16,12 +17,12 @@ export async function ProjectDetailSection({
   section,
   images,
   isFirst = false,
-}: {
+}: Readonly<{
   section: ProjectSectionData;
   /** 갤러리 이미지 — 증거가 src로 이 목록을 가리킨다. */
   images: ProjectImage[];
   isFirst?: boolean;
-}) {
+}>) {
   const evidence = section.evidence ?? [];
   // 문법 강조는 서버에서 끝낸다 — Shiki를 클라이언트로 내려보내면 문법 파일까지
   // 번들에 실린다(lib/highlight.ts). 이미지 증거 자리는 null로 비워 인덱스를 맞춘다.
@@ -54,7 +55,9 @@ export async function ProjectDetailSection({
         text={section.body}
         className="mt-4 max-w-xl text-[0.9375rem] leading-[1.9] text-zinc-600 dark:text-zinc-400"
       />
-      {/* 증거는 있을 때만 붙는다 — 없는 문단이 기본이다. */}
+      {/* 증거는 있을 때만 붙는다 — 없는 문단이 기본이다. 근거(오버레이)를 먼저,
+          외부 링크를 그다음에 둔다: 이 사이트 안에서 확인할 수 있는 것을 먼저
+          보여주고, 밖으로 나가는 길은 뒤에 놓는다. */}
       {evidence.length > 0 ? (
         <SectionEvidenceList
           evidence={evidence}
@@ -62,6 +65,18 @@ export async function ProjectDetailSection({
           images={images}
           sectionTitle={section.title}
         />
+      ) : null}
+
+      {/* 근거 링크는 본문 끝에 별도 줄로 둔다 — 문장 안에 섞으면 링크임이 눈에
+          걸리지 않는다. 여럿이면 한 줄에 나란히 놓고 좁은 폭에서 접힌다. */}
+      {section.links?.length ? (
+        <div className="mt-4 flex max-w-xl flex-wrap items-center gap-x-4 gap-y-1">
+          {section.links.map((link) => (
+            <ExternalLink key={link.url} href={link.url}>
+              {link.label}
+            </ExternalLink>
+          ))}
+        </div>
       ) : null}
     </section>
   );
