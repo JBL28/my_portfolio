@@ -2,6 +2,7 @@ import type { ProjectImage, ProjectSectionData } from "@/types/portfolio";
 import { RichText } from "@/lib/rich-text";
 import { SectionEvidenceList } from "@/components/domains/project/SectionEvidence";
 import { ExternalLink } from "@/components/ui/ExternalLink";
+import { InternalLink } from "@/components/ui/InternalLink";
 import { highlightCode } from "@/lib/highlight";
 
 /**
@@ -83,11 +84,17 @@ export async function ProjectDetailSection({
           걸리지 않는다. 여럿이면 한 줄에 나란히 놓고 좁은 폭에서 접힌다. */}
       {section.links?.length ? (
         <div className="mt-4 flex max-w-xl flex-wrap items-center gap-x-4 gap-y-1">
-          {section.links.map((link) => (
-            <ExternalLink key={link.url} href={link.url}>
-              {link.label}
-            </ExternalLink>
-          ))}
+          {section.links.map((link) => {
+            // `/`로 시작하면 이 사이트 안의 경로다 — 새 탭을 열지 않고 그대로 옮겨간다.
+            const Anchor = link.url.startsWith("/")
+              ? InternalLink
+              : ExternalLink;
+            return (
+              <Anchor key={link.url} href={link.url}>
+                {link.label}
+              </Anchor>
+            );
+          })}
         </div>
       ) : null}
     </section>
