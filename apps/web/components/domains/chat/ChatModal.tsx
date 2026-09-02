@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { DURATION, EASE } from "@/lib/motion";
 import { postChatMessage } from "@/lib/api/chat";
@@ -11,6 +11,7 @@ import {
   MessageList,
   type ConversationTurn,
 } from "@/components/domains/chat/MessageList";
+import type { ChatConversation } from "@/components/domains/chat/conversation";
 
 /**
  * 플로팅 모달(01_설계.md 5.2, 5.3). FloatingChatButton이 `next/dynamic`으로
@@ -18,10 +19,16 @@ import {
  * 여기서 참조하는 lib/api/chat, motion 등은 초기 클라이언트 번들에 포함되지
  * 않는다.
  *
- * 대화 이력·로딩 상태는 이 컴포넌트 로컬 useState로만 관리한다(Context·전역
- * 상태관리 라이브러리 금지, 5.3) — 모달이 unmount되면(닫힘) 상태도 함께
- * 사라져야 "모달을 닫으면 대화가 사라진다"는 정책과 구현이 어긋나지 않는다.
- * chatSessionId도 매번 새로 열릴 때(=매번 새로 mount될 때) 생성한다(5.4, 8.2).
+ * 대화 이력·로딩 상태는 이 컴포넌트가 **소유하지 않는다.** 닫아도 대화가 남아야
+ * 하기 때문이다 — 모바일에서는 패널이 화면을 거의 덮어서 citation을 읽으려면 일단
+ * 닫아야 하는데, 그때마다 이력이 날아가면 읽고 돌아올 수가 없다. 그래서 상태는
+ * 닫아도 unmount되지 않는 FloatingChatButton이 들고 여기로 내려준다(conversation
+ * prop). Context나 전역 상태관리 라이브러리를 쓰지 않는다는 5.3의 제약은 그대로다 —
+ * 부모가 useState로 들고 prop으로 내려주는 것뿐이다.
+ *
+ * chatSessionId도 같은 곳에 산다. 이력이 이어지는데 이 값만 재발급되면 한 대화가
+ * trace 상에서 여러 세션으로 쪼개지기 때문이다(8.2). 새로고침하면 트리가 통째로 다시
+ * 만들어지므로 이력과 함께 사라진다 — 저장소에 쓰지 않는 이유다.
  *
  * **비모달(non-modal) 팝오버다.** 답변의 citation 링크를 눌러 본문을 읽고, 다시
  * 다른 링크를 눌러보는 흐름이 성립하려면 채팅이 열려 있는 동안에도 페이지와
@@ -34,22 +41,28 @@ import {
  * 본문을 읽으려고 누른 클릭에 대화가 통째로 사라지면 안 된다.
  *
  * 이 패널은 PageLayout(RootLayout 하위)에 있는 FloatingChatButton이 렌더링하므로
- * App Router의 클라이언트 사이드 내비게이션에서 layout이 유지되는 한 unmount되지
- * 않는다 — citation 링크로 페이지를 옮겨 다녀도 대화 이력이 그대로 남는다.
+ * App Router의 클라이언트 사이드 내비게이션에서 layout이 유지되는 한 대화가 유지된다 —
+ * citation 링크로 페이지를 옮겨 다녀도, 그러다 패널을 닫았다 다시 열어도 그대로다.
  */
 export default function ChatModal({
   onClose,
   panelId,
+  conversation,
 }: Readonly<{
   onClose: () => void;
   panelId: string;
+  conversation: ChatConversation;
 }>) {
-  // crypto.randomUUID()를 직접 쓰지 않는다 - 보안 컨텍스트(HTTPS/localhost)에서만
-  // 존재해서 평문 HTTP로 접근하면 함수가 없어 모달이 통째로 죽는다(lib/uuid.ts).
-  const [chatSessionId] = useState(() => randomUUID());
-  const [turns, setTurns] = useState<ConversationTurn[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    turns,
+    setTurns,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    chatSessionId,
+    setChatSessionId,
+  } = conversation;
   // MotionConfig(components/layouts/MotionProvider.tsx)의 reducedMotion 설정은 이
   // 컴포넌트까지 닿지 않는다 — next/dynamic으로 분리된 청크라 Motion 컨텍스트를
   // 공유하지 못한다(실측: 모션 감소를 켜도 scale 8%, y 12px가 그대로 실행됐다).
@@ -69,6 +82,14 @@ export default function ChatModal({
     setIsLoading(true);
     setError(null);
 
+    // 첫 전송에서 대화의 상관관계 키를 만든다. 이후 턴은 같은 값을 계속 쓰므로
+    // 닫았다 열어도 하나의 대화로 이어진다(8.2). crypto.randomUUID()를 직접 쓰지
+    // 않는 이유는 lib/uuid.ts 참고 — 평문 HTTP에서는 그 함수가 아예 없다.
+    const sessionId = chatSessionId ?? randomUUID();
+    if (chatSessionId === null) {
+      setChatSessionId(sessionId);
+    }
+
     // 2장 "대화 맥락 처리 방식": assistant 턴은 실제 사용된 citations(sectionId
     // + caseId)만 재전송한다 — 렌더링용 전체 Citation(path/anchor/quotedTitle
     // 포함)은 화면 상태(turns)에만 남기고, 요청 바디에는 축소형으로 변환해 담는다.
@@ -86,7 +107,10 @@ export default function ChatModal({
     );
 
     try {
-      const response = await postChatMessage({ chatSessionId, messages });
+      const response = await postChatMessage({
+        chatSessionId: sessionId,
+        messages,
+      });
       setTurns((prev) => [
         ...prev,
         {
@@ -160,8 +184,7 @@ export default function ChatModal({
       </div>
 
       <p className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500 dark:border-zinc-900 dark:bg-zinc-900 dark:text-zinc-400">
-        이 대화는 저장되지 않습니다. 새로고침하거나 창을 닫으면 대화 내용이
-        사라집니다.
+        이 대화는 저장되지 않습니다. 새로고침하면 사라집니다.
       </p>
 
       <MessageList turns={turns} isLoading={isLoading} />

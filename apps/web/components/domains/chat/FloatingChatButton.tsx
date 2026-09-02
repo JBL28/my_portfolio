@@ -6,6 +6,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { DURATION, EASE, ORBIT_DURATION } from "@/lib/motion";
 import { readCookie, subscribeCookies, writeCookie } from "@/lib/cookie";
 import { CometOutline } from "@/components/domains/chat/CometOutline";
+// 타입만 가져온다 — 값 import를 걸면 ChatModal 쪽 코드가 초기 번들로 딸려 와
+// next/dynamic으로 떼어낸 의미가 사라진다(01_설계.md 5.2).
+import type { ConversationTurn } from "@/components/domains/chat/MessageList";
+import type { ChatConversation } from "@/components/domains/chat/conversation";
 
 /**
  * ChatModal은 여기서만, 그것도 `next/dynamic`으로 동적 import한다(01_설계.md 5.2) —
@@ -37,8 +41,9 @@ const CHAT_HINT_COOKIE = "portfolio-chat-hint-seen";
  * 아무 일도 일어나지 않으면 버튼이 고장난 것처럼 보인다.
  *
  * 이 컴포넌트는 PageLayout(RootLayout 하위)에 있으므로 클라이언트 사이드
- * 내비게이션에서 unmount되지 않는다 — 답변의 citation 링크를 눌러 다른 페이지로
- * 이동해도 `isOpen`과 ChatModal의 대화 이력이 그대로 유지된다.
+ * 내비게이션에서 unmount되지 않는다. 그래서 `isOpen`뿐 아니라 **대화 상태도 여기서
+ * 든다** — 모달은 닫힐 때 사라지지만 이 컴포넌트는 남으므로, 대화가 닫기와 페이지
+ * 이동을 견디고 새로고침에서만 초기화된다.
  */
 export function FloatingChatButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,6 +72,37 @@ export function FloatingChatButton() {
    */
   const dismissHint = () => {
     writeCookie(CHAT_HINT_COOKIE, "1");
+  };
+
+  /**
+   * 대화 상태를 ChatModal이 아니라 여기서 든다.
+   *
+   * 모달은 닫힐 때 unmount되므로 상태를 거기 두면 닫는 순간 대화가 사라진다. 모바일
+   * 에서는 패널이 화면을 거의 덮어서 citation을 읽으려면 일단 닫아야 하는데, 그때마다
+   * 이력이 날아가면 읽고 돌아오는 흐름 자체가 성립하지 않는다.
+   *
+   * 이 컴포넌트는 PageLayout(RootLayout 하위)에 있어 클라이언트 사이드 내비게이션에서
+   * unmount되지 않으므로, 여기 둔 값은 **닫기와 페이지 이동을 견디고 새로고침에서만**
+   * 사라진다 — 정확히 우리가 원하는 수명이다. 그래서 localStorage 같은 저장소를 쓰지
+   * 않는다. 하나라도 쓰면 새로고침에도 살아남아 "저장하지 않는다"는 약속이 깨진다.
+   */
+  const [turns, setTurns] = useState<ConversationTurn[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // 첫 전송 때 ChatModal이 만들어 넣는다. 생성을 여기서 하지 않는 이유는 두 가지다 —
+  // 이 컴포넌트는 SSG로 서버에서도 렌더되고, UUID 생성기를 값으로 import하면 그 코드가
+  // 초기 번들에 들어간다.
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+
+  const conversation: ChatConversation = {
+    turns,
+    setTurns,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    chatSessionId,
+    setChatSessionId,
   };
 
   return (
@@ -113,7 +149,11 @@ export function FloatingChatButton() {
 
       <AnimatePresence>
         {isOpen ? (
-          <ChatModal panelId={CHAT_PANEL_ID} onClose={() => setIsOpen(false)} />
+          <ChatModal
+            panelId={CHAT_PANEL_ID}
+            onClose={() => setIsOpen(false)}
+            conversation={conversation}
+          />
         ) : null}
       </AnimatePresence>
     </>
