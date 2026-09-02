@@ -93,7 +93,7 @@ export function ProjectCard({
 
       <Link
         href={`/projects/${project.slug}`}
-        className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-700 transition-colors hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-50"
+        className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
       >
         자세히 보기{" "}
         <span aria-hidden="true" className="font-mono text-xs">
