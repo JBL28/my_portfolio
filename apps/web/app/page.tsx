@@ -115,26 +115,37 @@ export default function HomePage() {
                   </FactLink>
                 </Fact>
               </div>
+            </dl>
 
-              {/* 스택 — 위에서 아래로 앱·상태·운영 순이다. 데이터(profile.skills)의
-                  순서가 곧 그 층위이므로 따로 표시하지 않는다. */}
-              <div className="mt-12 border-t border-zinc-200 dark:border-zinc-800">
-                {profile.skills.map((group) => (
-                  <div
-                    key={group.label}
-                    className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-4 sm:grid-cols-[6rem_minmax(0,1fr)] dark:border-zinc-800"
-                  >
-                    <dt className="pt-1 font-mono text-[11px] tracking-[0.14em] text-zinc-500 uppercase dark:text-zinc-400">
-                      {group.label}
-                    </dt>
-                    <dd className="flex flex-wrap gap-1.5">
-                      {group.items.map((item) => (
-                        <Badge key={item}>{item}</Badge>
-                      ))}
-                    </dd>
-                  </div>
-                ))}
-              </div>
+            {/* 소제목은 About과 같은 처리(mono·대문자·자간 0.22em·아래 괘선)를 쓴다 —
+                같은 층위의 구획 이름이라 서로 다르게 보일 이유가 없다. 다만 h3다:
+                About(h2) 안에 든 하위 구획이므로 문서 구조에서도 한 단계 아래다.
+
+                dl 밖으로 뺀 이유는 마크업 규칙이다 — dl은 dt/dd(와 이를 감싸는 div)만
+                담을 수 있어 제목이 그 안에 들어갈 수 없다. 그래서 사실 목록과 스택을
+                각각 별개의 dl로 나눈다. 원래도 성격이 다른 두 덩어리였다. */}
+            <h3 className="mt-12 border-b border-zinc-200 pb-3 font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400">
+              Skills
+            </h3>
+
+            {/* 스택 — 위에서 아래로 앱·상태·운영 순이다. 데이터(profile.skills)의
+                순서가 곧 그 층위이므로 따로 표시하지 않는다. */}
+            <dl>
+              {profile.skills.map((group) => (
+                <div
+                  key={group.label}
+                  className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-5 border-b border-zinc-200 py-4 sm:grid-cols-[6rem_minmax(0,1fr)] dark:border-zinc-800"
+                >
+                  <dt className="pt-1 font-mono text-[11px] tracking-[0.14em] text-zinc-500 uppercase dark:text-zinc-400">
+                    {group.label}
+                  </dt>
+                  <dd className="flex flex-wrap gap-1.5">
+                    {group.items.map((item) => (
+                      <Badge key={item}>{item}</Badge>
+                    ))}
+                  </dd>
+                </div>
+              ))}
             </dl>
           </Reveal>
         </section>

@@ -12,8 +12,8 @@
     "email": "joungbok8263@gmail.com",
     "education": "전북대학교 컴퓨터공학과",
     "certifications": [
-      "정보처리기사(2026.06.15)",
-      "TOEIC 815점(2024.11.09)"
+      "정보처리기사 (2026.06.15)",
+      "TOEIC 815점 (2024.11.09)"
     ],
     "github": "https://github.com/JBL28"
   },
@@ -23,8 +23,8 @@
       "items": [
         "Java",
         "Spring Boot",
-        "Python",
-        "FastAPI"
+        "Gradle",
+        "JPA"
       ]
     },
     {
@@ -43,11 +43,10 @@
       "label": "Frontend",
       "items": [
         "TypeScript",
-        "Next.js",
         "React",
+        "Next.js",
         "Tailwind CSS",
-        "Motion",
-        "Electron"
+        "Vue.js"
       ]
     },
     {
@@ -62,9 +61,9 @@
     {
       "label": "Infra",
       "items": [
-        "AWS",
-        "Ubuntu",
+        "Linux",
         "Docker",
+        "AWS",
         "Nginx",
         "Jenkins",
         "GitLab CI/CD",
