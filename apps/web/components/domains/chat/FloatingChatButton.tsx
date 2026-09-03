@@ -33,6 +33,14 @@ const CHAT_PANEL_ID = "portfolio-ai-chat-panel";
 const CHAT_HINT_COOKIE = "portfolio-chat-hint-seen";
 
 /**
+ * 안내를 다시 띄우지 않을 기간(초). 3일이 지나면 쿠키가 만료돼 처음 온 것처럼 다시
+ * 뜬다 — 며칠 만에 다시 들른 사람은 채팅이 있다는 사실을 잊었을 가능성이 크고, 안내는
+ * 한 줄짜리라 다시 봐도 방해가 크지 않다. 영구히 눌러 두면 그 사람은 이 사이트에
+ * 챗봇이 있다는 것을 영영 모르고 지나갈 수 있다.
+ */
+const CHAT_HINT_MAX_AGE = 60 * 60 * 24 * 3;
+
+/**
  * 전역 고정 플로팅 버튼(00_기획.md "AI가 그려져있는 플로팅 버튼"). 클릭 시
  * ChatModal을 토글한다.
  *
@@ -71,7 +79,7 @@ export function FloatingChatButton() {
    * 채팅을 연 사람에게 "물어보세요"를 다시 띄울 이유가 없다.
    */
   const dismissHint = () => {
-    writeCookie(CHAT_HINT_COOKIE, "1");
+    writeCookie(CHAT_HINT_COOKIE, "1", CHAT_HINT_MAX_AGE);
   };
 
   /**
