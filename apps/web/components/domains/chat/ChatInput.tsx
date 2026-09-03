@@ -38,7 +38,14 @@ export function ChatInput({
         placeholder="지원자에 대해 질문해보세요"
         disabled={disabled}
         aria-label="채팅 입력"
-        className="h-10 flex-1 border border-zinc-300 bg-transparent px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
+        // max-sm:min-w-0 — 좁은 화면에서 입력·전송이 패널 밖으로 밀려나는 것을 막는다.
+        // input은 size 속성에서 오는 고유 너비(약 20자)를 갖고, flex 항목의 기본
+        // min-width가 auto라 flex-1이어도 그 아래로는 줄어들지 않는다. 패널 폭이
+        // min(24rem, 100vw-3rem)이므로 뷰포트가 좁아지면 입력 최소 너비 + 여백 +
+        // 전송 버튼의 합이 패널을 넘어서고, 남는 만큼이 오른쪽으로 삐져나간다.
+        // 넓은 화면은 패널이 24rem으로 고정돼 이 조건에 걸리지 않으므로 건드리지
+        // 않는다 — min-width만 풀어주는 것이라 보이는 모습도 달라지지 않는다.
+        className="h-10 flex-1 border border-zinc-300 bg-transparent px-3 text-sm text-zinc-900 outline-none max-sm:min-w-0 placeholder:text-zinc-400 focus:border-zinc-900 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
       />
       <button
         type="submit"
