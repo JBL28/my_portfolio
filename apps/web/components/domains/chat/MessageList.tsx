@@ -37,12 +37,6 @@ export function MessageList({
 
   return (
     <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-      {turns.length === 0 && !isLoading ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          지원자의 경험, 역량, 프로젝트에 대해 질문해보세요.
-        </p>
-      ) : null}
-
       {turns.map((turn) => (
         // 새 턴이 어디에 생겼는지 시선을 유도한다. `initial`은 mount 시 1회만
         // 실행되므로 이미 읽고 있던 메시지가 다시 움직이는 일은 없다 — 읽는 중에

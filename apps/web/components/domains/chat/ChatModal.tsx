@@ -7,6 +7,7 @@ import { postChatMessage } from "@/lib/api/chat";
 import { randomUUID } from "@/lib/uuid";
 import type { ChatMessage } from "@/lib/api/chat";
 import { ChatInput } from "@/components/domains/chat/ChatInput";
+import { SuggestedQuestions } from "@/components/domains/chat/SuggestedQuestions";
 import {
   MessageList,
   type ConversationTurn,
@@ -193,6 +194,14 @@ export default function ChatModal({
         <p className="px-4 py-1 text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
+      ) : null}
+
+      {/* 빈 대화에서만 입력창 위에 붙는다 — MessageList가 들고 있던 빈 상태 안내
+          문구를 대신하며, 표시 조건도 그 문구와 같다. 첫 질문이 들어가는 순간
+          사라지고, 대화가 닫기·페이지 이동을 견디므로 다시 열어도 돌아오지 않는다
+          (새로고침해야 초기 상태가 된다). */}
+      {turns.length === 0 && !isLoading ? (
+        <SuggestedQuestions onSelect={handleSend} />
       ) : null}
 
       <ChatInput onSend={handleSend} disabled={isLoading} />
