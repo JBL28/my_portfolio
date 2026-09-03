@@ -7,6 +7,10 @@ import { ORBIT_DURATION } from "@/lib/motion";
 /**
  * 둥근 사각형 테두리를 따라 도는 혜성. 말풍선(ChatHint) 전용이다.
  *
+ * 혜성은 하나만 돈다. 플로팅 버튼(CometRing)은 두 개인데, 그쪽은 지름 48px짜리
+ * 원이라 둘이 반대편에 서야 테두리가 비어 보이지 않는다. 여기 붙는 말풍선·예시
+ * 질문은 그보다 훨씬 길쭉해서 둘을 돌리면 어느 쪽이 머리인지 읽히지 않는다.
+ *
  * 플로팅 버튼의 CometRing과 **의도적으로 별개**다. 원은 요소를 통째로 돌리는 것만으로
  * 테두리 추적이 되지만, 사각형은 돌리면 궤도가 테두리를 벗어난다. 그래서 여기서는
  * 회전 대신 **경로 추적**을 쓴다 — 실제 테두리 모양 그대로의 path를 만들고 점들이 그
@@ -73,18 +77,15 @@ export function CometOutline({
     >
       {path === null
         ? null
-        : COMET_PHASES.map((phase) =>
-            Array.from({ length: TRAIL_LENGTH }, (_, index) => (
-              <CometDot
-                key={`${phase}-${index}`}
-                path={path}
-                progress={progress}
-                phase={phase}
-                index={index}
-                gap={gap}
-              />
-            )),
-          )}
+        : Array.from({ length: TRAIL_LENGTH }, (_, index) => (
+            <CometDot
+              key={index}
+              path={path}
+              progress={progress}
+              index={index}
+              gap={gap}
+            />
+          ))}
     </span>
   );
 }
@@ -100,13 +101,11 @@ export function CometOutline({
 function CometDot({
   path,
   progress,
-  phase,
   index,
   gap,
 }: Readonly<{
   path: string;
   progress: MotionValue<number>;
-  phase: number;
   index: number;
   /** 앞 점과의 간격(둘레 대비). 픽셀 길이에서 환산되어 내려온다. */
   gap: number;
@@ -119,7 +118,7 @@ function CometDot({
 
   const offsetDistance = useTransform(progress, (value) => {
     // 진행 방향의 뒤쪽이므로 뺀다. 음수는 한 바퀴를 더해 0~1로 되돌린다.
-    const position = (((value - phase - index * gap) % 1) + 1) % 1;
+    const position = (((value - index * gap) % 1) + 1) % 1;
     return `${position * 100}%`;
   });
 
@@ -160,9 +159,6 @@ const TAIL_LENGTH = 38;
  */
 const BUTTON_DIAMETER = 48;
 const COMET_SPEED = (Math.PI * BUTTON_DIAMETER) / ORBIT_DURATION;
-
-/** 혜성 두 개를 정확히 반대편에 둔다. */
-const COMET_PHASES = [0, 0.5];
 
 /**
  * 머리(0)에서 꼬리 끝(1)까지의 색. 보라→파랑→청록은 버튼의 혜성과 같은 색이다 —

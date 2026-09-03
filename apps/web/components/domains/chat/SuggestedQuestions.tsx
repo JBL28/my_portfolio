@@ -27,6 +27,13 @@ const ROTATION_INTERVAL = 3000;
 const SLIDE = 12;
 
 /**
+ * hover·focus에서 커지는 배율. 패널 폭을 거의 다 쓰는 가로로 긴 버튼이라 배율이
+ * 조금만 커져도 좌우로 크게 벌어져 채팅 패널 밖으로 넘어간다 — 3%면 "반응했다"는
+ * 신호는 남으면서 테두리 안에 머문다.
+ */
+const HOVER_SCALE = 1.03;
+
+/**
  * 3초마다 오른쪽에서 왼쪽으로 넘어가는 예상 질문. 누르면 그 질문이 그대로 전송된다.
  *
  * 자동으로 도는 대상을 눌러야 하므로 **포인터가 올라가 있거나 포커스가 잡혀 있는
@@ -67,13 +74,18 @@ export function SuggestedQuestions({
           회전을 멈추는 핸들러도 바깥 div가 아니라 버튼에 직접 단다 — 상호작용은
           네이티브 상호작용 요소가 받아야 키보드·터치 경로가 함께 따라온다. 멈추는
           범위가 버튼 안으로 좁아지는데, 어차피 누를 대상이 버튼이라 그게 맞다. */}
-      <button
+      <motion.button
         type="button"
         onClick={() => onSelect(question)}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onFocus={() => setIsPaused(true)}
         onBlur={() => setIsPaused(false)}
+        // 커서를 올리면 커진다. 포커스에도 같이 거는 이유는 키보드로 온 사람에게도
+        // "지금 이게 눌리는 대상"이라는 같은 신호가 필요하기 때문이다.
+        whileHover={prefersReducedMotion ? undefined : { scale: HOVER_SCALE }}
+        whileFocus={prefersReducedMotion ? undefined : { scale: HOVER_SCALE }}
+        transition={{ duration: DURATION.fast, ease: EASE }}
         className="relative flex h-9 w-full items-center rounded-lg border border-zinc-200 px-3 text-left text-sm text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
       >
         {/* 말풍선 테두리를 돌던 것과 같은 혜성 — 둘 다 둥근 사각형이라 그대로 쓴다. */}
@@ -102,7 +114,7 @@ export function SuggestedQuestions({
             </motion.span>
           </AnimatePresence>
         </span>
-      </button>
+      </motion.button>
     </div>
   );
 }
