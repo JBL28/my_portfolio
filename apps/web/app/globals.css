@@ -17,6 +17,16 @@
      근거다"라는 정보를 명도만으로는 전달하기 어렵기 때문이다. 채도를 낮추고
      알파를 얕게 잡아 본문 가독성을 해치지 않는 선에 둔다. */
   --anchor-flash: rgb(34 197 94 / 0.14);
+
+  /* 링크 악센트. 5.5의 무채색 원칙에 대한 두 번째 의도적 예외로, **다음 페이지로
+     넘어가는 링크**에만 쓴다(카드의 "자세히 보기", 상세의 "← About Me"). 값은
+     Pantone 7462 C = R0 G103 B172. 두 링크가 한 쌍으로 읽혀야 하므로 색을 각자
+     들고 있지 않고 여기 한 곳에서 정한다.
+
+     hover는 명도만 움직인다 — 밝은 배경에서는 더 어둡게, 어두운 배경에서는 더
+     밝게(.dark 참고). 기준색 자체는 두 테마가 같다. */
+  --accent: #0067ac;
+  --accent-hover: #00558f;
 }
 
 .dark {
@@ -24,11 +34,19 @@
   --foreground: #f4f4f5;
   /* 어두운 배경에서는 같은 알파가 거의 보이지 않아 조금 올린다. */
   --anchor-flash: rgb(52 211 153 / 0.2);
+  /* 기준색은 그대로 두고 hover만 밝은 쪽으로 뒤집는다. */
+  --accent-hover: #2a8fd0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  /* 라이트박스처럼 테마와 무관하게 늘 어두운 면 위에 놓이는 악센트. 기준색을 그대로
+     쓰면 검은 배경 대비가 3.3:1까지 떨어져 작은 글씨가 읽히지 않는다. 색상은 같고
+     명도만 올린 값이라 같은 악센트로 읽힌다. */
+  --color-accent-bright: #2a8fd0;
   /* 본문·헤드라인: Pretendard Variable (layout.tsx에서 npm 패키지 CSS를 import —
      외부 CDN 없이 self-host). */
   --font-sans:

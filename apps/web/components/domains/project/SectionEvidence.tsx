@@ -96,10 +96,12 @@ export function SectionEvidenceList({
           onMouseLeave={() => setHover(null)}
           onFocus={(event) => openPreview(index, event.currentTarget)}
           onBlur={() => setHover(null)}
-          className="inline-flex cursor-pointer items-center gap-2 border border-zinc-200 px-2.5 py-1.5 font-mono text-[11px] text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 dark:focus-visible:outline-zinc-100"
+          className="inline-flex cursor-pointer items-center gap-2 border border-accent/30 px-2.5 py-1.5 font-mono text-[11px] text-accent transition-colors hover:border-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:focus-visible:outline-zinc-100"
         >
-          {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다. */}
-          <span aria-hidden className="text-zinc-500 dark:text-zinc-400">
+          {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다.
+              라벨과 같은 색 계열이되 한 단계 옅게 둬서, 글리프가 라벨보다 먼저
+              읽히지 않게 한다. */}
+          <span aria-hidden className="text-accent/60">
             {item.kind === "image" ? "▣" : "⟨⟩"}
           </span>
           {item.label}
