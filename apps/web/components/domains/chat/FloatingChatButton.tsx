@@ -182,10 +182,10 @@ export function FloatingChatButton() {
 function ChatHint({
   reducedMotion,
   onDismiss,
-}: {
+}: Readonly<{
   reducedMotion: boolean;
   onDismiss: () => void;
-}) {
+}>) {
   return (
     <motion.div
       // 좁은 화면에서 글이 화면 밖으로 나가지 않도록 최대 폭을 뷰포트에 묶어 둔다.
@@ -286,7 +286,7 @@ const RING_MASK =
  * `spinning`이 false면(prefers-reduced-motion) 회전 없이 정지한 그라데이션 링만
  * 남는다 — 장식을 통째로 걷어내는 대신 움직임만 뺀다.
  */
-function CometRing({ spinning }: { spinning: boolean }) {
+function CometRing({ spinning }: Readonly<{ spinning: boolean }>) {
   return (
     <motion.span
       aria-hidden="true"
@@ -315,7 +315,7 @@ function CometRing({ spinning }: { spinning: boolean }) {
   );
 }
 
-function CometHead({ className }: { className: string }) {
+function CometHead({ className }: Readonly<{ className: string }>) {
   return (
     <span
       className={`absolute h-[3px] w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-200 shadow-[0_0_6px_1px_rgba(167,139,250,0.8)] ${className}`}

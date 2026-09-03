@@ -17,7 +17,9 @@ import { ORBIT_DURATION } from "@/lib/motion";
  * 논다. 그래서 측정한 둘레를 버튼과 같은 속도로 나눠 주기를 구한다. 꼬리 길이도 같은
  * 이유로 둘레 비율이 아니라 픽셀로 고정한다.
  */
-export function CometOutline({ spinning }: { spinning: boolean }) {
+export function CometOutline({
+  spinning,
+}: Readonly<{ spinning: boolean }>) {
   const ref = useRef<HTMLSpanElement>(null);
   const [size, setSize] = useState<{ width: number; height: number } | null>(
     null,
@@ -101,14 +103,14 @@ function CometDot({
   phase,
   index,
   gap,
-}: {
+}: Readonly<{
   path: string;
   progress: MotionValue<number>;
   phase: number;
   index: number;
   /** 앞 점과의 간격(둘레 대비). 픽셀 길이에서 환산되어 내려온다. */
   gap: number;
-}) {
+}>) {
   // 0(머리) ~ 1(꼬리 끝).
   const decay = index / (TRAIL_LENGTH - 1);
   const size = 3.5 - 2.5 * decay;

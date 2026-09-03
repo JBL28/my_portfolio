@@ -59,19 +59,21 @@ export function SuggestedQuestions({
   const question = QUESTIONS[index];
 
   return (
-    <div
-      className="px-3 py-2"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocus={() => setIsPaused(true)}
-      onBlur={() => setIsPaused(false)}
-    >
+    <div className="px-3 py-2">
       {/* 버튼(테두리·혜성)은 계속 떠 있고 **글자만** 바뀐다. 버튼째 교체하면 3초마다
           혜성이 처음부터 다시 돌고 테두리가 깜빡여, 누를 대상이 사라졌다 나타나는
-          것처럼 보인다. */}
+          것처럼 보인다.
+
+          회전을 멈추는 핸들러도 바깥 div가 아니라 버튼에 직접 단다 — 상호작용은
+          네이티브 상호작용 요소가 받아야 키보드·터치 경로가 함께 따라온다. 멈추는
+          범위가 버튼 안으로 좁아지는데, 어차피 누를 대상이 버튼이라 그게 맞다. */}
       <button
         type="button"
         onClick={() => onSelect(question)}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
         className="relative flex h-9 w-full items-center rounded-lg border border-zinc-200 px-3 text-left text-sm text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-100"
       >
         {/* 말풍선 테두리를 돌던 것과 같은 혜성 — 둘 다 둥근 사각형이라 그대로 쓴다. */}
