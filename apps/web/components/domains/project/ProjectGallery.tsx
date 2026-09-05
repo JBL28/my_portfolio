@@ -307,7 +307,7 @@ export function ProjectGallery({
                   {image.detailUrl ? (
                     <CaptionDetailLink
                       href={image.detailUrl}
-                      className="hover:text-zinc-900 dark:hover:text-zinc-100"
+                      className="text-accent hover:text-accent-hover"
                     />
                   ) : null}
                 </figcaption>
@@ -642,7 +642,7 @@ function GalleryLightbox({
                 {image.detailUrl ? (
                   <CaptionDetailLink
                     href={image.detailUrl}
-                    className="hover:text-zinc-100"
+                    className="text-accent-bright hover:text-white"
                   />
                 ) : null}
               </figcaption>
@@ -701,9 +701,12 @@ function GalleryButton({
  * 캡션 뒤에 붙는 원본 링크. 이미지로는 세부를 읽을 수 없는 자료(테이블 30개짜리
  * ERD 등)에서 원본을 직접 열게 한다.
  *
- * 캡션 색을 물려받고 밑줄과 화살표로만 링크임을 알린다 — 캡션은 이미지의 보조
- * 설명이라 링크를 색으로 튀게 하면 그림보다 먼저 읽힌다. hover 색은 배경이
- * 다른 두 자리(갤러리/라이트박스)에서 달라야 하므로 호출부가 넘긴다.
+ * 색은 사이트의 링크 악센트를 따른다(globals.css의 --accent) — 저장소·문서 링크와
+ * 같은 "여기서 다음으로 넘어간다"는 역할이라 같은 색으로 읽혀야 한다.
+ *
+ * 색을 자기가 정하지 않고 호출부에서 받는 이유는 놓이는 자리가 둘이기 때문이다.
+ * 라이트박스는 테마와 무관하게 늘 검은 면이라 기준색이 그대로면 대비가 3.3:1까지
+ * 떨어진다 — 그쪽에는 명도만 올린 --accent-bright를 넘긴다.
  */
 function CaptionDetailLink({
   href,

@@ -53,7 +53,13 @@ export default async function ProjectDetailPage({
   }
 
   const sections = [...project.sections].sort((a, b) => a.order - b.order);
-  const hasGallery = (project.images?.length ?? 0) > 0;
+  // 갤러리에 거는 것과 Section 증거가 찾아 쓰는 것은 같은 목록이다(types/portfolio.ts의
+  // ProjectImage). 증거 전용 이미지는 갤러리에서만 빼고 목록에서는 빼지 않는다 —
+  // 증거가 src로 이 목록을 뒤져 alt·caption을 가져오기 때문이다.
+  const galleryImages = (project.images ?? []).filter(
+    (image) => !image.evidenceOnly,
+  );
+  const hasGallery = galleryImages.length > 0;
 
   return (
     <Container className="py-14 sm:py-20 lg:grid lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-x-20">
@@ -65,7 +71,7 @@ export default async function ProjectDetailPage({
         {hasGallery ? (
           <Reveal from="right">
             <ProjectGallery
-              images={project.images!}
+              images={galleryImages}
               projectName={project.name}
             />
           </Reveal>

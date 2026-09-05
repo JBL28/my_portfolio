@@ -45,10 +45,12 @@ export function ProjectOverview({
       <Reveal>
         {/* 돌아가는 길. 이 레일이 lg에서 sticky이므로 맨 위에 두면 우측 서술을
             끝까지 읽는 동안에도 계속 손에 닿는다. 화살표는 ProjectCard의 "자세히
-            보기 →"와 짝을 이루는 반대 방향 글리프다. */}
+            보기 →"와 짝을 이루는 반대 방향 글리프다. 색도 그 링크와 같은 악센트
+            토큰을 쓴다 — 페이지를 넘나드는 링크라는 같은 역할이라 같은 색이어야
+            한 쌍으로 읽힌다(globals.css의 --accent). */}
         <Link
           href="/#profile"
-          className="group inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="group inline-flex items-center gap-1.5 font-mono text-xs text-accent transition-colors hover:text-accent-hover"
         >
           <span
             aria-hidden="true"

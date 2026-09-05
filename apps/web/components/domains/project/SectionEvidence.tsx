@@ -96,10 +96,12 @@ export function SectionEvidenceList({
           onMouseLeave={() => setHover(null)}
           onFocus={(event) => openPreview(index, event.currentTarget)}
           onBlur={() => setHover(null)}
-          className="inline-flex cursor-pointer items-center gap-2 border border-zinc-200 px-2.5 py-1.5 font-mono text-[11px] text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 dark:focus-visible:outline-zinc-100"
+          className="inline-flex cursor-pointer items-center gap-2 border border-accent/30 px-2.5 py-1.5 font-mono text-[11px] text-accent transition-colors hover:border-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:focus-visible:outline-zinc-100"
         >
-          {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다. */}
-          <span aria-hidden className="text-zinc-500 dark:text-zinc-400">
+          {/* 무엇이 열릴지 종류를 먼저 알린다 — 이미지와 코드는 여는 마음가짐이 다르다.
+              라벨과 같은 색 계열이되 한 단계 옅게 둬서, 글리프가 라벨보다 먼저
+              읽히지 않게 한다. */}
+          <span aria-hidden className="text-accent/60">
             {item.kind === "image" ? "▣" : "⟨⟩"}
           </span>
           {item.label}
@@ -253,7 +255,14 @@ function EvidenceOverlay({
                 ease: EASE,
                 delay: STAGGER * 2,
               }}
-              className="min-h-0 shrink-0 overflow-y-auto lg:w-[22rem] xl:w-[26rem]"
+              /* lg 이상은 가로 배치라 폭이 고정된 열이고(shrink-0 + w-[22rem]),
+                 그 아래에서는 세로 배치라 같은 shrink-0이 **높이**에 걸린다 — 본문이
+                 길면 줄어들지 않고 그대로 늘어나 근거 이미지를 위로 밀어내고,
+                 오버레이가 overflow-hidden이라 밀려난 만큼이 잘려 나간다.
+                 overflow-y-auto도 소용이 없다(박스가 이미 내용만큼 높아서 넘칠 것이
+                 없다). 그래서 세로 배치에서는 높이를 화면의 45%로 묶어 그 안에서
+                 스크롤되게 하고, shrink-0은 가로 배치에만 남긴다. */
+              className="min-h-0 overflow-y-auto max-lg:max-h-[45%] lg:w-[22rem] lg:shrink-0 xl:w-[26rem]"
             >
               <h2 className="text-[1.05rem] leading-snug font-bold text-zinc-100">
                 {sectionTitle}

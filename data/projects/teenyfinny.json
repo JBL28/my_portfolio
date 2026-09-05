@@ -50,13 +50,25 @@
       "src": "/projects/teenyfinny/04_TeenyFinny_Presentation.jpg",
       "alt": "우리FIS 아카데미 프로젝트 발표회에서 기능 구현과 테스트 항목을 발표하는 장면",
       "caption": "최종 발표 — 구현과 테스트, 인프라 설계, AI를 활용한 개발 생산성 개선을 발표했습니다."
+    },
+    {
+      "src": "/projects/teenyfinny/teenyfinny-websocket-vs-polling-2.png",
+      "alt": "발표자료 '현재 프로젝트의 맥락/상황' 슬라이드 — \"투자 기능을 사용하는 타겟은 어린 아이이다\"에 큰 액수가 오가는 다른 서비스 대비 실시간성의 중요성이 덜할 것이라는 판단이 달려 있고, \"요청마다 JPA 쿼리가 필요하다\"에 요청마다 커넥션을 관리해야 한다는 설명이, 마지막에 \"양방향 통신이 필요하지 않다\"가 적힌 화면",
+      "caption": "요구사항 대조 — WebSocket과 Polling 중 무엇이 더 나은 기술인지가 아니라, 이 서비스가 초저지연·양방향 통신을 필요로 하는지를 먼저 물었습니다. 팀에 공유한 자료에서 그 판단 근거를 정리한 장입니다.",
+      "evidenceOnly": true
+    },
+    {
+      "src": "/projects/teenyfinny/teenyfinny-db-failover.png",
+      "alt": "발표자료 '로깅/모니터링 환경 구축으로 구현 사항 검증 — 이중화 DB Failover 검증' 슬라이드 — Channel DB 1, Channel DB 2, ProxySQL 1 세 개의 Grafana 패널이 세로로 놓여 있고, Channel DB 1 그래프만 아래로 급락했다 곧 회복되는 반면 Channel DB 2와 ProxySQL 그래프는 평평하게 유지된 상태",
+      "caption": "Failover 관측 — Active DB를 직접 중단했을 때 Channel DB 1만 끊겼다 돌아오고 Channel DB 2와 ProxySQL은 그대로 유지됐습니다. 구성을 마쳤다는 사실이 아니라 장애 중 각 구성 요소가 어떻게 움직이는지를 지표로 확인한 화면입니다.",
+      "evidenceOnly": true
     }
   ],
   "sections": [
     {
       "id": "916bbd4c-afa6-4274-9fba-8c6bca5782bc",
       "title": "처음 맡은 PL에서 팀이 일할 방식을 먼저 정했습니다",
-      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리를 핵심으로 잡았습니다. 프론트엔드와 병행 개발이 전제였으니 **계약을 먼저 정해야 통합 비용이 줄어든다**고 판단했습니다. 기능부터 구현하고 형식은 나중에 맞추는 순서는 접었습니다. API 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
+      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리에 집중했습니다.\n\n프론트엔드와 병행 개발이 전제였으니 **계약을 먼저 정해야 통합 비용이 줄어든다**고 판단했습니다.\n\nAPI 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
       "anchor": "처음-맡은-pl에서-팀이-일할-방식을-먼저-정했습니다",
       "order": 1,
       "searchable": true
@@ -64,15 +76,22 @@
     {
       "id": "6946234b-d914-4cd5-9379-3fe69ff60de2",
       "title": "의견이 갈렸을 때 요구사항으로 판단 기준을 맞췄습니다",
-      "body": "실시간 주식 시세를 두고 WebSocket과 Polling 사이에서 팀 의견이 갈렸습니다. 두 방식의 특징을 조사해 문서로 공유한 뒤 **초저지연·양방향 통신이 필요한가**를 서비스 요구사항과 대조해 Polling을 제안했고 팀이 이를 받아들였습니다.",
+      "body": "실시간 주식 시세를 두고 WebSocket과 Polling 사이에서 팀 의견이 갈렸습니다.\n\n두 방식의 특징을 조사해 문서로 공유한 뒤 **초저지연·양방향 통신이 필요한가**를 서비스 요구사항과 대조해 Polling을 제안했고 팀이 이를 받아들였습니다.",
       "anchor": "의견이-갈렸을-때-요구사항으로-판단-기준을-맞췄습니다",
       "order": 2,
-      "searchable": true
+      "searchable": true,
+      "evidence": [
+        {
+          "kind": "image",
+          "label": "요구사항과 대조한 판단 근거",
+          "src": "/projects/teenyfinny/teenyfinny-websocket-vs-polling-2.png"
+        }
+      ]
     },
     {
       "id": "0f407cdb-8140-48a9-91ce-19da445eddf5",
       "title": "이중화는 Active DB를 직접 끊어보고 검증했습니다",
-      "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다. Failover 동안 읽기는 유지됐고 쓰기는 수 초 지연된 뒤 재개됐습니다. **구성이 끝났다는 사실만으로 무중단이라고 말할 수는 없어서 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.**",
+      "body": "MySQL 이중화와 ProxySQL·Orchestrator 기반 Failover를 구성한 뒤 Active DB를 직접 중단했습니다.\n\nFailover 동안 읽기는 유지됐고 쓰기는 수 초 지연된 뒤 재개됐습니다.\n\n**구성이 끝났다는 사실만으로 무중단이라고 말할 수는 없어서 읽기와 쓰기가 실제 장애에서 어떻게 달라지는지 구분해 확인했습니다.**",
       "anchor": "이중화는-active-db를-직접-끊어보고-검증했습니다",
       "order": 3,
       "searchable": true,
@@ -81,13 +100,18 @@
           "kind": "image",
           "label": "이중화 구성도",
           "src": "/projects/teenyfinny/02_TeenyFinny_Infra.png"
+        },
+        {
+          "kind": "image",
+          "label": "Failover 중 DB·ProxySQL 지표",
+          "src": "/projects/teenyfinny/teenyfinny-db-failover.png"
         }
       ]
     },
     {
       "id": "ac01f2d0-e685-43fd-a77b-ae97047909b5",
       "title": "혼자 아는 상태로 두지 않고 문서로 넘겼습니다",
-      "body": "인프라는 팀원들이 잘 모르는 영역이라 제가 계속 맡았습니다. 그런데 **한 사람이 계속 쥐고 있으면 팀원의 학습 기회를 빼앗는다고 판단해** 분산 환경의 구조와 구축 과정을 기술 문서로 정리해 팀에 넘겼습니다. **설정 순서만 나열하면 읽어도 따라올 수 없다고 보아** VPC·서브넷·IGW·NAT처럼 처음 보는 사람이 막히는 개념은 따로 풀어 썼습니다. 읽는 순서도 앞에 두어 전부 읽지 않아도 흐름을 파악할 수 있게 했습니다.",
+      "body": "인프라는 팀원들이 잘 모르는 영역이라 제가 맡았습니다. 그런데 **한 사람이 계속 쥐고 있으면 팀원의 학습 기회를 빼앗는다고 판단해** 분산 환경의 구조와 구축 과정을 기술 문서로 정리해 팀에 넘겼습니다.\n\n**설정 순서만 나열하면 읽어도 따라올 수 없다고 보아** 팀에 넘기는 문서는 같은 틀로 썼습니다. VPC·서브넷·IGW·NAT처럼 처음 보는 사람이 막히는 개념은 본문에서 따로 풀어 썼습니다. 읽는 순서를 맨 앞에 두어 전부 읽지 않아도 흐름을 파악할 수 있게 했습니다.\n\n아래 문서는 그렇게 남긴 것 중 하나입니다.",
       "anchor": "혼자-아는-상태로-두지-않고-문서로-넘겼습니다",
       "order": 4,
       "searchable": true,
@@ -101,10 +125,16 @@
     {
       "id": "aa221ace-dccc-4b02-b3af-edce10843774",
       "title": "운영의 아쉬움을 다음 환경에서 다시 설계했습니다",
-      "body": "Grafana·Loki·Prometheus로 여러 서버를 관측하고 Jenkins·SonarQube로 개발 흐름을 자동화했지만 운영 도구까지 Public 환경에 둔 점이 남았습니다. **로그인 기능이 있어도 운영 도구는 내부망에서만 접근하는 것이 맞다**는 생각은 프로젝트가 끝난 뒤에야 들었습니다. 그래서 개인 서버를 구축해 서비스 공개 필요 여부에 따라 접근 경계를 다시 설계했습니다.",
+      "body": "Grafana·Loki·Prometheus로 여러 서버를 관측하고 Jenkins·SonarQube로 개발 흐름을 자동화했지만 운영 도구까지 Public 환경에 둔 점이 남았습니다. **로그인 기능이 있어도 운영 도구는 내부망에서만 접근하는 것이 맞다**는 생각은 프로젝트가 끝난 뒤에야 들었습니다.\n\n그래서 개인 서버를 구축해 서비스 공개 필요 여부에 따라 접근 경계를 다시 설계했습니다.",
       "anchor": "운영의-아쉬움을-다음-환경에서-다시-설계했습니다",
       "order": 5,
-      "searchable": true
+      "searchable": true,
+      "links": [
+        {
+          "label": "개인 서버에서 다시 설계한 접근 경계",
+          "url": "/projects/home-server"
+        }
+      ]
     }
   ]
 }
