@@ -181,5 +181,21 @@
     "aliases": [
       "Arize Phoenix"
     ]
+  },
+  {
+    "canonical": "K3s",
+    "category": "Container Orchestration",
+    "aliases": [
+      "k3s",
+      "Kubernetes",
+      "쿠버네티스"
+    ]
+  },
+  {
+    "canonical": "k6",
+    "category": "Load Testing",
+    "aliases": [
+      "K6"
+    ]
   }
 ]

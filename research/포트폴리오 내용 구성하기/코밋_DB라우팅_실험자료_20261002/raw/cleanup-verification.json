@@ -1,0 +1,17 @@
+{
+  "time": "2026-10-02T07:57:24.381132+00:00",
+  "test_namespace_deleted": true,
+  "credentials_deleted": true,
+  "test_schema_count": 0,
+  "logging_restored": {
+    "service-db-1": "-1",
+    "service-db-2": "-1",
+    "service-db-3": "-1"
+  },
+  "synchronous_commit": "remote_apply",
+  "synchronous_standby_names": "ANY 2 (\"service-db-2\",\"service-db-3\")",
+  "hpa_spec_restored": true,
+  "hpa_min": 2,
+  "hpa_max": 5,
+  "test_containers_remaining": ""
+}

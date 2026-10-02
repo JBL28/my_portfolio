@@ -1,0 +1,184 @@
+{
+  "mixed_transactions": 18000,
+  "mixed_reads": 16200,
+  "mixed_writes": 1800,
+  "routing_mismatches": 0,
+  "errors": 0,
+  "normal_consistency": [
+    {
+      "phase": "consistency-idle",
+      "pairs": 1000,
+      "stale": 0,
+      "routes": {
+        "10.42.0.19/32": 500,
+        "10.42.0.26/32": 500
+      },
+      "write_p50_ms": 3.222479,
+      "write_p95_ms": 3.92946195,
+      "read_p95_ms": 0.8921834499999998
+    },
+    {
+      "phase": "consistency-loaded",
+      "pairs": 1000,
+      "stale": 0,
+      "routes": {
+        "10.42.0.19/32": 500,
+        "10.42.0.26/32": 500
+      },
+      "write_p50_ms": 2.9646685,
+      "write_p95_ms": 4.1637055,
+      "read_p95_ms": 0.6899979499999996
+    }
+  ],
+  "pool_trials": [
+    {
+      "cycle": 1,
+      "connections": {
+        "10.42.0.26/32": 6,
+        "10.42.0.19/32": 14
+      },
+      "reads": {
+        "10.42.0.19/32": 883,
+        "10.42.0.26/32": 17
+      },
+      "active_read_backends": 9,
+      "top_two_backend_reads": 649
+    },
+    {
+      "cycle": 2,
+      "connections": {
+        "10.42.0.19/32": 12,
+        "10.42.0.26/32": 8
+      },
+      "reads": {
+        "10.42.0.19/32": 814,
+        "10.42.0.26/32": 86
+      },
+      "active_read_backends": 8,
+      "top_two_backend_reads": 784
+    },
+    {
+      "cycle": 3,
+      "connections": {
+        "10.42.0.26/32": 9,
+        "10.42.0.19/32": 11
+      },
+      "reads": {
+        "10.42.0.26/32": 869,
+        "10.42.0.19/32": 31
+      },
+      "active_read_backends": 5,
+      "top_two_backend_reads": 835
+    }
+  ],
+  "delay_groups": [
+    {
+      "timer_ms": 500,
+      "mode": "remote_apply",
+      "trials": 5,
+      "write_median_ms": 988.255908,
+      "write_min_ms": 977.845288,
+      "write_max_ms": 1070.732007,
+      "resume_median_ms": 997.5759163498878,
+      "stale_reads": 0,
+      "reads": 100
+    },
+    {
+      "timer_ms": 500,
+      "mode": "local",
+      "trials": 5,
+      "write_median_ms": 2.244938,
+      "write_min_ms": 1.851803,
+      "write_max_ms": 3.474036,
+      "resume_median_ms": 985.7882680371404,
+      "stale_reads": 100,
+      "reads": 100
+    },
+    {
+      "timer_ms": 2000,
+      "mode": "remote_apply",
+      "trials": 5,
+      "write_median_ms": 2490.138208,
+      "write_min_ms": 2471.400796,
+      "write_max_ms": 2520.747216,
+      "resume_median_ms": 2499.2143069393933,
+      "stale_reads": 0,
+      "reads": 100
+    },
+    {
+      "timer_ms": 2000,
+      "mode": "local",
+      "trials": 5,
+      "write_median_ms": 2.169257,
+      "write_min_ms": 1.776803,
+      "write_max_ms": 2.465518,
+      "resume_median_ms": 2491.94187996909,
+      "stale_reads": 100,
+      "reads": 100
+    }
+  ],
+  "api_trials": [
+    {
+      "label": "api-r1-10",
+      "requests": 600,
+      "valid": 600,
+      "target_rps": 10,
+      "p50_ms": 20.09083959273994,
+      "p95_ms": 49.26939227152609,
+      "p99_ms": 156.76066560670716,
+      "scheduler_drops": 0,
+      "max_schedule_lag_ms": 2.6039457879960537,
+      "stats_delta": {
+        "service-db-1": {
+          "seq_scan": 0,
+          "idx_scan": 0,
+          "seq_tup_read": 0,
+          "idx_tup_fetch": 0
+        },
+        "service-db-2": {
+          "seq_scan": 570,
+          "idx_scan": 0,
+          "seq_tup_read": 8550,
+          "idx_tup_fetch": 0
+        },
+        "service-db-3": {
+          "seq_scan": 636,
+          "idx_scan": 0,
+          "seq_tup_read": 9540,
+          "idx_tup_fetch": 0
+        }
+      }
+    },
+    {
+      "label": "api-r1-50",
+      "requests": 3000,
+      "valid": 2997,
+      "target_rps": 50,
+      "p50_ms": 49.97176770120859,
+      "p95_ms": 275.8099022554227,
+      "p99_ms": 467.84696511458435,
+      "scheduler_drops": 0,
+      "max_schedule_lag_ms": 108.50992426276207,
+      "stats_delta": {
+        "service-db-1": {
+          "seq_scan": 1,
+          "idx_scan": 0,
+          "seq_tup_read": 15,
+          "idx_tup_fetch": 0
+        },
+        "service-db-2": {
+          "seq_scan": 2688,
+          "idx_scan": 3,
+          "seq_tup_read": 40320,
+          "idx_tup_fetch": 3
+        },
+        "service-db-3": {
+          "seq_scan": 3260,
+          "idx_scan": 0,
+          "seq_tup_read": 48900,
+          "idx_tup_fetch": 0
+        }
+      }
+    }
+  ]
+}

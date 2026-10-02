@@ -1,0 +1,43 @@
+{
+  "apiVersion": "postgresql.cnpg.io/v1",
+  "kind": "Cluster",
+  "metadata": {
+    "name": "routing-lab",
+    "namespace": "komit-routing-lab-20261002"
+  },
+  "spec": {
+    "instances": 3,
+    "imageName": "ghcr.io/cloudnative-pg/postgresql:16.15-minimal-trixie",
+    "bootstrap": {
+      "initdb": {
+        "database": "lab",
+        "owner": "lab"
+      }
+    },
+    "storage": {
+      "size": "1Gi"
+    },
+    "resources": {
+      "requests": {
+        "cpu": "50m",
+        "memory": "128Mi"
+      },
+      "limits": {
+        "memory": "512Mi"
+      }
+    },
+    "postgresql": {
+      "parameters": {
+        "synchronous_commit": "remote_apply",
+        "shared_buffers": "64MB",
+        "max_connections": "100"
+      },
+      "synchronous": {
+        "number": 2,
+        "method": "any",
+        "dataDurability": "preferred",
+        "failoverQuorum": false
+      }
+    }
+  }
+}

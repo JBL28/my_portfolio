@@ -1,0 +1,5 @@
+{
+  "label": "api-r1-50",
+  "reason": "error >= 1%, p95 > 1000 ms, or pod restarted",
+  "restarts_added": 1
+}

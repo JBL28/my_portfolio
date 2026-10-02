@@ -1,0 +1,94 @@
+{
+  "sync_commit": "remote_apply",
+  "sync_names": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")",
+  "replication": "routing-lab-2|quorum|streaming\nrouting-lab-3|quorum|streaming",
+  "ro_endpoints": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "addressType": "IPv4",
+        "apiVersion": "discovery.k8s.io/v1",
+        "endpoints": [
+          {
+            "addresses": [
+              "10.42.0.128"
+            ],
+            "conditions": {
+              "ready": true,
+              "serving": true,
+              "terminating": false
+            },
+            "nodeName": "ip-172-26-14-234",
+            "targetRef": {
+              "kind": "Pod",
+              "name": "routing-lab-2",
+              "namespace": "komit-routing-lab-20261002",
+              "uid": "5e1112bc-ae16-4ce7-a43a-89bb947892d6"
+            }
+          },
+          {
+            "addresses": [
+              "10.42.0.131"
+            ],
+            "conditions": {
+              "ready": true,
+              "serving": true,
+              "terminating": false
+            },
+            "nodeName": "ip-172-26-14-234",
+            "targetRef": {
+              "kind": "Pod",
+              "name": "routing-lab-3",
+              "namespace": "komit-routing-lab-20261002",
+              "uid": "b19b4b4f-bd9a-4aa9-95dc-044b4ffdb42d"
+            }
+          }
+        ],
+        "kind": "EndpointSlice",
+        "metadata": {
+          "annotations": {
+            "endpoints.kubernetes.io/last-change-trigger-time": "2026-10-02T07:20:16Z"
+          },
+          "creationTimestamp": "2026-10-02T07:19:10Z",
+          "generateName": "routing-lab-ro-",
+          "generation": 5,
+          "labels": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/instance": "routing-lab",
+            "app.kubernetes.io/managed-by": "cloudnative-pg",
+            "app.kubernetes.io/name": "postgresql",
+            "app.kubernetes.io/version": "16",
+            "cnpg.io/cluster": "routing-lab",
+            "endpointslice.kubernetes.io/managed-by": "endpointslice-controller.k8s.io",
+            "kubernetes.io/service-name": "routing-lab-ro"
+          },
+          "name": "routing-lab-ro-dvbw4",
+          "namespace": "komit-routing-lab-20261002",
+          "ownerReferences": [
+            {
+              "apiVersion": "v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Service",
+              "name": "routing-lab-ro",
+              "uid": "5c13bc68-65dd-49ed-95ce-d9ed5c3b1788"
+            }
+          ],
+          "resourceVersion": "3432170",
+          "uid": "db2ac1a6-aecf-4c7e-9ca6-c1b4cee5124e"
+        },
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP"
+          }
+        ]
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  }
+}

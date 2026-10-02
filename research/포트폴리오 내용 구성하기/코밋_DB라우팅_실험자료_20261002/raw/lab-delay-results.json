@@ -1,0 +1,498 @@
+{
+  "baseline": [
+    {
+      "phase": "lab-baseline",
+      "pairs": 1000,
+      "stale": 0,
+      "routes": {
+        "10.42.0.128/32": 500,
+        "10.42.0.131/32": 500
+      },
+      "write_p50_ms": 3.404612,
+      "write_p95_ms": 4.3263247,
+      "read_p95_ms": 1.1175358499999999
+    }
+  ],
+  "trials": [
+    {
+      "stale": 0,
+      "write_ms": 986.515967,
+      "expected": 105002,
+      "event": "RESULT",
+      "before": 1110,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 500,
+      "repeat": 1,
+      "actual_resume_complete_ms": 995.358016807586,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:39:54.410678+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 3.341774,
+      "expected": 105003,
+      "event": "RESULT",
+      "before": 105002,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 500,
+      "repeat": 1,
+      "actual_resume_complete_ms": 1012.2304819524288,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:39:58.088469+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 3.474036,
+      "expected": 105005,
+      "event": "RESULT",
+      "before": 105003,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 500,
+      "repeat": 2,
+      "actual_resume_complete_ms": 1004.2682704515755,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:01.418795+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 997.410465,
+      "expected": 105004,
+      "event": "RESULT",
+      "before": 105005,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 500,
+      "repeat": 2,
+      "actual_resume_complete_ms": 1009.6360370516777,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:04.545099+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 988.255908,
+      "expected": 105006,
+      "event": "RESULT",
+      "before": 105004,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 500,
+      "repeat": 3,
+      "actual_resume_complete_ms": 997.5759163498878,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:08.097539+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 2.244938,
+      "expected": 105007,
+      "event": "RESULT",
+      "before": 105006,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 500,
+      "repeat": 3,
+      "actual_resume_complete_ms": 985.7700439170003,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:10.969395+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 1.851803,
+      "expected": 105009,
+      "event": "RESULT",
+      "before": 105007,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 500,
+      "repeat": 4,
+      "actual_resume_complete_ms": 979.177821893245,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:14.096019+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 1070.732007,
+      "expected": 105008,
+      "event": "RESULT",
+      "before": 105009,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 500,
+      "repeat": 4,
+      "actual_resume_complete_ms": 1080.2342011593282,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:17.499903+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 977.845288,
+      "expected": 105010,
+      "event": "RESULT",
+      "before": 105008,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 500,
+      "repeat": 5,
+      "actual_resume_complete_ms": 987.2609530575573,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:20.415388+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 2.055186,
+      "expected": 105011,
+      "event": "RESULT",
+      "before": 105010,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 500,
+      "repeat": 5,
+      "actual_resume_complete_ms": 985.7882680371404,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:23.397252+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 2520.747216,
+      "expected": 120002,
+      "event": "RESULT",
+      "before": 105011,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 2000,
+      "repeat": 1,
+      "actual_resume_complete_ms": 2530.248167924583,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:27.949206+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 2.465518,
+      "expected": 120003,
+      "event": "RESULT",
+      "before": 120002,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 2000,
+      "repeat": 1,
+      "actual_resume_complete_ms": 2485.958379227668,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:32.391903+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 1.8294,
+      "expected": 120005,
+      "event": "RESULT",
+      "before": 120003,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 2000,
+      "repeat": 2,
+      "actual_resume_complete_ms": 2563.4947973303497,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:36.974795+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 2491.78545,
+      "expected": 120004,
+      "event": "RESULT",
+      "before": 120005,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 2000,
+      "repeat": 2,
+      "actual_resume_complete_ms": 2500.225349329412,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:41.701877+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 2487.19297,
+      "expected": 120006,
+      "event": "RESULT",
+      "before": 120004,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 2000,
+      "repeat": 3,
+      "actual_resume_complete_ms": 2497.7187933400273,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:46.123434+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 2.336411,
+      "expected": 120007,
+      "event": "RESULT",
+      "before": 120006,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 2000,
+      "repeat": 3,
+      "actual_resume_complete_ms": 2489.6764187142253,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:50.906521+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 1.776803,
+      "expected": 120009,
+      "event": "RESULT",
+      "before": 120007,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 2000,
+      "repeat": 4,
+      "actual_resume_complete_ms": 2571.9616170972586,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:40:55.821783+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 2490.138208,
+      "expected": 120008,
+      "event": "RESULT",
+      "before": 120009,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 2000,
+      "repeat": 4,
+      "actual_resume_complete_ms": 2499.2143069393933,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:41:00.656809+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 0,
+      "write_ms": 2471.400796,
+      "expected": 120010,
+      "event": "RESULT",
+      "before": 120008,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "remote_apply",
+      "delay_ms": 2000,
+      "repeat": 5,
+      "actual_resume_complete_ms": 2479.479650966823,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:41:05.185000+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    },
+    {
+      "stale": 20,
+      "write_ms": 2.169257,
+      "expected": 120011,
+      "event": "RESULT",
+      "before": 120010,
+      "write_primary": true,
+      "reads": 20,
+      "routes": {
+        "10.42.0.128/32": 10,
+        "10.42.0.131/32": 10
+      },
+      "mode": "local",
+      "delay_ms": 2000,
+      "repeat": 5,
+      "actual_resume_complete_ms": 2491.94187996909,
+      "after_resume": {
+        "stale": 0,
+        "event": "VERIFIED",
+        "reads": 20
+      },
+      "time": "2026-10-02T07:41:09.770776+00:00",
+      "quorum": "ANY 2 (\"routing-lab-2\",\"routing-lab-3\")"
+    }
+  ]
+}

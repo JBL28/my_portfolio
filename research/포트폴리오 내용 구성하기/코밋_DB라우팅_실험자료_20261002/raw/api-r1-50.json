@@ -1,0 +1,189 @@
+{
+  "label": "api-r1-50",
+  "start": "2026-10-02T07:47:13.443399+00:00",
+  "stop": "2026-10-02T07:48:13.456108+00:00",
+  "target_rps": 50,
+  "duration_s": 60,
+  "elapsed_s": 60.012685178313404,
+  "requests": 3000,
+  "valid": 2997,
+  "scheduler_drops": 0,
+  "statuses": {
+    "200": 2997,
+    "0": 3
+  },
+  "p50_ms": 49.97176770120859,
+  "p95_ms": 275.8099022554227,
+  "p99_ms": 467.84696511458435,
+  "max_schedule_lag_ms": 108.50992426276207,
+  "stats_before": {
+    "service-db-1": {
+      "seq_scan": 129,
+      "idx_scan": 295,
+      "seq_tup_read": 992,
+      "idx_tup_fetch": 292
+    },
+    "service-db-2": {
+      "seq_scan": 3683,
+      "idx_scan": 15010,
+      "seq_tup_read": 45178,
+      "idx_tup_fetch": 14194
+    },
+    "service-db-3": {
+      "seq_scan": 3533,
+      "idx_scan": 16040,
+      "seq_tup_read": 43165,
+      "idx_tup_fetch": 15225
+    }
+  },
+  "stats_after": {
+    "service-db-1": {
+      "seq_scan": 130,
+      "idx_scan": 295,
+      "seq_tup_read": 1007,
+      "idx_tup_fetch": 292
+    },
+    "service-db-2": {
+      "seq_scan": 6371,
+      "idx_scan": 15013,
+      "seq_tup_read": 85498,
+      "idx_tup_fetch": 14197
+    },
+    "service-db-3": {
+      "seq_scan": 6793,
+      "idx_scan": 16040,
+      "seq_tup_read": 92065,
+      "idx_tup_fetch": 15225
+    }
+  },
+  "stats_delta": {
+    "service-db-1": {
+      "seq_scan": 1,
+      "idx_scan": 0,
+      "seq_tup_read": 15,
+      "idx_tup_fetch": 0
+    },
+    "service-db-2": {
+      "seq_scan": 2688,
+      "idx_scan": 3,
+      "seq_tup_read": 40320,
+      "idx_tup_fetch": 3
+    },
+    "service-db-3": {
+      "seq_scan": 3260,
+      "idx_scan": 0,
+      "seq_tup_read": 48900,
+      "idx_tup_fetch": 0
+    }
+  },
+  "state_before": [
+    {
+      "name": "service-7f6d5cdd48-2tpst",
+      "ip": "10.42.0.135",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-8bgtz",
+      "ip": "10.42.0.116",
+      "ready": true,
+      "restarts": 1,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:45:22Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-cjbst",
+      "ip": "10.42.0.136",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-dxd2d",
+      "ip": "10.42.0.16",
+      "ready": true,
+      "restarts": 15,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:12:40Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-f8q2h",
+      "ip": "10.42.0.134",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    }
+  ],
+  "state_after": [
+    {
+      "name": "service-7f6d5cdd48-2tpst",
+      "ip": "10.42.0.135",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-8bgtz",
+      "ip": "10.42.0.116",
+      "ready": false,
+      "restarts": 1,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:48:10Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-cjbst",
+      "ip": "10.42.0.136",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-dxd2d",
+      "ip": "10.42.0.16",
+      "ready": false,
+      "restarts": 16,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:47:25Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-f8q2h",
+      "ip": "10.42.0.134",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    }
+  ]
+}
