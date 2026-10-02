@@ -67,12 +67,22 @@
   "sections": [
     {
       "id": "916bbd4c-afa6-4274-9fba-8c6bca5782bc",
-      "title": "처음 맡은 PL에서 팀이 일할 방식을 먼저 정했습니다",
-      "category": "communication",
-      "body": "PL을 맡은 뒤 역할부터 조사해 문서·산출물 관리와 기술 이슈 관리에 집중했습니다.\n\n프론트엔드와 병행 개발이 전제였으니 **계약을 먼저 정해야 통합 비용이 줄어든다**고 판단했습니다.\n\nAPI 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
+      "title": "PL로서 REST API 명세와 공통 구현 기준을 마련했습니다",
+      "category": "backend",
+      "body": "처음 PL을 맡아 역할을 조사한 뒤 문서·산출물 관리와 기술 이슈 관리에 집중했습니다. 프론트엔드와 병행 개발이 전제였으니 **계약을 먼저 정해야 통합 비용이 줄어든다고 판단했습니다.**\n\nREST API 명세에서 HTTP 상태 코드와 성공·실패 응답 형식을 정하고, 공통 응답·오류 코드·예외 클래스로 구현했습니다. 팀원이 사용 방법을 참고할 수 있도록 샘플 API를 작성하고, 응답 분기와 DB 저장·조회·제약조건을 확인하는 테스트도 작성했습니다.\n\n이슈·PR 템플릿과 Notion 기술 문서를 관리했으며, 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
       "anchor": "처음-맡은-pl에서-팀이-일할-방식을-먼저-정했습니다",
       "order": 1,
-      "searchable": true
+      "searchable": true,
+      "links": [
+        {
+          "label": "공통 응답·예외 구조 구현 코드",
+          "url": "https://github.com/TeenyFinny/TeenyFinny-channel-be/commit/e7607a6df3c8405a54d34431a6266f33932def2a"
+        },
+        {
+          "label": "샘플 API·DB 테스트 코드",
+          "url": "https://github.com/TeenyFinny/TeenyFinny-channel-be/commit/5abb08dd"
+        }
+      ]
     },
     {
       "id": "6946234b-d914-4cd5-9379-3fe69ff60de2",
