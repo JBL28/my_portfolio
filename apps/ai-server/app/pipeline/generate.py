@@ -2,11 +2,12 @@
 
 [Generate] 선택된 근거(Section.body + 연결된 Case 필드 + path/anchor/project 정보)를
 바탕으로 근거 기반 답변을 생성한다. 01_설계.md 2장 [Generate]의 system prompt 제약
-4가지를 그대로 반영한다:
+4가지를 반영하고, 답변 형식 제약을 추가한다:
   1. 제공된 Section.body 범위 밖의 사실을 추론하지 않는다(Case 필드는 참고 정보일 뿐).
   2. Project-USES/Overview는 팀 사용의 근거일 뿐 개인 기여의 근거가 아니다.
   3. 근거가 부족하면 부족하다고 답하고 citations를 비운다.
   4. 답변은 짧게 요약하고, 상세 확인은 Section 링크로 유도한다(AI는 탐색 수단).
+  5. answer는 마크다운 문법 없이 일반 텍스트로 작성한다.
 
 `run_generate`는 파싱된 `GenerateResult`와 함께 OpenAI 응답의 토큰 사용량
 (`CompletionUsage`)도 함께 반환한다 — 파이프라인 알고리즘 자체는 그대로이고, 8.2가
@@ -55,6 +56,9 @@ _SYSTEM_PROMPT = """당신은 포트폴리오 웹사이트에 내장된 Graph RA
    대신 설명하는 주체가 아니라, 사용자가 포트폴리오 원문의 근거를 더 빠르게 찾도록 돕는
    탐색 수단이다 — 상세 내용을 answer에서 길게 풀어 쓰지 말고, 자세한 내용은 인용된
    Section 링크에서 확인하라고 안내한다.
+5. answer는 마크다운 문법을 사용하지 않고 일반 텍스트로 작성한다. 제목, 굵게·기울임,
+   목록 표시, 표, 코드 블록·인라인 코드, 링크 등 마크다운 서식을 쓰지 않는다.
+   근거 원문에 마크다운이 있어도 답변에 그대로 옮기지 않는다. 출처는 citations로 제공한다.
 
 citations는 실제로 답변에 사용한 근거 후보에서만 만든다 — sectionId/path/anchor/projectSlug
 값은 그 후보에 주어진 값을 그대로 사용하고 새로 지어내지 않는다. quotedTitle은 caseId가
