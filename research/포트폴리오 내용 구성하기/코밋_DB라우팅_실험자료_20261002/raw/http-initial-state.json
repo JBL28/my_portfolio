@@ -1,0 +1,24 @@
+[
+  {
+    "name": "service-7f6d5cdd48-8bgtz",
+    "ip": "10.42.0.116",
+    "ready": true,
+    "restarts": 0,
+    "last_termination": [
+      {}
+    ]
+  },
+  {
+    "name": "service-7f6d5cdd48-dxd2d",
+    "ip": "10.42.0.16",
+    "ready": true,
+    "restarts": 15,
+    "last_termination": [
+      {
+        "exitCode": 137,
+        "finishedAt": "2026-10-02T07:12:40Z",
+        "reason": "OOMKilled"
+      }
+    ]
+  }
+]

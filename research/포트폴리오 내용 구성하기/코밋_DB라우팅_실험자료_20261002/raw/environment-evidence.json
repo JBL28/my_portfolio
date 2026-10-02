@@ -1,0 +1,154 @@
+{
+  "recorded_at": "2026-10-02T07:47:12.277571+00:00",
+  "node": {
+    "capacity": {
+      "cpu": "4",
+      "ephemeral-storage": "323938280Ki",
+      "hugepages-1Gi": "0",
+      "hugepages-2Mi": "0",
+      "memory": "16164176Ki",
+      "pods": "110"
+    },
+    "allocatable": {
+      "cpu": "4",
+      "ephemeral-storage": "315127158537",
+      "hugepages-1Gi": "0",
+      "hugepages-2Mi": "0",
+      "memory": "16164176Ki",
+      "pods": "110"
+    },
+    "version": {
+      "architecture": "amd64",
+      "bootID": "256e860d-40c6-41ac-b885-d54f43daa07a",
+      "containerRuntimeVersion": "containerd://2.1.5-k3s1",
+      "kernelVersion": "6.17.0-1019-aws",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "v1.35.2+k3s1",
+      "machineID": "ec2254acc9891c8f22de68397f0a5d24",
+      "operatingSystem": "linux",
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "systemUUID": "ec2254ac-c989-1c8f-22de-68397f0a5d24"
+    }
+  },
+  "application": {
+    "image": "docker.io/komit2026/komit-service:0e992abe",
+    "resources": {
+      "limits": {
+        "cpu": "1",
+        "memory": "512Mi"
+      },
+      "requests": {
+        "cpu": "100m",
+        "memory": "256Mi"
+      }
+    },
+    "configured_replicas": 5,
+    "libraries": [
+      "postgresql-42.7.13.jar",
+      "spring-jdbc-7.0.9.jar",
+      "spring-tx-7.0.9.jar",
+      "HikariCP-7.0.2.jar"
+    ],
+    "routing_class": "BOOT-INF/classes/com/a501/service/config/DataSourceRoutingConfig.class",
+    "routing_class_sha256": "e9c8126d7e4b2ff621a337c48bed25166fcd92ea63b286898691d03820240946"
+  },
+  "database": {
+    "spec": {
+      "imageName": "ghcr.io/cloudnative-pg/postgresql:16.15-minimal-trixie",
+      "instances": 3,
+      "postgresql": {
+        "parameters": {
+          "archive_mode": "on",
+          "archive_timeout": "5min",
+          "dynamic_shared_memory_type": "posix",
+          "full_page_writes": "on",
+          "log_destination": "csvlog",
+          "log_directory": "/controller/log",
+          "log_filename": "postgres",
+          "log_rotation_age": "0",
+          "log_rotation_size": "0",
+          "log_truncate_on_rotation": "false",
+          "logging_collector": "on",
+          "max_connections": "200",
+          "max_parallel_workers": "32",
+          "max_replication_slots": "32",
+          "max_worker_processes": "32",
+          "shared_memory_type": "mmap",
+          "shared_preload_libraries": "",
+          "ssl_max_protocol_version": "TLSv1.3",
+          "ssl_min_protocol_version": "TLSv1.3",
+          "synchronous_commit": "remote_apply",
+          "wal_keep_size": "512MB",
+          "wal_level": "logical",
+          "wal_log_hints": "on",
+          "wal_receiver_timeout": "5s",
+          "wal_sender_timeout": "5s"
+        },
+        "syncReplicaElectionConstraint": {
+          "enabled": false
+        },
+        "synchronous": {
+          "dataDurability": "preferred",
+          "failoverQuorum": false,
+          "method": "any",
+          "number": 2
+        }
+      },
+      "resources": {
+        "limits": {
+          "memory": "512Mi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "primary": "service-db-1",
+    "sync_commit": "remote_apply",
+    "sync_names": "ANY 2 (\"service-db-2\",\"service-db-3\")",
+    "role_settings": "",
+    "developer_rows": "15",
+    "database_bytes": "11893783",
+    "test_schema_count": "0"
+  },
+  "restarts": [
+    {
+      "name": "service-7f6d5cdd48-2tpst",
+      "restart_count": 0,
+      "last_termination": {}
+    },
+    {
+      "name": "service-7f6d5cdd48-8bgtz",
+      "restart_count": 1,
+      "last_termination": {
+        "containerID": "containerd://ea510f79d999a98d4abad8e13fead1107a1d9829fd19f03a004114e6a22ec718",
+        "exitCode": 137,
+        "finishedAt": "2026-10-02T07:45:22Z",
+        "reason": "OOMKilled",
+        "startedAt": "2026-10-02T05:59:34Z"
+      }
+    },
+    {
+      "name": "service-7f6d5cdd48-cjbst",
+      "restart_count": 0,
+      "last_termination": {}
+    },
+    {
+      "name": "service-7f6d5cdd48-dxd2d",
+      "restart_count": 15,
+      "last_termination": {
+        "containerID": "containerd://12652c64e7a81e8861daa1ec2398aaa3a10815e36ba1f187a9262a5cd6a667ef",
+        "exitCode": 137,
+        "finishedAt": "2026-10-02T07:12:40Z",
+        "reason": "OOMKilled",
+        "startedAt": "2026-10-02T05:15:38Z"
+      }
+    },
+    {
+      "name": "service-7f6d5cdd48-f8q2h",
+      "restart_count": 0,
+      "last_termination": {}
+    }
+  ]
+}

@@ -384,11 +384,14 @@ function FullCode({
   item: Extract<SectionEvidence, { kind: "code" }>;
   html: string | null;
 }>) {
+  const longestLine = Math.max(...item.code.split("\n").map((line) => line.length));
+
   return (
-    /* 크기를 내용에 맡긴다 — 예전에는 h-full/flex-1이라 네 줄짜리 코드도 화면 높이를
-       다 차지해 아래가 텅 빈 검은 상자로 보였다. max-h/max-w로 상한만 두고, 넘칠 때만
-       스크롤한다. 가로도 마찬가지로 짧은 코드는 그만큼만 차지한다. */
-    <figure className="flex max-h-full w-fit max-w-full flex-col gap-3">
+    /* 코드 길이와 줄 번호 여백을 기준으로 폭을 늘리되, 기존 열 안에 둔다. */
+    <figure
+      className="flex max-h-full max-w-full flex-col gap-3 font-mono text-[12.5px]"
+      style={{ width: `calc(${longestLine * 1.36}ch + 5.78rem)` }}
+    >
       <div
         className="code-block min-h-0 overflow-auto border border-zinc-700 [&_pre]:py-4 [&_pre]:pr-4 [&_pre]:font-mono [&_pre]:text-[12.5px] [&_pre]:leading-[1.75]"
         dangerouslySetInnerHTML={{ __html: html ?? "" }}

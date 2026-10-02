@@ -1,0 +1,185 @@
+{
+  "label": "api-warmup",
+  "start": "2026-10-02T07:44:00.674789+00:00",
+  "stop": "2026-10-02T07:46:00.605814+00:00",
+  "target_rps": 10,
+  "duration_s": 120,
+  "elapsed_s": 119.93099541496485,
+  "requests": 1200,
+  "valid": 1199,
+  "scheduler_drops": 0,
+  "statuses": {
+    "200": 1199,
+    "0": 1
+  },
+  "p50_ms": 30.433665262535214,
+  "p95_ms": 138.67406668141484,
+  "p99_ms": 488.118012691848,
+  "max_schedule_lag_ms": 48.35694981738925,
+  "stats_before": {
+    "service-db-1": {
+      "seq_scan": 129,
+      "idx_scan": 295,
+      "seq_tup_read": 992,
+      "idx_tup_fetch": 292
+    },
+    "service-db-2": {
+      "seq_scan": 1849,
+      "idx_scan": 15007,
+      "seq_tup_read": 17668,
+      "idx_tup_fetch": 14191
+    },
+    "service-db-3": {
+      "seq_scan": 1779,
+      "idx_scan": 16031,
+      "seq_tup_read": 16855,
+      "idx_tup_fetch": 15216
+    }
+  },
+  "stats_after": {
+    "service-db-1": {
+      "seq_scan": 129,
+      "idx_scan": 295,
+      "seq_tup_read": 992,
+      "idx_tup_fetch": 292
+    },
+    "service-db-2": {
+      "seq_scan": 3113,
+      "idx_scan": 15010,
+      "seq_tup_read": 36628,
+      "idx_tup_fetch": 14194
+    },
+    "service-db-3": {
+      "seq_scan": 2897,
+      "idx_scan": 16040,
+      "seq_tup_read": 33625,
+      "idx_tup_fetch": 15225
+    }
+  },
+  "stats_delta": {
+    "service-db-1": {
+      "seq_scan": 0,
+      "idx_scan": 0,
+      "seq_tup_read": 0,
+      "idx_tup_fetch": 0
+    },
+    "service-db-2": {
+      "seq_scan": 1264,
+      "idx_scan": 3,
+      "seq_tup_read": 18960,
+      "idx_tup_fetch": 3
+    },
+    "service-db-3": {
+      "seq_scan": 1118,
+      "idx_scan": 9,
+      "seq_tup_read": 16770,
+      "idx_tup_fetch": 9
+    }
+  },
+  "state_before": [
+    {
+      "name": "service-7f6d5cdd48-2tpst",
+      "ip": "10.42.0.135",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-8bgtz",
+      "ip": "10.42.0.116",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-cjbst",
+      "ip": "10.42.0.136",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-dxd2d",
+      "ip": "10.42.0.16",
+      "ready": true,
+      "restarts": 15,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:12:40Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-f8q2h",
+      "ip": "10.42.0.134",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    }
+  ],
+  "state_after": [
+    {
+      "name": "service-7f6d5cdd48-2tpst",
+      "ip": "10.42.0.135",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-8bgtz",
+      "ip": "10.42.0.116",
+      "ready": false,
+      "restarts": 1,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:45:22Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-cjbst",
+      "ip": "10.42.0.136",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-dxd2d",
+      "ip": "10.42.0.16",
+      "ready": true,
+      "restarts": 15,
+      "last_termination": [
+        {
+          "exitCode": 137,
+          "finishedAt": "2026-10-02T07:12:40Z",
+          "reason": "OOMKilled"
+        }
+      ]
+    },
+    {
+      "name": "service-7f6d5cdd48-f8q2h",
+      "ip": "10.42.0.134",
+      "ready": true,
+      "restarts": 0,
+      "last_termination": [
+        {}
+      ]
+    }
+  ]
+}

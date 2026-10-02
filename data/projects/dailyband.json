@@ -120,7 +120,7 @@
       "links": [
         {
           "label": "레이턴시 구간 분석 문서",
-          "url": "https://aromatic-fahrenheit-c89.notion.site/39830865329180d88858c33d19239391"
+          "url": "https://quick-moustache-fdd.notion.site/4033abaf6e088369a6d781a30c8dd596"
         }
       ]
     },
@@ -139,5 +139,6 @@
         }
       ]
     }
-  ]
+  ],
+  "bridgeNote": "컴포즈로는 감당되지 않던 배포와 장애 대응을 다음 환경에서 다시 설계했습니다."
 }

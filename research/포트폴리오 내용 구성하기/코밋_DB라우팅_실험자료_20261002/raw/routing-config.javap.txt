@@ -1,0 +1,91 @@
+Compiled from "DataSourceRoutingConfig.java"
+public class com.a501.service.config.DataSourceRoutingConfig {
+  public com.a501.service.config.DataSourceRoutingConfig();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: return
+
+  com.zaxxer.hikari.HikariDataSource writeDataSource(org.springframework.boot.jdbc.autoconfigure.DataSourceProperties, org.springframework.beans.factory.ObjectProvider<org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails>);
+    Code:
+       0: aload_1
+       1: aload_2
+       2: invokestatic  #7                  // Method builder:(Lorg/springframework/boot/jdbc/autoconfigure/DataSourceProperties;Lorg/springframework/beans/factory/ObjectProvider;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+       5: invokevirtual #13                 // Method org/springframework/boot/jdbc/DataSourceBuilder.build:()Ljavax/sql/DataSource;
+       8: checkcast     #19                 // class com/zaxxer/hikari/HikariDataSource
+      11: astore_3
+      12: aload_3
+      13: ldc           #21                 // String write-pool
+      15: invokevirtual #23                 // Method com/zaxxer/hikari/HikariDataSource.setPoolName:(Ljava/lang/String;)V
+      18: aload_3
+      19: areturn
+
+  com.zaxxer.hikari.HikariDataSource readDataSource(org.springframework.boot.jdbc.autoconfigure.DataSourceProperties, org.springframework.beans.factory.ObjectProvider<org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails>, java.lang.String);
+    Code:
+       0: aload_1
+       1: aload_2
+       2: invokestatic  #7                  // Method builder:(Lorg/springframework/boot/jdbc/autoconfigure/DataSourceProperties;Lorg/springframework/beans/factory/ObjectProvider;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+       5: astore        4
+       7: aload_3
+       8: invokevirtual #27                 // Method java/lang/String.isBlank:()Z
+      11: ifne          21
+      14: aload         4
+      16: aload_3
+      17: invokevirtual #33                 // Method org/springframework/boot/jdbc/DataSourceBuilder.url:(Ljava/lang/String;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      20: pop
+      21: aload         4
+      23: invokevirtual #13                 // Method org/springframework/boot/jdbc/DataSourceBuilder.build:()Ljavax/sql/DataSource;
+      26: checkcast     #19                 // class com/zaxxer/hikari/HikariDataSource
+      29: astore        5
+      31: aload         5
+      33: ldc           #37                 // String read-pool
+      35: invokevirtual #23                 // Method com/zaxxer/hikari/HikariDataSource.setPoolName:(Ljava/lang/String;)V
+      38: aload         5
+      40: iconst_1
+      41: invokevirtual #39                 // Method com/zaxxer/hikari/HikariDataSource.setReadOnly:(Z)V
+      44: aload         5
+      46: areturn
+
+  javax.sql.DataSource dataSource(javax.sql.DataSource, javax.sql.DataSource);
+    Code:
+       0: new           #43                 // class org/springframework/jdbc/datasource/LazyConnectionDataSourceProxy
+       3: dup
+       4: aload_1
+       5: invokespecial #45                 // Method org/springframework/jdbc/datasource/LazyConnectionDataSourceProxy."<init>":(Ljavax/sql/DataSource;)V
+       8: astore_3
+       9: aload_3
+      10: aload_2
+      11: invokevirtual #48                 // Method org/springframework/jdbc/datasource/LazyConnectionDataSourceProxy.setReadOnlyDataSource:(Ljavax/sql/DataSource;)V
+      14: aload_3
+      15: areturn
+
+  private static org.springframework.boot.jdbc.DataSourceBuilder<com.zaxxer.hikari.HikariDataSource> builder(org.springframework.boot.jdbc.autoconfigure.DataSourceProperties, org.springframework.beans.factory.ObjectProvider<org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails>);
+    Code:
+       0: aload_1
+       1: invokeinterface #51,  1           // InterfaceMethod org/springframework/beans/factory/ObjectProvider.getIfAvailable:()Ljava/lang/Object;
+       6: checkcast     #57                 // class org/springframework/boot/jdbc/autoconfigure/JdbcConnectionDetails
+       9: astore_2
+      10: aload_2
+      11: ifnonnull     24
+      14: aload_0
+      15: invokevirtual #59                 // Method org/springframework/boot/jdbc/autoconfigure/DataSourceProperties.initializeDataSourceBuilder:()Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      18: ldc           #19                 // class com/zaxxer/hikari/HikariDataSource
+      20: invokevirtual #65                 // Method org/springframework/boot/jdbc/DataSourceBuilder.type:(Ljava/lang/Class;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      23: areturn
+      24: invokestatic  #69                 // Method org/springframework/boot/jdbc/DataSourceBuilder.create:()Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      27: ldc           #19                 // class com/zaxxer/hikari/HikariDataSource
+      29: invokevirtual #65                 // Method org/springframework/boot/jdbc/DataSourceBuilder.type:(Ljava/lang/Class;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      32: aload_2
+      33: invokeinterface #72,  1           // InterfaceMethod org/springframework/boot/jdbc/autoconfigure/JdbcConnectionDetails.getDriverClassName:()Ljava/lang/String;
+      38: invokevirtual #76                 // Method org/springframework/boot/jdbc/DataSourceBuilder.driverClassName:(Ljava/lang/String;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      41: aload_2
+      42: invokeinterface #79,  1           // InterfaceMethod org/springframework/boot/jdbc/autoconfigure/JdbcConnectionDetails.getJdbcUrl:()Ljava/lang/String;
+      47: invokevirtual #33                 // Method org/springframework/boot/jdbc/DataSourceBuilder.url:(Ljava/lang/String;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      50: aload_2
+      51: invokeinterface #82,  1           // InterfaceMethod org/springframework/boot/jdbc/autoconfigure/JdbcConnectionDetails.getUsername:()Ljava/lang/String;
+      56: invokevirtual #85                 // Method org/springframework/boot/jdbc/DataSourceBuilder.username:(Ljava/lang/String;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      59: aload_2
+      60: invokeinterface #88,  1           // InterfaceMethod org/springframework/boot/jdbc/autoconfigure/JdbcConnectionDetails.getPassword:()Ljava/lang/String;
+      65: invokevirtual #91                 // Method org/springframework/boot/jdbc/DataSourceBuilder.password:(Ljava/lang/String;)Lorg/springframework/boot/jdbc/DataSourceBuilder;
+      68: areturn
+}
