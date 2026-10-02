@@ -53,7 +53,7 @@ export async function ProjectDetailSection({
           : "scroll-mt-24 mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800"
       }
     >
-      <h3 className="group text-[1.2rem] font-bold leading-snug tracking-[-0.015em] text-zinc-900 dark:text-zinc-100">
+      <h3 className="group text-[1.2rem] font-semibold leading-snug tracking-[-0.015em] text-zinc-700 dark:text-zinc-300">
         {section.title}
         <a
           href={`#${section.anchor}`}
