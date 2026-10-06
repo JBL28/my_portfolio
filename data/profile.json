@@ -63,6 +63,7 @@
       "items": [
         "Linux",
         "Docker",
+        "K3s",
         "AWS",
         "Nginx",
         "Jenkins",
