@@ -1,14 +1,15 @@
 [
   {
     "id": "d214abe2-2d63-4f0d-9a6c-89d53265e5c2",
-    "title": "PL로서 팀이 따를 개발 기준 수립",
-    "summary": "처음 맡은 PL 역할을 조사해 API 명세·템플릿·Mock 서버 기반 병행 개발 흐름을 정했습니다.",
+    "title": "PL로서 REST API 명세와 공통 구현 기준을 마련했습니다",
+    "summary": "PL로서 병행 개발을 위한 REST API 명세를 정하고, 공통 응답·예외 구조와 샘플 API·테스트를 구현해 팀의 개발 기준을 마련했습니다.",
     "order": 1,
     "sectionIds": ["916bbd4c-afa6-4274-9fba-8c6bca5782bc"],
-    "judgment": "역할부터 조사해 문서·산출물 관리와 기술 이슈 관리를 핵심으로 잡았습니다.",
-    "action": "API 명세와 이슈·PR 템플릿을 정하고 Notion 기술 문서를 관리했으며, 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
-    "competencies": ["협업"],
-    "usedTechnologies": ["Notion", "Postman"]
+    "problem": "처음 PL을 맡았고, 프론트엔드와 백엔드가 병행 개발해야 했습니다.",
+    "judgment": "역할을 조사해 문서·산출물 관리와 기술 이슈 관리에 집중했습니다. 병행 개발에서는 계약을 먼저 정해야 통합 비용이 줄어든다고 판단했습니다.",
+    "action": "REST API 명세에서 HTTP 상태 코드와 성공·실패 응답 형식을 정하고, 공통 응답·오류 코드·예외 클래스로 구현했습니다. 샘플 API와 응답 분기·DB 저장·조회·제약조건을 확인하는 테스트를 작성했습니다. 이슈·PR 템플릿과 Notion 기술 문서를 관리했으며, 프론트엔드는 Postman Mock Server를 기준으로 백엔드와 병행 개발했습니다.",
+    "competencies": ["협업", "기술적 판단"],
+    "usedTechnologies": ["Spring Boot", "Notion", "Postman"]
   },
   {
     "id": "6e1b04e8-f462-4e25-8c70-518b447f0a63",

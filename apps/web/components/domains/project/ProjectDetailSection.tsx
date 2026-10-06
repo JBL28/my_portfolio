@@ -6,7 +6,7 @@ import { InternalLink } from "@/components/ui/InternalLink";
 import { highlightCode } from "@/lib/highlight";
 
 /**
- * Project Detail 우측 "서술" 컬럼의 H2 Section. 01_설계.md 3.2의 anchor 렌더링
+ * Project Detail 분류(H2) 아래의 H3 Section. 01_설계.md 3.2의 anchor 렌더링
  * 규칙에 따라 <section id={section.anchor}>로 렌더링한다 — 이후 Phase의 citation
  * 링크가 `path#anchor`로 이 id를 찾아간다.
  *
@@ -49,11 +49,11 @@ export async function ProjectDetailSection({
       id={section.anchor}
       className={
         isFirst
-          ? "scroll-mt-24 pb-12"
-          : "scroll-mt-24 border-t border-zinc-200 py-12 dark:border-zinc-800"
+          ? "scroll-mt-24"
+          : "scroll-mt-24 mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800"
       }
     >
-      <h2 className="group text-[1.2rem] font-bold leading-snug tracking-[-0.015em] text-zinc-900 dark:text-zinc-100">
+      <h3 className="group text-[1.2rem] font-semibold leading-snug tracking-[-0.015em] text-zinc-700 dark:text-zinc-300">
         {section.title}
         <a
           href={`#${section.anchor}`}
@@ -62,7 +62,7 @@ export async function ProjectDetailSection({
         >
           #
         </a>
-      </h2>
+      </h3>
       <RichText
         text={section.body}
         className="mt-4 max-w-xl text-[0.9375rem] leading-[1.9] text-zinc-600 dark:text-zinc-400"

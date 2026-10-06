@@ -1,3 +1,5 @@
+import type { ProjectSectionCategory } from "@/lib/project-section-categories";
+
 /**
  * data/ 아래 JSON 파일의 실제 필드 구조를 그대로 반영하는 타입 정의.
  * 01_설계.md 3.2, 02_구현계획.md 0장(데이터 파일 포맷 = JSON) 기준.
@@ -101,6 +103,8 @@ export type SectionEvidence =
 export interface ProjectSectionData {
   id: string;
   title: string;
+  /** 표시용 분류. 공통 이름·순서는 lib/project-section-categories.ts에서 관리한다. */
+  category: ProjectSectionCategory;
   body: string;
   anchor: string;
   order: number;

@@ -8,7 +8,8 @@ import { Container } from "@/components/ui/Container";
 import { ProjectOverview } from "@/components/domains/project/ProjectOverview";
 import { ProjectGallery } from "@/components/domains/project/ProjectGallery";
 import { Reveal } from "@/components/ui/Reveal";
-import { ProjectDetailSection } from "@/components/domains/project/ProjectDetailSection";
+import { ProjectSectionGroup } from "@/components/domains/project/ProjectSectionGroup";
+import { groupProjectSections } from "@/lib/project-section-groups";
 import { stripInlineRichText } from "@/lib/rich-text";
 
 export function generateStaticParams() {
@@ -40,7 +41,7 @@ export async function generateMetadata({
 
 /**
  * Project Detail — Home과 같은 2단 뼈대를 유지한다: 좌측은 고정된 "명세"(프로젝트
- * 메타데이터 spec sheet, sticky), 우측은 흐르는 "서술"(H2 Section 원문). AI 답변의
+ * 메타데이터 spec sheet, sticky), 우측은 분류(H2) 아래에 흐르는 Section 원문(H3). AI 답변의
  * citation은 우측 서술의 anchor로 착지한다.
  */
 export default async function ProjectDetailPage({
@@ -52,7 +53,7 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const sections = [...project.sections].sort((a, b) => a.order - b.order);
+  const groups = groupProjectSections(project.sections);
   // 갤러리에 거는 것과 Section 증거가 찾아 쓰는 것은 같은 목록이다(types/portfolio.ts의
   // ProjectImage). 증거 전용 이미지는 갤러리에서만 빼고 목록에서는 빼지 않는다 —
   // 증거가 src로 이 목록을 뒤져 alt·caption을 가져오기 때문이다.
@@ -76,17 +77,19 @@ export default async function ProjectDetailPage({
             />
           </Reveal>
         ) : null}
-        {/* stagger를 주지 않는다 - 섹션 하나하나가 길어서 순차 지연이 쌓이면
-            스크롤을 따라 내려가는 읽기 속도를 애니메이션이 앞지르지 못한다. */}
-        {sections.map((section, index) => (
-          <Reveal key={section.id} from="right">
-            <ProjectDetailSection
-              section={section}
-              images={project.images ?? []}
-              isFirst={index === 0 && !hasGallery}
-            />
-          </Reveal>
-        ))}
+        {/* 빈 분류는 그룹화 단계에서 제외한다. 순서·라벨을 페이지에 다시 정의하지
+            않아 프로젝트가 늘어도 공통 표시 정책은 한 곳에서 관리된다. */}
+        {groups.length > 0 ? (
+          <div className={hasGallery ? "mt-12 space-y-16" : "space-y-16"}>
+            {groups.map((group) => (
+              <ProjectSectionGroup
+                key={group.category}
+                group={group}
+                images={project.images ?? []}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     </Container>
   );
