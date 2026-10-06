@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  getAllProjects,
   getProjectBySlug,
   getProjectSlugsForStaticParams,
 } from "@/lib/portfolio-data";
@@ -62,6 +64,10 @@ export default async function ProjectDetailPage({
   );
   const hasGallery = galleryImages.length > 0;
 
+  const projects = getAllProjects();
+  const nextProject =
+    projects[projects.findIndex((p) => p.slug === project.slug) + 1];
+
   return (
     <Container className="py-14 sm:py-20 lg:grid lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-x-20">
       <ProjectOverview project={project} />
@@ -88,6 +94,20 @@ export default async function ProjectDetailPage({
                 images={project.images ?? []}
               />
             ))}
+          </div>
+        ) : null}
+        {/* 다음 프로젝트는 Home 시간축과 같은 order 순서를 따른다. 마지막 프로젝트에는 없다. */}
+        {nextProject ? (
+          <div className="mt-20 flex justify-end border-t border-zinc-200 pt-8 dark:border-zinc-800">
+            <Link
+              href={`/projects/${nextProject.slug}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent transition-colors hover:text-accent-hover"
+            >
+              다음 프로젝트로{" "}
+              <span aria-hidden="true" className="font-mono text-xs">
+                →
+              </span>
+            </Link>
           </div>
         ) : null}
       </div>
