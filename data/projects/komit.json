@@ -14,11 +14,11 @@
   "repositoryVisibility": "private",
   "repositoryNotice": "비공개 저장소라 설계도와 부하 테스트 결과를 공개 가능한 범위에서 정리했습니다.",
   "technologies": [
+    "K3s",
     "Spring Boot",
     "PostgreSQL",
     "Redis",
     "Docker",
-    "K3s",
     "Nginx",
     "GitLab CI/CD",
     "SonarQube",
